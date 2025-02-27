@@ -34,7 +34,8 @@ class PiplineBuild
 {
 public:
     PiplineBuild();
-    gboolean start_pipeline(gboolean create_offer);
+    //创建管道
+    static gboolean start_pipeline(gboolean create_offer);
 
     static void send_ice_candidate_message(GstElement *webrtc G_GNUC_UNUSED,
                                            guint mlineindex,
@@ -46,9 +47,27 @@ public:
     static void send_sdp_to_peer(GstWebRTCSessionDescription *desc);
     static gchar *get_string_from_json_object(JsonObject *object);
     static gboolean bus_watch_cb(GstBus *bus, GstMessage *message, gpointer user_data);
+    static void connect_data_channel_signals(GObject *data_channel);
+    static void data_channel_on_error(GObject *dc, gpointer user_data);
+    static void data_channel_on_open(GObject *dc, gpointer user_data);
+    static void data_channel_on_close(GObject *dc, gpointer user_data);
+    static void data_channel_on_message_string(GObject *dc, gchar *str, gpointer user_data);
+    static gboolean cleanup_and_quit_loop(const char *msg, enum AppState state);
+    static void on_data_channel(GstElement *webrtc, GObject *data_channel, gpointer user_data);
+    static void on_incoming_stream(GstElement *webrtc, GstPad *pad, GstElement *pipe);
+    static void on_incoming_decodebin_stream(GstElement *decodebin, GstPad *pad, GstElement *pipe);
+    static void handle_media_stream(GstPad *pad,
+                                    GstElement *pipe,
+                                    const char *convert_name,
+                                    const char *sink_name);
+    static void on_answer_create(GstPromise *promise, gpointer user_data);
+    static void on_offer_set(GstPromise *promise, gpointer user_data);
+    static void on_offer_received(GstSDPMessage *sdp);
 
 private:
     static GstElement *m_pipeline, *m_webrtcbin, *m_audio_bin, *m_video_bin;
     static enum AppState app_state;
-    GObject *send_channel, *receive_channel;
+    static GObject *send_channel,
+        *receive_channel; //send_channel是由本地创建，receive_channel是由远程创建
+    static gboolean is_offer;
 };
