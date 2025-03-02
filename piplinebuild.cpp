@@ -1,4 +1,11 @@
+//这个版本的管道设计没问题，可以向anser发起通话，视频流正常，音频流耳机正常，系统内置音频有杂音。
+//添加了loop循环，但好像没有其作用，bus总线上的watch好像也没有其作用，因为我点击关闭视频窗口没有错误弹出
+//还需要考虑关闭一个视频通话后，与另一个用户建立连接的话怎么创新创建管道，管道的这些元素都是静态的，注意释放和重新赋值
+//现在先去搭建ui界面，后面再考虑这部分代码的调整
+
 #include "piplinebuild.h"
+
+unsigned int uid = 20000000;
 
 GstElement *PiplineBuild::m_audio_bin = nullptr;
 GstElement *PiplineBuild::m_pipeline = nullptr;
@@ -6,11 +13,38 @@ GstElement *PiplineBuild::m_video_bin = nullptr;
 GstElement *PiplineBuild::m_webrtcbin = nullptr;
 GObject *PiplineBuild::receive_channel = nullptr;
 GObject *PiplineBuild::send_channel = nullptr;
-
+GMainLoop *PiplineBuild::loop = g_main_loop_new(NULL, FALSE);
 enum AppState PiplineBuild::app_state = APP_STATE_UNKNOWN;
 gboolean PiplineBuild::is_offer = FALSE;
 
+boost::asio::ip::tcp::socket *PiplineBuild::m_socket = nullptr;
+unsigned int PiplineBuild::m_object_id = NULL;
+
 PiplineBuild::PiplineBuild() {}
+/*******************************send-msg************/
+static void SendRequest(boost::asio::ip::tcp::socket &sock,
+                        std::string data,
+                        unsigned int object_id,
+                        unsigned int msg_id)
+{
+    char send_data[MAX_LENGTH] = {0};
+    int msgid_host = boost::asio::detail::socket_ops::host_to_network_short(msg_id);
+    memcpy(send_data, &msgid_host, 2);
+
+    nlohmann::json send_str;
+    send_str["uid"] = uid;
+    send_str["object_id"] = object_id;
+    send_str["data"] = data;
+    std::string temp_send_str = send_str.dump();
+
+    int request_host_length = boost::asio::detail::socket_ops::host_to_network_short(
+        temp_send_str.size());
+    memcpy(send_data + 2, &request_host_length, 2);
+    memcpy(send_data + 4, temp_send_str.c_str(), temp_send_str.size());
+    std::cout << "send_data: " << send_str.dump() << "length:" << sizeof(send_str.dump()) + 1
+              << std::endl;
+    boost::asio::write(sock, boost::asio::buffer(send_data, temp_send_str.size() + 4));
+}
 
 gboolean PiplineBuild::start_pipeline(gboolean create_offer)
 {
@@ -28,10 +62,15 @@ gboolean PiplineBuild::start_pipeline(gboolean create_offer)
     //创建管道
     m_pipeline = gst_pipeline_new("webrtc-pipeline");
 
+    //创建音频箱
     audio_desc = g_strdup_printf(
-        "autoaudiosrc! audioconvert ! audioresample"
-        "! queue ! opusenc perfect-timestamp=true ! rtpopuspay name=audiopay pt=%u "
-        "! application/x-rtp, encoding-name=OPUS ! queue",
+        "autoaudiosrc ! audioconvert ! audio/x-raw,format=S16LE ! audioresample ! "
+        "audio/x-raw,rate=48000 ! volume volume=0.5 ! queue ! "
+        "capsfilter caps=audio/x-raw,rate=48000 ! opusenc "
+        "perfect-timestamp=true bitrate=64000 ! rtpopuspay name=audiopay pt=%u "
+        "! application/x-rtp, media=audio, encoding-name=OPUS, payload=%u, clock-rate=48000 ! "
+        "queue",
+        RTP_OPUS_DEFAULT_PT,
         RTP_OPUS_DEFAULT_PT);
     m_audio_bin = gst_parse_bin_from_description(audio_desc, TRUE, &audio_erro);
     g_free(audio_desc);
@@ -47,8 +86,9 @@ gboolean PiplineBuild::start_pipeline(gboolean create_offer)
         return FALSE;
     }
 
-    video_desc = g_strdup_printf("v4l2src  ! videoconvert ! queue ! "
-                                 "vp8enc deadline=1 keyframe-max-dist=2000 ! "
+    //创建视频箱
+    video_desc = g_strdup_printf("v4l2src ! videoconvert ! queue ! vp8enc "
+                                 "deadline=1 keyframe-max-dist=2000 ! "
                                  "rtpvp8pay name=videopay picture-id-mode=15-bit pt=%u ! queue",
                                  RTP_VP8_DEFAULT_PT);
     m_video_bin = gst_parse_bin_from_description(video_desc, TRUE, &video_erro);
@@ -64,6 +104,8 @@ gboolean PiplineBuild::start_pipeline(gboolean create_offer)
         }
         return FALSE;
     }
+
+    //创建webrtcbin元素并设置stun服务器
     m_webrtcbin = gst_element_factory_make_full("webrtcbin",
                                                 "name",
                                                 "sendrecv",
@@ -71,6 +113,12 @@ gboolean PiplineBuild::start_pipeline(gboolean create_offer)
                                                 STUN_SERVER,
                                                 NULL);
     g_assert_nonnull(m_webrtcbin);
+    g_print("webrtcbin create succeed");
+
+    g_object_set(m_webrtcbin, "rtcp-rsize", TRUE, NULL);
+    g_object_set(m_webrtcbin, "rtcp-rr-mode", 1, NULL);      // 启用RTCP反馈
+    g_object_set(m_webrtcbin, "jitterbuffer-mode", 1, NULL); // 启用抖动缓冲
+
     //为webrtcbin设置bundle策略属性，值为max-bundle意思为尽可能将多个媒体流打包到单个的连接中，以减少网络延迟和带宽
     gst_util_set_object_arg(G_OBJECT(m_webrtcbin), "bundle-policy", "max-bundle");
 
@@ -86,6 +134,7 @@ gboolean PiplineBuild::start_pipeline(gboolean create_offer)
     
     //如果我是作为offer,考虑是否写头部扩展
 *************************************************************/
+
     g_signal_connect(m_webrtcbin,
                      "on-negotiation-needed",
                      G_CALLBACK(on_negotiation_needed),
@@ -99,19 +148,6 @@ gboolean PiplineBuild::start_pipeline(gboolean create_offer)
 
     //将管道状态设置为ready
     gst_element_set_state(m_pipeline, GST_STATE_READY);
-
-    //给send_channel初始化
-    g_signal_emit_by_name(m_webrtcbin, "create-data-channel", "channel", NULL, &send_channel);
-
-    //将信号绑定到send_channel
-    if (send_channel) {
-        gst_print("Created data channel\n");
-        connect_data_channel_signals(send_channel);
-    } else {
-        gst_print("Create data channel failed\n");
-    }
-    //建立远程数据通道
-    g_signal_connect(m_webrtcbin, "on-data-channel", G_CALLBACK(on_data_channel), NULL);
 
     //将webrtcbin元素的pad-added信号与处理媒体流的回调函数相连，动态添加元素decodebin
     g_signal_connect(m_webrtcbin, "pad-added", G_CALLBACK(on_incoming_stream), m_pipeline);
@@ -133,6 +169,7 @@ void PiplineBuild::on_negotiation_needed(GstElement *element, gpointer user_data
 {
     gboolean create_offer = GPOINTER_TO_INT(user_data);
     app_state = PEER_CALL_NEGOTIATING;
+
     //本地创建offer
     if (create_offer) {
         //设置promise异步操作完成后的回调函数
@@ -140,6 +177,7 @@ void PiplineBuild::on_negotiation_needed(GstElement *element, gpointer user_data
         //m_webrtcbin发送信号"create_offer",并将promise作为参数传递，当m_webrtcbin异步创建offer完成后调用promise的回调函数
         g_signal_emit_by_name(m_webrtcbin, "create-offer", NULL, promise);
     }
+
     /***********************************************************
     //远端创建offer,请求远端传教offer
     if(!create_offer){
@@ -161,10 +199,10 @@ void PiplineBuild::on_offer_created(GstPromise *promise, gpointer user_data)
     gst_structure_get(reply, "offer", GST_TYPE_WEBRTC_SESSION_DESCRIPTION, &offer, NULL);
     gst_promise_unref(promise);
 
-    //打印sdp
-    gchar *sdp = gst_sdp_message_as_text(offer->sdp);
-    g_print("Offer SDP:\n%s\n", sdp);
-    g_free(sdp);
+    // //打印sdp
+    // gchar *sdp = gst_sdp_message_as_text(offer->sdp);
+    // g_print("Offer SDP:\n%s\n", sdp);
+    // g_free(sdp);
 
     // 设置本地描述
     GstPromise *local_promise = gst_promise_new();
@@ -191,7 +229,7 @@ void PiplineBuild::send_sdp_to_peer(GstWebRTCSessionDescription *desc)
         json_object_set_string_member(sdp, "type", "offer");
     } else if (desc->type == GST_WEBRTC_SDP_TYPE_ANSWER) {
         gst_print("Sending answer to signaling server:\n%s\n", text);
-        json_object_set_string_member(sdp, "type", "offer");
+        json_object_set_string_member(sdp, "type", "answer");
     } else {
         g_assert_not_reached();
     }
@@ -202,10 +240,12 @@ void PiplineBuild::send_sdp_to_peer(GstWebRTCSessionDescription *desc)
     msg = json_object_new();
     json_object_set_object_member(msg, "sdp", sdp);
     text = get_string_from_json_object(msg);
+    std::string data = text;
     json_object_unref(msg);
 
-    /*****************************************
- * 向服务器发送消息的函数*******************/
+    /*****************************************/
+    SendRequest(*m_socket, data, m_object_id, MSG_TEXT_CHAT);
+    /*向服务器发送消息的函数*******************/
     g_free(text);
     text = NULL;
 }
@@ -241,10 +281,14 @@ void PiplineBuild::send_ice_candidate_message(GstElement *m_webrtcbin,
     msg = json_object_new();
     json_object_set_object_member(msg, "ice", ice);
     text = get_string_from_json_object(msg);
-    json_object_unref(msg);
 
-    /**********************************************
-     * 向信令服务器发送候选者text*******************/
+    g_print("this is ice-candidate:%s\n", text);
+
+    json_object_unref(msg);
+    std::string data = text;
+    /**********************************************/
+    SendRequest(*m_socket, data, m_object_id, MSG_TEXT_CHAT);
+    /* * 向信令服务器发送候选者text*******************/
     g_free(text);
     text = NULL;
 }
@@ -268,10 +312,12 @@ gboolean PiplineBuild::bus_watch_cb(GstBus *bus, GstMessage *message, gpointer u
                                           "webrtc-sendrecv.error");
 
         gst_message_parse_error(message, &error, &debug);
-        g_warning("Error on bus: %s (debug: %s)", error->message, debug);
+        g_printerr("Error on bus: %s (debug: %s)", message->src, error->message);
+        g_printerr("Debugging info: %s\n", (debug) ? debug : "none");
         g_error_free(error);
         g_free(debug);
-        break;
+        cleanup_and_quit_loop("bus have some erro", APP_STATE_UNKNOWN);
+        break; 
     }
     case GST_MESSAGE_WARNING: {
         GError *error = NULL;
@@ -292,45 +338,6 @@ gboolean PiplineBuild::bus_watch_cb(GstBus *bus, GstMessage *message, gpointer u
     return G_SOURCE_CONTINUE;
 }
 
-//连接创建的通道和信号
-void PiplineBuild::connect_data_channel_signals(GObject *data_channel)
-{
-    g_signal_connect(data_channel, "on-error", G_CALLBACK(data_channel_on_error), NULL);
-    g_signal_connect(data_channel, "on-open", G_CALLBACK(data_channel_on_open), NULL);
-    g_signal_connect(data_channel, "on-close", G_CALLBACK(data_channel_on_close), NULL);
-    g_signal_connect(data_channel,
-                     "on-message-string",
-                     G_CALLBACK(data_channel_on_message_string),
-                     NULL);
-}
-
-//通道error信号的回调函数
-void PiplineBuild::data_channel_on_error(GObject *dc, gpointer user_data)
-{
-    cleanup_and_quit_loop("Data channel error", APP_STATE_UNKNOWN);
-}
-
-//通道open信号的回调函数
-void PiplineBuild::data_channel_on_open(GObject *dc, gpointer user_data)
-{
-    GBytes *bytes = g_bytes_new("data", strlen("data"));
-    gst_print("data channel open\n");
-    g_signal_emit_by_name(dc, "send-string", "Hi! from channel");
-    g_signal_emit_by_name(dc, "send-data", bytes);
-    g_bytes_unref(bytes);
-}
-
-//通道closed信号的回调函数
-void PiplineBuild::data_channel_on_close(GObject *dc, gpointer user_data)
-{
-    cleanup_and_quit_loop("Data channel closed", APP_STATE_UNKNOWN);
-}
-
-//通道受到消息信号的回调函数
-void PiplineBuild::data_channel_on_message_string(GObject *dc, gchar *str, gpointer user_data)
-{
-    gst_print("Received data channel message:%s\n", str);
-}
 
 //清理
 gboolean PiplineBuild::cleanup_and_quit_loop(const char *msg, enum AppState state)
@@ -338,20 +345,22 @@ gboolean PiplineBuild::cleanup_and_quit_loop(const char *msg, enum AppState stat
     //在这里处理一下要是通道接收到错误信号怎么清理并退出程序
     /*****************...**********************/
     if (msg) {
-        gst_printerr("%s\n", msg);
+        gst_printerr("cleanup_and_quit_loop %s\n", msg);
     }
-}
 
-//远程通道建立时on-data-channel信号触发时调用的回调函数，给recieve_channel赋值，并连接信号到该通道上
-void PiplineBuild::on_data_channel(GstElement *webrtc, GObject *data_channel, gpointer user_data)
-{
-    connect_data_channel_signals(data_channel);
-    receive_channel = data_channel;
+    if (loop) {
+        g_main_loop_quit(loop);
+        g_clear_pointer(&loop, g_main_loop_unref);
+    }
+
+    /* To allow usage as a GSourceFunc */
+    return G_SOURCE_REMOVE;
 }
 
 //webrtcbin元素的pad-added信号的回调函数，将webrtcbin的pad与创建的decodebin的pad连接
 void PiplineBuild::on_incoming_stream(GstElement *webrtc, GstPad *pad, GstElement *pipe)
 {
+    g_print("this is on_incoming_stream function");
     GstElement *decodebin;
     GstPad *sinkpad;
 
@@ -383,7 +392,7 @@ void PiplineBuild::on_incoming_decodebin_stream(GstElement *decodebin, GstPad *p
 
     gst_print("the caps name:%s", name);
     if (g_str_has_prefix(name, "video")) {
-        handle_media_stream(pad, pipe, "videoconvert", "autovideosink");
+        handle_media_stream(pad, pipe, "videoconvert", "xvimagesink");
     } else if (g_str_has_prefix(name, "audio")) {
         handle_media_stream(pad, pipe, "audioconvert", "autoaudiosink");
     } else {
@@ -405,7 +414,9 @@ void PiplineBuild::handle_media_stream(GstPad *pad,
 
     q = gst_element_factory_make("queue", NULL);
     g_assert_nonnull(q);
-    conv = gst_element_factory_make(sink_name, NULL);
+    conv = gst_element_factory_make(convert_name, NULL);
+    g_assert_nonnull(conv);
+    sink = gst_element_factory_make(sink_name, NULL);
     g_assert_nonnull(sink);
 
     if (g_strcmp0(convert_name, "audioconvert") == 0) {
@@ -453,6 +464,7 @@ void PiplineBuild::on_answer_create(GstPromise *promise, gpointer user_data)
 
 void PiplineBuild::on_offer_set(GstPromise *promise, gpointer user_data)
 {
+    gst_print("remote set succeed!!!!!!!!!!!!!!!");
     gst_promise_unref(promise);
     promise = gst_promise_new_with_change_func(on_answer_create, NULL, NULL);
     g_signal_emit_by_name(m_webrtcbin, "create-answer", NULL, promise);
@@ -464,9 +476,10 @@ void PiplineBuild::on_offer_received(GstSDPMessage *sdp)
     GstPromise *promise;
 
     gst_print("Starting pipeline as answer!");
-    if (!start_pipeline(is_offer)) {
-        gst_print("Start pipeline failed");
-    }
+
+    // if (!start_pipeline(is_offer)) {
+    //     gst_print("Start pipeline failed");
+    // }
 
     offer = gst_webrtc_session_description_new(GST_WEBRTC_SDP_TYPE_OFFER, sdp);
     g_assert_nonnull(offer);

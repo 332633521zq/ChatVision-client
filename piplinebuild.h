@@ -1,11 +1,20 @@
 #pragma once
+#include "ConstValue.h"
+#include <boost/asio.hpp>
 #include <gst/gst.h>
 #include <gst/gststructure.h>
 #include <gst/rtp/rtp.h>
 #include <gst/sdp/sdp.h>
 #include <gst/webrtc/nice/nice.h>
 #include <gst/webrtc/webrtc.h>
+#include <iostream>
 #include <json-glib/json-glib.h>
+#include <json/json.h>
+#include <json/reader.h>
+#include <json/value.h>
+#include <nlohmann/json.hpp>
+
+const int MAX_LENGTH = 1024 * 2;
 
 #define RTP_OPUS_DEFAULT_PT 97
 #define RTP_VP8_DEFAULT_PT 96
@@ -63,10 +72,15 @@ public:
     static void on_answer_create(GstPromise *promise, gpointer user_data);
     static void on_offer_set(GstPromise *promise, gpointer user_data);
     static void on_offer_received(GstSDPMessage *sdp);
+    static boost::asio::ip::tcp::socket *m_socket;
+    static unsigned int m_object_id;
+    static enum AppState app_state;
+    static GstElement *m_webrtcbin;
+    static GMainLoop *loop;
 
 private:
-    static GstElement *m_pipeline, *m_webrtcbin, *m_audio_bin, *m_video_bin;
-    static enum AppState app_state;
+    static GstElement *m_pipeline, *m_audio_bin, *m_video_bin;
+
     static GObject *send_channel,
         *receive_channel; //send_channel是由本地创建，receive_channel是由远程创建
     static gboolean is_offer;
