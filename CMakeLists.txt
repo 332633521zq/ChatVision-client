@@ -27,7 +27,27 @@ qt_add_qml_module(
   piplinebuild.cpp
   mediathread.cpp
   mediathread.h
-  ConstValue.h)
+  ConstValue.h
+  QML_FILES
+  LoginPage.qml
+  QML_FILES
+  HomePage.qml
+  RESOURCES
+  RESOURCES
+  assets.qrc
+  SOURCES
+  personalpagecontroller.h
+  personalpagecontroller.cpp
+  SOURCES
+  communicationpagecontroller.h
+  communicationpagecontroller.cpp
+  SOURCES
+  tool.h
+  tool.cpp
+  QML_FILES
+  ConversationListPage.qml
+  QML_FILES CommunicationPage.qml
+  QML_FILES FindFriendPage.qml)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GST REQUIRED gstreamer-1.0 gstreamer-webrtc-1.0

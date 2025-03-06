@@ -56,13 +56,7 @@ public:
     static void send_sdp_to_peer(GstWebRTCSessionDescription *desc);
     static gchar *get_string_from_json_object(JsonObject *object);
     static gboolean bus_watch_cb(GstBus *bus, GstMessage *message, gpointer user_data);
-    static void connect_data_channel_signals(GObject *data_channel);
-    static void data_channel_on_error(GObject *dc, gpointer user_data);
-    static void data_channel_on_open(GObject *dc, gpointer user_data);
-    static void data_channel_on_close(GObject *dc, gpointer user_data);
-    static void data_channel_on_message_string(GObject *dc, gchar *str, gpointer user_data);
     static gboolean cleanup_and_quit_loop(const char *msg, enum AppState state);
-    static void on_data_channel(GstElement *webrtc, GObject *data_channel, gpointer user_data);
     static void on_incoming_stream(GstElement *webrtc, GstPad *pad, GstElement *pipe);
     static void on_incoming_decodebin_stream(GstElement *decodebin, GstPad *pad, GstElement *pipe);
     static void handle_media_stream(GstPad *pad,
