@@ -8,6 +8,7 @@
 
 class MediaThread : public QThread
 {
+    Q_OBJECT
 public:
     MediaThread();
     void startThread();

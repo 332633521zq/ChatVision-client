@@ -3,29 +3,29 @@ import QtQuick.Controls 2.15
 import Qt5Compat.GraphicalEffects
 //找新朋友的列表
 Rectangle{
-    id:centerbar
+    id:findfriendbar
     width:240
     height: parent.height
     color:"transparent"
     ListModel{
-        id:conversationlist
+        id:findfriendlist
         ListElement{
-            name:"沐树"
+            name:"黄昏时风起"
             avater:"qrc:/image/avater.jpg"
             friendId:"20000001"
         }
         ListElement{
-            name:"亦已"
+            name:"坐看云起时"
             avater:"qrc:/image/avater.png"
             friendId:"20000000"
         }
     }
     Component{
-        id:conversationcomponent
+        id:findfriendcomponent
         Rectangle{
-            id:conversationrec
-            width: centerbar.width
-            height: centerbar.width/7*2
+            id:findfriendrec
+            width: findfriendbar.width
+            height: findfriendbar.width/7*2
             color:"transparent"
             // border.color: "black"
             Row{
@@ -60,7 +60,7 @@ Rectangle{
                 }
             }
             Rectangle{
-                id:conversationrecmask
+                id:findfriendmask
                 width: parent.width
                 height: parent.height
                 color:"black"
@@ -71,10 +71,10 @@ Rectangle{
             HoverHandler{
                 onHoveredChanged: {
                     if(hovered){
-                        conversationrecmask.visible=true
+                        findfriendmask.visible=true
                     }
                     else{
-                        conversationrecmask.visible=false
+                        findfriendmask.visible=false
                     }
                 }
             }
@@ -93,8 +93,8 @@ Rectangle{
     }
     ListView{
         anchors.fill: parent
-        model: conversationlist
-        delegate: conversationcomponent
+        model: findfriendlist
+        delegate: findfriendcomponent
     }
 
 }

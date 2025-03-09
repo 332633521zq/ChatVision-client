@@ -79,6 +79,11 @@ Rectangle{
                             }
                         }
                     }
+                    TapHandler{
+                        onTapped: {
+                            centerloader.source="FindFriendPage.qml"
+                        }
+                    }
                 }
 
                 Rectangle{
@@ -185,6 +190,11 @@ Rectangle{
                             }
                         }
                     }
+                    TapHandler{
+                        onTapped: {
+                            settingpopup.open()
+                        }
+                    }
                 }
             }
         }
@@ -196,8 +206,8 @@ Rectangle{
             height: parent.height
             color:"#4C82A1"
             Loader{
-                anchors.fill: parent
                 id:centerloader
+                anchors.fill: parent
                 source: "qrc:/ConversationListPage.qml"
             }
         }
@@ -209,14 +219,105 @@ Rectangle{
             height: parent.height
             color: "#1D5B7F"
             Loader{
-                anchors.fill: parent
                 id:rightloader
+                anchors.fill: parent
                 source: "CommunicationPage.qml"
                 visible: false
             }
         }
     }
+    Popup{
+        id:settingpopup
+        width: 200
+        height: 120
+        x:leftbar.width+5
+        y:homepagerec.height-settingpopup.height-20
+        background: Rectangle{
+            color: "#368EB0"
+            radius: 5
+            clip: true
+        }
+        modal: true
+        closePolicy: Popup.CloseOnPressOutside
+        onClosed: console.log("popup was closed")
+        Rectangle{
+            id:poprec
+            anchors.fill: parent
+            radius: 5
+            clip: true
+            color:"transparent"
+            ListModel{
+                id:exitlist
+                ListElement{
+                    name:"退出"
+                }
+                ListElement{
+                    name:"关闭"
+                }
+                ListElement{
+                    name:"取消"
+                }
+            }
+            Component{
+                id:exitcomponent
+                Rectangle{
+                    id:listrec
+                    width: poprec.width
+                    height: poprec.height/3
+                    radius:5
+                    color:"transparent"
+                    Text {
+                        id: textpoprec
+                        text: name
+                        anchors.centerIn: parent
+                        font.pixelSize: 15
+                    }
+                    Rectangle{
+                        id:masklistrec
+                        anchors.fill: parent
+                        color:"black"
+                        opacity: 0.2
+                        visible: false
+                    }
+                    HoverHandler{
+                        onHoveredChanged: {
+                            if(hovered){
+                                masklistrec.visible=true
+                            }
+                            else{
+                                masklistrec.visible=false
+                            }
+                        }
+                    }
 
+                    TapHandler{
+                        onTapped: {
+                            if(index===0){
+                                console.log("1 was taped")
+                                loginloader.source=""
+                                loginpage.width=320
+                                loginpage.height=420
+                                sourceComponent=logincomponent
+                            }
+                            else if(index===1){
+                                console.log("2 was taped")
+                                Qt.quit()
+                            }
+                            else{
+                                console.log("3 was taped")
+                                settingpopup.close()
+                            }
+                        }
+                    }
+                }
+            }
+            ListView{
+                anchors.fill: parent
+                model: exitlist
+                delegate: exitcomponent
+            }
+        }
+    }
 
     // StackView{
     //     anchors.fill: parent
