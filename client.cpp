@@ -1,13 +1,11 @@
 #include "client.h"
-#include "recvmsg.h"
-#include "sendmsg.h"
+#include "filetools.h"
 
 using namespace std;
 using namespace boost::asio::ip;
 
 Client::Client(tcp::socket& sock, unsigned int uid)
-    : _uid(uid)
-    , _sock(sock)
+    : _sock(sock)
 {
     //创建上下文服务
     // boost::asio::io_context ioc;
@@ -16,6 +14,8 @@ Client::Client(tcp::socket& sock, unsigned int uid)
     // tcp::socket sock(ioc);
     // sock.connect(remote_ep);
 
-    SendMsg(_sock, _uid);
-    RecvMsg(_sock, _uid);
+    User::GetInstance()->SetUid(uid);
+
+    _send_msg = std::make_shared<SendMsg>(_sock);
+    _recv_msg = std::make_shared<RecvMsg>(_sock);
 }

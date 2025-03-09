@@ -11,12 +11,12 @@ using boost::asio::ip::tcp;
 class SendMsg
 {
 public:
-    SendMsg(boost::asio::ip::tcp::socket& sock, unsigned int uid);
+    // SendMsg();
+    SendMsg(boost::asio::ip::tcp::socket& sock);
     void SendRequest(char* msg, size_t msg_len, unsigned int object_id, short msgid);
     void SendRequest(std::string msg, unsigned int object_id, short msgid);
 
 private:
-    unsigned int _uid;
     tcp::socket& _sock;
     std::mutex _mutex;
     std::condition_variable _consume;

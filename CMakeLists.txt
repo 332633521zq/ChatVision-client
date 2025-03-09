@@ -52,7 +52,9 @@ qt_add_qml_module(
   SOURCES sendmsg.h sendmsg.cpp
   SOURCES recvmsg.h recvmsg.cpp
   SOURCES msgnode.h msgnode.cpp
-  SOURCES user.h user.cpp)
+  SOURCES user.h user.cpp
+  SOURCES filetools.h filetools.cpp
+  SOURCES singleton.h singleton.cpp)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GST REQUIRED gstreamer-1.0 gstreamer-webrtc-1.0

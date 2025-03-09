@@ -1,16 +1,18 @@
 #include "sendmsg.h"
 #include <QDebug>
 #include "ConstValue.h"
+#include "user.h"
 #include <iostream>
 #include <nlohmann/json.hpp>
 
 using namespace nlohmann;
 
-SendMsg::SendMsg(boost::asio::ip::tcp::socket& sock, unsigned int uid)
+SendMsg::SendMsg(boost::asio::ip::tcp::socket& sock)
     : _sock(sock)
-    , _uid(uid)
 {
-    SendRequest("hello world", 20000001, MSG_HELLO_WORLD);
+    auto uid = User::GetInstance()->GetUid();
+    SendRequest("yes", uid, MSG_LOGIN);
+    SendRequest("hello world", 20000000, MSG_TEXT_CHAT);
 }
 
 void SendMsg::SendRequest(std::string msg, unsigned int object_id, short msgid)
@@ -21,7 +23,7 @@ void SendMsg::SendRequest(std::string msg, unsigned int object_id, short msgid)
     memcpy(send_data, &msgid_host, 2);
 
     json send_str;
-    send_str["uid"] = _uid;
+    send_str["uid"] = User::GetInstance()->GetUid();
     send_str["object_id"] = object_id;
     send_str["data"] = msg;
     std::string temp_send_str = send_str.dump();
@@ -42,7 +44,7 @@ void SendMsg::SendRequest(char* msg, size_t msg_len, unsigned int object_id, sho
     memcpy(send_data, &msgid_host, 2);
 
     json send_str;
-    send_str["uid"] = _uid;
+    send_str["uid"] = User::GetInstance()->GetUid();
     send_str["object_id"] = object_id;
     send_str["data"] = std::string(msg, msg_len);
     std::string temp_send_str = send_str.dump();

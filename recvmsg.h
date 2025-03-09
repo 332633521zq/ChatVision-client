@@ -8,19 +8,23 @@
 
 using boost::asio::ip::tcp;
 
-typedef std::function<void(const short& msg_id, const std::string& msg_data)> FunCallBack;
+typedef std::function<void(const std::string& msg_data)> FunCallBack;
 
 class RecvMsg
 {
 public:
-    RecvMsg(boost::asio::ip::tcp::socket& io_context, unsigned int uid);
+    RecvMsg(boost::asio::ip::tcp::socket& io_context);
     void ReceiveMsg();
     void DealMsg();
     void RegisterCallBacks();
-    void HelloWorldCallBack(const short& msg_id, const std::string& msg_data);
+    void HelloWorldCallBack(const std::string& msg_data);
+    void UserInfoCallBack(const std::string& msg_data);
+    void GetFollowingCallBack(const std::string& msg_data);
+    void GetFollowerCallBack(const std::string& msg_data);
+    void GetBlacklistCallBack(const std::string& msg_data);
+    void TextChatCallBack(const std::string& msg_data);
 
 private:
-    unsigned int _uid;
     tcp::socket& _sock;
     std::mutex _mutex;
     std::condition_variable _consume;

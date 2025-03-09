@@ -1,14 +1,15 @@
 #include "recvmsg.h"
 #include <QDebug>
 #include "ConstValue.h"
+#include "filetools.h"
+#include "user.h"
 #include <iostream>
 #include <nlohmann/json.hpp>
 
 using namespace nlohmann;
 
-RecvMsg::RecvMsg(boost::asio::ip::tcp::socket &sock, unsigned int uid)
+RecvMsg::RecvMsg(boost::asio::ip::tcp::socket &sock)
     : _sock(sock)
-    , _uid(uid)
 {
     _recv_thread = std::thread(&RecvMsg::DealMsg, this);
     RegisterCallBacks();
@@ -69,7 +70,7 @@ void RecvMsg::DealMsg()
                     _recv_que.pop();
                     continue;
                 }
-                call_back_iter->second(msg_id, std::string(msg_node->_data, msg_node->_total_len));
+                call_back_iter->second(std::string(msg_node->_data, msg_node->_total_len));
                 _recv_que.pop();
             }
             return;
@@ -82,7 +83,7 @@ void RecvMsg::DealMsg()
             _recv_que.pop();
             return;
         }
-        call_back_iter->second(msg_id, std::string(msg_node->_data, msg_node->_total_len));
+        call_back_iter->second(std::string(msg_node->_data, msg_node->_total_len));
         _recv_que.pop();
     }
 }
@@ -91,11 +92,91 @@ void RecvMsg::RegisterCallBacks()
 {
     _fun_callbacks[MSG_HELLO_WORLD] = std::bind(&RecvMsg::HelloWorldCallBack,
                                                 this,
-                                                std::placeholders::_1,
-                                                std::placeholders::_2);
+                                                std::placeholders::_1);
+
+    _fun_callbacks[MSG_USER_INFO] = std::bind(&RecvMsg::UserInfoCallBack,
+                                              this,
+                                              std::placeholders::_1);
+
+    _fun_callbacks[MSG_GET_FOLLOWINGS] = std::bind(&RecvMsg::GetFollowingCallBack,
+                                                   this,
+                                                   std::placeholders::_1);
+
+    _fun_callbacks[MSG_GET_FOLLOWERS] = std::bind(&RecvMsg::GetFollowerCallBack,
+                                                  this,
+                                                  std::placeholders::_1);
+
+    _fun_callbacks[MSG_GET_BLACKLIST] = std::bind(&RecvMsg::GetBlacklistCallBack,
+                                                  this,
+                                                  std::placeholders::_1);
+
+    _fun_callbacks[MSG_TEXT_CHAT] = std::bind(&RecvMsg::TextChatCallBack,
+                                              this,
+                                              std::placeholders::_1);
 }
 
-void RecvMsg::HelloWorldCallBack(const short &msg_id, const std::string &msg_data)
+void RecvMsg::HelloWorldCallBack(const std::string &msg_data)
 {
     qDebug() << "HelloWorldCallBack----------------";
+}
+
+void RecvMsg::UserInfoCallBack(const std::string &msg_data)
+{
+    qDebug() << "UserInfoCallBack----------------";
+    FileTools::GetInstance()->SaveUserInfo(msg_data);
+    User::GetInstance()->SetMyInfo(msg_data);
+}
+
+void RecvMsg::GetFollowingCallBack(const std::string &msg_data)
+{
+    qDebug() << "GetFollowingCallBack----------------";
+
+    json jsonmsg = json::parse(msg_data);
+    jsonmsg = jsonmsg["data"];
+
+    for (const auto &item : jsonmsg) {
+        std::string str = item["uid"];
+        FileTools::GetInstance()->SaveRelation(RELATION_FOLLOWING, std::stoi(str), item);
+        User::GetInstance()->InsertToFollowing(std::stoi(str), item);
+    }
+}
+
+void RecvMsg::GetFollowerCallBack(const std::string &msg_data)
+{
+    qDebug() << "GetFollowerCallBack----------------";
+
+    json jsonmsg = json::parse(msg_data);
+    jsonmsg = jsonmsg["data"];
+
+    for (const auto &item : jsonmsg) {
+        std::string str = item["uid"];
+
+        FileTools::GetInstance()->SaveRelation(RELATION_FOLLOWER, std::stoi(str), item);
+        User::GetInstance()->InsertToFollower(std::stoi(str), item);
+    }
+}
+
+void RecvMsg::GetBlacklistCallBack(const std::string &msg_data)
+{
+    qDebug() << "GetBlacklistCallBack----------------";
+
+    json jsonmsg = json::parse(msg_data);
+    jsonmsg = jsonmsg["data"];
+
+    for (const auto &item : jsonmsg) {
+        std::string str = item["uid"];
+
+        FileTools::GetInstance()->SaveRelation(RELATION_BLOCK, std::stoi(str), item);
+        User::GetInstance()->InsertToBlacklist(std::stoi(str), item);
+    }
+}
+
+void RecvMsg::TextChatCallBack(const std::string &msg_data)
+{
+    qDebug() << "TextChatCallBack----------------";
+
+    json jsonmsg = json::parse(msg_data);
+    std::cout << "jsonmsg:" << jsonmsg << std::endl;
+    unsigned int object_id = jsonmsg["object_id"];
+    FileTools::GetInstance()->SaveTextMsg(object_id, jsonmsg);
 }

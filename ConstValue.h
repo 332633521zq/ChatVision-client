@@ -53,7 +53,7 @@ enum MSG_IDS {
     MSG_RANDOM_PUSH = 1019
 };
 
-enum Relation_IDS {
+enum Relation_IDS : unsigned int {
     RELATION_BLOCKED = 0,
     RELATION_BLOCK = 1,
     RELATION_STRANGER = 2,
