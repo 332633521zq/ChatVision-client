@@ -28,6 +28,7 @@ public:
     json GetLatestMsg(unsigned int& uid);
     bool SaveRelation(unsigned int relation, unsigned int uid, json baseinfo);
     json GetRelations(unsigned int relation);
+    void RemoveRelation(unsigned int relation, unsigned int uid);
 
 private:
     FileTools();

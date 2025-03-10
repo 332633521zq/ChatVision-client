@@ -83,7 +83,7 @@ bool FileTools::SaveUserInfo(const json& msg_data)
     root_path = root_path / "ChatVisionUserInfo" / std::to_string(my_uid);
 
     std::filesystem::path file_path = root_path / "userinfo.txt";
-    std::ofstream file(file_path, std::ios::app);
+    std::ofstream file(file_path);
     if (!file.is_open()) {
         std::cerr << "Failed to open file: " << file_path << std::endl;
         return false;
@@ -270,4 +270,41 @@ json FileTools::GetRelations(unsigned int relation)
 
     file.close();
     return res;
+}
+
+void FileTools::RemoveRelation(unsigned int relation, unsigned int uid)
+{
+    unsigned int my_uid = User::GetInstance()->GetUid();
+
+    std::filesystem::path root_path
+        = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation).toStdString();
+    std::cout << "root_path:" << root_path;
+    root_path = root_path / "ChatVisionUserInfo" / std::to_string(my_uid);
+
+    auto file_path = root_path / (_relation[relation] + ".txt");
+
+    // 打开文件
+    std::ifstream file(file_path);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open file: " << file_path << std::endl;
+        return;
+    }
+
+    json res;
+    std::string line;
+    while (std::getline(file, line)) {
+        auto json_line = json::parse(line);
+        if (json_line[uid] == uid)
+            continue;
+        res.push_back(line);
+    }
+    file.close();
+
+    std::ofstream outFile(file_path, std::ios::out | std::ios::trunc);
+    if (!outFile.is_open()) {
+        std::cerr << "无法打开文件！" << std::endl;
+    }
+    // 写入修改后的内容
+    outFile << res;
+    outFile.close();
 }

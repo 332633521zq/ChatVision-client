@@ -4,6 +4,7 @@
 //现在先去搭建ui界面，后面再考虑这部分代码的调整
 
 #include "piplinebuild.h"
+#include "sendmsg.h"
 
 unsigned int uid = 20000000;
 
@@ -21,30 +22,6 @@ boost::asio::ip::tcp::socket *PiplineBuild::m_socket = nullptr;
 unsigned int PiplineBuild::m_object_id = NULL;
 
 PiplineBuild::PiplineBuild() {}
-/*******************************send-msg************/
-static void SendRequest(boost::asio::ip::tcp::socket &sock,
-                        std::string data,
-                        unsigned int object_id,
-                        unsigned int msg_id)
-{
-    char send_data[MAX_LENGTH] = {0};
-    int msgid_host = boost::asio::detail::socket_ops::host_to_network_short(msg_id);
-    memcpy(send_data, &msgid_host, 2);
-
-    nlohmann::json send_str;
-    send_str["uid"] = uid;
-    send_str["object_id"] = object_id;
-    send_str["data"] = data;
-    std::string temp_send_str = send_str.dump();
-
-    int request_host_length = boost::asio::detail::socket_ops::host_to_network_short(
-        temp_send_str.size());
-    memcpy(send_data + 2, &request_host_length, 2);
-    memcpy(send_data + 4, temp_send_str.c_str(), temp_send_str.size());
-    std::cout << "send_data: " << send_str.dump() << "length:" << sizeof(send_str.dump()) + 1
-              << std::endl;
-    boost::asio::write(sock, boost::asio::buffer(send_data, temp_send_str.size() + 4));
-}
 
 gboolean PiplineBuild::start_pipeline(gboolean create_offer)
 {
@@ -244,7 +221,7 @@ void PiplineBuild::send_sdp_to_peer(GstWebRTCSessionDescription *desc)
     json_object_unref(msg);
 
     /*****************************************/
-    SendRequest(*m_socket, data, m_object_id, MSG_TEXT_CHAT);
+    // SendMsg::GetInstance()->SendRequest(data, m_object_id, MSG_VIDEO_CHAT);
     /*向服务器发送消息的函数*******************/
     g_free(text);
     text = NULL;
@@ -287,7 +264,7 @@ void PiplineBuild::send_ice_candidate_message(GstElement *m_webrtcbin,
     json_object_unref(msg);
     std::string data = text;
     /**********************************************/
-    SendRequest(*m_socket, data, m_object_id, MSG_TEXT_CHAT);
+    // SendMsg::GetInstance()->SendRequest(data, m_object_id, MSG_VIDEO_CHAT);
     /* * 向信令服务器发送候选者text*******************/
     g_free(text);
     text = NULL;

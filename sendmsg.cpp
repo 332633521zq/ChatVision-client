@@ -7,12 +7,21 @@
 
 using namespace nlohmann;
 
-SendMsg::SendMsg(boost::asio::ip::tcp::socket& sock)
-    : _sock(sock)
+SendMsg::SendMsg()
+{}
+
+SendMsg::~SendMsg() {}
+
+void SendMsg::Start()
 {
     auto uid = User::GetInstance()->GetUid();
     SendRequest("yes", uid, MSG_LOGIN);
-    SendRequest("hello world", 20000000, MSG_TEXT_CHAT);
+    SendRequest("test-----", 20000000, MSG_TEXT_CHAT);
+}
+
+void SendMsg::SetSocket(boost::asio::ip::tcp::socket* sock)
+{
+    _sock = sock;
 }
 
 void SendMsg::SendRequest(std::string msg, unsigned int object_id, short msgid)
@@ -34,7 +43,7 @@ void SendMsg::SendRequest(std::string msg, unsigned int object_id, short msgid)
     memcpy(send_data + 4, temp_send_str.c_str(), temp_send_str.size());
 
     std::cout << send_str.dump() << std::endl;
-    boost::asio::write(_sock, boost::asio::buffer(send_data, temp_send_str.size() + 4));
+    boost::asio::write((*_sock), boost::asio::buffer(send_data, temp_send_str.size() + 4));
 }
 
 void SendMsg::SendRequest(char* msg, size_t msg_len, unsigned int object_id, short msgid)
@@ -54,5 +63,5 @@ void SendMsg::SendRequest(char* msg, size_t msg_len, unsigned int object_id, sho
     memcpy(send_data + 2, &request_host_length, 2);
     memcpy(send_data + 4, temp_send_str.c_str(), temp_send_str.size());
 
-    boost::asio::write(_sock, boost::asio::buffer(send_data, temp_send_str.size() + 4));
+    boost::asio::write(*_sock, boost::asio::buffer(send_data, temp_send_str.size() + 4));
 }

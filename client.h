@@ -10,10 +10,12 @@ using boost::asio::ip::tcp;
 class Client
 {
 public:
-    Client(tcp::socket& sock, unsigned int uid);
+    Client();
+    void Start();
 
 private:
-    tcp::socket& _sock;
+    tcp::socket* _sock = nullptr;
+    std::thread _logic_thread;
     std::shared_ptr<SendMsg> _send_msg;
     std::shared_ptr<RecvMsg> _recv_msg;
 };

@@ -4,18 +4,29 @@
 using namespace std;
 using namespace boost::asio::ip;
 
-Client::Client(tcp::socket& sock, unsigned int uid)
-    : _sock(sock)
+#define IPADDRESS "127.0.0.1"
+#define PORT 10086
+
+Client::Client()
 {
-    //创建上下文服务
-    // boost::asio::io_context ioc;
-    // //构造endpoint
-    // tcp::endpoint remote_ep(make_address(IPADDRESS), PORT);
-    // tcp::socket sock(ioc);
-    // sock.connect(remote_ep);
+    // 创建上下文服务
+    boost::asio::io_context ioc;
+    //构造endpoint
+    tcp::endpoint remote_ep(make_address(IPADDRESS), PORT);
+    _sock = new tcp::socket(ioc);
+    (*_sock).connect(remote_ep);
 
-    User::GetInstance()->SetUid(uid);
+    User::GetInstance()->SetUid(20000001);
 
-    _send_msg = std::make_shared<SendMsg>(_sock);
-    _recv_msg = std::make_shared<RecvMsg>(_sock);
+    _logic_thread = std::thread(&Client::Start, this);
+}
+
+void Client::Start()
+{
+    _send_msg = SendMsg::GetInstance();
+    _recv_msg = RecvMsg::GetInstance();
+    _send_msg->SetSocket(_sock);
+    _recv_msg->SetSocket(_sock);
+    _send_msg->Start();
+    _recv_msg->Start();
 }
