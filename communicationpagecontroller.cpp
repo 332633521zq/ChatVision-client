@@ -17,12 +17,17 @@ void CommunicationPageController::setMssages()
 }
 void CommunicationPageController::initCommunicationPage()
 {
-    messages.clear();
-    setMssages();
-    for (auto &it : messages) {
-        QString text = it["text"].toString();
-        QString sender = it["sender"].toString();
-        if (sender == m_myId) {
+    unsigned int object_id = m_friendId.toUInt();
+    json totalmsg = FileTools::GetInstance()->GetLatestMsg(object_id);
+    if (totalmsg.size() == 0) {
+        return;
+    }
+    for (const auto &json_it : totalmsg) {
+        std::cout << "initCommunication msg is:" << json_it << std::endl;
+        // json json_it = json::parse(it);
+        QString text = QString::fromStdString(json_it["data"].get<std::string>());
+        QString uid = QString::number(json_it["uid"].get<unsigned int>());
+        if (uid == m_myId) {
             setMyMessage(text);
         } else {
             setFriendMessage(text);
@@ -32,13 +37,28 @@ void CommunicationPageController::initCommunicationPage()
 
 void CommunicationPageController::saveMessage()
 {
-    QJsonObject jo;
-    QString path = "/root/test/" + m_friendId + ".json";
-    jo["text"] = m_myMessage;
-    jo["sender"] = m_myId;
-    if (!Tool::getInstance().saveJsonObjectToFile(jo, path)) {
-        qDebug() << "save failed";
+    json jo;
+    jo["data"] = m_myMessage.toStdString();
+    jo["uid"] = m_myId.toUInt();
+    unsigned int object_id = m_friendId.toUInt();
+    jo["object_id"] = object_id;
+    if (!FileTools::GetInstance()->SaveTextMsg(object_id, jo)) {
+        qDebug() << "save send msg in file failed";
     }
+}
+
+void CommunicationPageController::sendMessage(QString data)
+{
+    std::string s_data = data.toStdString();
+    unsigned int object_id = m_friendId.toUInt();
+    SendMsg::GetInstance()->SendRequest("", object_id, MSG_FOLLOWING);
+    SendMsg::GetInstance()->SendRequest(s_data, object_id, MSG_TEXT_CHAT);
+}
+
+void CommunicationPageController::callRequest()
+{
+    unsigned int object_id = m_friendId.toUInt();
+    SendMsg::GetInstance()->SendRequest("", object_id, MSG_VIDEO_CHAT);
 }
 
 void CommunicationPageController::saveMessage(QString msg, QString send_id)

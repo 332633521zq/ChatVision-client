@@ -1,25 +1,15 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include "client.h"
 #include "communicationpagecontroller.h"
 #include "personalpagecontroller.h"
 // #include "ConstValue.h"
 // #include "mediathread.h"
 // #include <boost/asio.hpp>
 // #include <iostream>
-// #include <json/json.h>
-// #include <json/reader.h>
-// #include <json/value.h>
 // #include <nlohmann/json.hpp>
 // #include <thread>
-
-// using namespace std;
-// using namespace boost::asio::ip;
-// using namespace nlohmann;
-
-// // #define IPADDRESS "192.168.253.186"
-// #define IPADDRESS "127.0.0.1"
-// #define PORT 10086
 
 // // const int MAX_LENGTH = 1024 * 2;
 // const int HEAD_LENGTH = 2;
@@ -32,14 +22,25 @@
 // void SendRequest(tcp::socket& sock, char* data, unsigned int object_id, unsigned int msg_id);
 // void SendRequest(tcp::socket& sock, std::string data, unsigned int object_id, unsigned int msg_id);
 
+using namespace boost::asio::ip;
+
+// #define IPADDRESS "192.168.253.186"
+#define IPADDRESS "127.0.0.1"
+#define PORT 10086
+
 int main(int argc, char* argv[])
 {
+    // //创建上下文服务
+    // boost::asio::io_context ioc;
+    // //构造endpoint
+    // tcp::endpoint remote_ep(make_address(IPADDRESS), PORT);
+    // tcp::socket sock(ioc);
+    // sock.connect(remote_ep);
+
+    Client client;
+    // ioc.run();
     // try {
-    //     //创建上下文服务
-    //     boost::asio::io_context ioc;
-    //     //构造endpoint
-    //     tcp::endpoint remote_ep(make_address(IPADDRESS), PORT);
-    //     tcp::socket sock(ioc);
+
     //     boost::system::error_code error = boost::asio::error::host_not_found;
     //     sock.connect(remote_ep, error);
     //     if (error) {
@@ -192,7 +193,7 @@ int main(int argc, char* argv[])
     engine.rootContext()->setContextProperty("communicationPageControler",
                                              &CommunicationPageController::getInstance());
 
-    const QUrl url(QStringLiteral("qrc:/Multimedia-moudle-Gstreamer/LoginPage.qml"));
+    const QUrl url(QStringLiteral("qrc:/qml/LoginPage.qml"));
     QObject::connect(
         &engine,
         &QQmlApplicationEngine::objectCreationFailed,
@@ -202,30 +203,4 @@ int main(int argc, char* argv[])
     engine.load(url);
 
     return app.exec();
-
-} /*catch (std::exception& e) {
-        std::cerr << "Exception: " << e.what() << endl;
-    }*/
-// }
-// void SendRequest(tcp::socket& sock, std::string data, unsigned int object_id, unsigned int msg_id)
-// {
-//     char send_data[MAX_LENGTH] = {0};
-//     int msgid_host = boost::asio::detail::socket_ops::host_to_network_short(msg_id);
-//     memcpy(send_data, &msgid_host, 2);
-
-//     json send_str;
-//     send_str["uid"] = uid;
-//     send_str["object_id"] = object_id;
-//     send_str["data"] = data;
-//     std::string temp_send_str = send_str.dump();
-
-//     int request_host_length = boost::asio::detail::socket_ops::host_to_network_short(
-//         temp_send_str.size());
-//     memcpy(send_data + 2, &request_host_length, 2);
-//     memcpy(send_data + 4, temp_send_str.c_str(), temp_send_str.size());
-//     std::cout << "send_data: " << send_str.dump() << "length:" << sizeof(send_str.dump()) + 1
-//               << std::endl;
-//     boost::asio::write(sock, boost::asio::buffer(send_data, temp_send_str.size() + 4));
-// }
-
-// void SendRequest(char* data, unsigned int msg_id) {}
+}

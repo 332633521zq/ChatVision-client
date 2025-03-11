@@ -14,8 +14,6 @@
 #include <json/value.h>
 #include <nlohmann/json.hpp>
 
-const int MAX_LENGTH = 1024 * 2;
-
 #define RTP_OPUS_DEFAULT_PT 97
 #define RTP_VP8_DEFAULT_PT 96
 #define STUN_SERVER "stun://stun.l.google.com:19302"

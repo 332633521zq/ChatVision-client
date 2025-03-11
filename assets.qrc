@@ -3,19 +3,26 @@
         <file>image/bg.png</file>
         <file>image/bg2.jpg</file>
         <file>image/bg3.png</file>
-        <file>HomePage.qml</file>
-        <file>image/guanzhu.png</file>
-        <file>image/Essence.svg</file>
         <file>image/Comment.svg</file>
         <file>image/Anonymous.svg</file>
         <file>image/Search.svg</file>
-        <file>image/Setting.svg</file>
-        <file>image/administering_user_16.svg</file>
         <file>image/avater.jpg</file>
         <file>image/avater.png</file>
-        <file>ConversationListPage.qml</file>
         <file>image/Phone.svg</file>
         <file>image/Photo.svg</file>
         <file>image/transmission_file_24.svg</file>
+        <file>qml/CommunicationPage.qml</file>
+        <file>qml/ConversationListPage.qml</file>
+        <file>qml/FindFriendPage.qml</file>
+        <file>qml/HomePage.qml</file>
+        <file>qml/LoginPage.qml</file>
+        <file>qml/Main.qml</file>
+        <file>audio/callaudio.mp3</file>
+        <file>image/message_24.svg</file>
+        <file>image/message_unread_24.svg</file>
+        <file>image/administering_user_24.svg</file>
+        <file>image/channel_icon_fire_v1_24.svg</file>
+        <file>image/channel_selection_16.svg</file>
+        <file>image/setting_24.svg</file>
     </qresource>
 </RCC>

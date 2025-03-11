@@ -8,7 +8,10 @@
 #include <QJsonObject>
 #include <QObject>
 #include <QVector>
+#include "filetools.h"
+#include "sendmsg.h"
 #include "tool.h"
+
 class CommunicationPageController : public QObject
 {
     Q_OBJECT
@@ -23,6 +26,8 @@ public:
     Q_INVOKABLE void initCommunicationPage();
     //保存我发送的消息
     Q_INVOKABLE void saveMessage();
+    Q_INVOKABLE void sendMessage(QString data);
+    Q_INVOKABLE void callRequest();
     //保存我接收的消息，需要消息内容和发送者id
     void saveMessage(QString msg, QString send_id);
     QString myMessage() const;
@@ -42,6 +47,7 @@ signals:
     void friendMessageChanged();
     void myIdChanged();
     void friendIdChanged();
+    void videoCallRequest();
 
 private:
     QString m_myMessage;

@@ -18,6 +18,9 @@ void PersonalPageController::setNetNumber(const QString number)
     } else {
         qDebug() << "newnumber set succeed";
     }
+
+    User::GetInstance()->SetUid(m_number);
+
     // emit netNumberChanged(m_number);
 }
 
@@ -25,7 +28,7 @@ QString PersonalPageController::netNumber() const
 {
     return QString::number(m_number);
 }
-void PersonalPageController::test()
+void PersonalPageController::init()
 {
-    qDebug() << "this is test";
+    SendMsg::GetInstance()->SendRequest("yes", m_number, MSG_LOGIN);
 }
