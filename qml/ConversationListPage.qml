@@ -10,14 +10,19 @@ Rectangle{
     ListModel{
         id:conversationlist
         ListElement{
-            name:"沐树"
+            name:"沐树01"
             avater:"qrc:/image/avater.jpg"
             friendId:"20000001"
         }
         ListElement{
-            name:"亦已"
+            name:"亦已00"
             avater:"qrc:/image/avater.png"
             friendId:"20000000"
+        }
+        ListElement{
+            name:"幻蓝02"
+            avater:"qrc:/image/avater.png"
+            friendId:"20000002"
         }
     }
     Component{
