@@ -5,6 +5,7 @@
 #include <QDebug>
 #include "ConstValue.h"
 #include "filetools.h"
+#include "followlistpagecontroller.h"
 #include "recvmsg.h"
 #include "user.h"
 #include <iostream>
@@ -172,6 +173,10 @@ void RecvMsg::RegisterCallBacks()
     _fun_callbacks[MSG_RANDOM_PUSH] = std::bind(&RecvMsg::RandomPushCallBack,
                                                 this,
                                                 std::placeholders::_1);
+
+    _fun_callbacks[MSG_CHATTED_USER] = std::bind(&RecvMsg::ChattedUserCallBack,
+                                                 this,
+                                                 std::placeholders::_1);
 }
 
 void RecvMsg::HelloWorldCallBack(const std::string &msg_data)
@@ -204,7 +209,7 @@ void RecvMsg::GetFollowingCallBack(const std::string &msg_data)
     json jsonmsg = json::parse(msg_data);
     jsonmsg = jsonmsg["data"];
 
-    for (const auto &item : jsonmsg) {
+    for (const json &item : jsonmsg) {
         std::string str = item["uid"];
         FileTools::GetInstance()->SaveRelation(RELATION_FOLLOWING, std::stoi(str), item);
         User::GetInstance()->InsertToFollowing(std::stoi(str), item);
@@ -213,7 +218,7 @@ void RecvMsg::GetFollowingCallBack(const std::string &msg_data)
 
 void RecvMsg::GetFollowerCallBack(const std::string &msg_data)
 {
-    qDebug() << "GetFollowerCallBack----------------";
+    qDebug() << "GetFollowerCallBack----------------" << msg_data;
 
     json jsonmsg = json::parse(msg_data);
     jsonmsg = jsonmsg["data"];
@@ -247,7 +252,7 @@ void RecvMsg::TextChatCallBack(const std::string &msg_data)
 
     json jsonmsg = json::parse(msg_data);
     std::cout << "jsonmsg:" << jsonmsg << std::endl;
-    unsigned int object_id = jsonmsg["object_id"];
+    unsigned int object_id = jsonmsg["uid"];
     FileTools::GetInstance()->SaveTextMsg(object_id, jsonmsg);
     FileTools::GetInstance()->GetLatestMsg(object_id);
 }
@@ -265,7 +270,7 @@ void RecvMsg::FollowingCallBack(const std::string &msg_data)
 
     json jsonmsg = json::parse(msg_data);
     std::cout << "jsonmsg:" << jsonmsg << std::endl;
-    unsigned int object_id = jsonmsg["object_id"];
+    unsigned int object_id = jsonmsg["uid"];
 
     User::GetInstance()->InsertToFollower(object_id, jsonmsg);
     FileTools::GetInstance()->SaveRelation(RELATION_FOLLOWER, object_id, jsonmsg);
@@ -279,7 +284,7 @@ void RecvMsg::CancelFollowCallBack(const std::string &msg_data)
 
     json jsonmsg = json::parse(msg_data);
     std::cout << "jsonmsg:" << jsonmsg << std::endl;
-    unsigned int object_id = jsonmsg["object_id"];
+    unsigned int object_id = jsonmsg["uid"];
 
     User::GetInstance()->RemoveFromFollower(object_id);
     FileTools::GetInstance()->RemoveRelation(RELATION_FOLLOWER, object_id);
@@ -414,4 +419,23 @@ void RecvMsg::RandomPushCallBack(const std::string &msg_data)
     std::cout << "jsonmsg:" << jsonmsg << std::endl;
     json users_data = jsonmsg["data"];
     // users_data是json数组，把数据转给前端
+}
+
+void RecvMsg::ChattedUserCallBack(const std::string &msg_data)
+{
+    qDebug() << "ChattedUserCallBack----------------";
+
+    json jsonmsg = json::parse(msg_data);
+    std::cout << "jsonmsg:" << jsonmsg << std::endl;
+    json users_data = jsonmsg["data"];
+
+    if (users_data.size() == 0)
+        return;
+
+    for (const auto &item : users_data) {
+        std::string str = item["uid"];
+        User::GetInstance()->InsertToChatted(std::stoul(str), item);
+    }
+
+    FileTools::GetInstance()->SaveChattedUsers(users_data);
 }

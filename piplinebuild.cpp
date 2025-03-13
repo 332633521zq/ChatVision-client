@@ -221,7 +221,8 @@ void PiplineBuild::send_sdp_to_peer(GstWebRTCSessionDescription *desc)
     json_object_unref(msg);
 
     /*****************************************/
-    // SendMsg::GetInstance()->SendRequest(data, m_object_id, MSG_VIDEO_CHAT);
+    SendMsg::GetInstance()->SendRequest(data, m_object_id, MSG_VIDEO_CHAT);
+    sleep(1);
     /*向服务器发送消息的函数*******************/
     g_free(text);
     text = NULL;
@@ -264,7 +265,8 @@ void PiplineBuild::send_ice_candidate_message(GstElement *m_webrtcbin,
     json_object_unref(msg);
     std::string data = text;
     /**********************************************/
-    // SendMsg::GetInstance()->SendRequest(data, m_object_id, MSG_VIDEO_CHAT);
+    SendMsg::GetInstance()->SendRequest(data, m_object_id, MSG_VIDEO_CHAT);
+    sleep(1);
     /* * 向信令服务器发送候选者text*******************/
     g_free(text);
     text = NULL;

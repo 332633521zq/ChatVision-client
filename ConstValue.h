@@ -20,7 +20,7 @@ constexpr int MAX_LENGTH = 1024 * 2;
 *   1008: 取消关注  ✅   **signal
 *   1009: 拉黑    ❌
 *   1010: 取消拉黑      ❌
-*   1011: 视频通话请求    
+*   1011: 视频通话请求 
 *   1020: 同意视频通话    **signal
 *   1012: 拒绝视频通话    **signal
 *   1013: 语音通话请求    **signal
@@ -30,7 +30,8 @@ constexpr int MAX_LENGTH = 1024 * 2;
 *   1016: 用户的粉丝列表   ✅
 *   1017: 用户的黑名单    ✅
 *   1018: 对方不在线     **signal
-*   1019: 随机推送可能想认识的用户      **signal
+*   1019: 随机推送可能想认识的用户
+*   1022: 聊过天的用户基本信息
 */
 
 enum MSG_IDS {
@@ -54,7 +55,8 @@ enum MSG_IDS {
     MSG_NOT_ONLINE = 1018,
     MSG_RANDOM_PUSH = 1019,
     MSG_AGREE_VIDEO = 1020,
-    MSG_AGREE_AUDIO = 1021
+    MSG_AGREE_AUDIO = 1021,
+    MSG_CHATTED_USER = 1022
 };
 
 enum Relation_IDS : unsigned int {

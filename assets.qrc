@@ -17,5 +17,8 @@
         <file>image/Phone.svg</file>
         <file>image/Photo.svg</file>
         <file>image/transmission_file_24.svg</file>
+        <file>FollowListPage.qml</file>
+        <file>FollowUserInfoPage.qml</file>
+        <file>BaseInfoProperties.qml</file>
     </qresource>
 </RCC>

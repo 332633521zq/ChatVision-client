@@ -54,7 +54,11 @@ qt_add_qml_module(
   SOURCES msgnode.h msgnode.cpp
   SOURCES user.h user.cpp
   SOURCES filetools.h filetools.cpp
-  SOURCES singleton.h singleton.cpp)
+  SOURCES singleton.h singleton.cpp
+  QML_FILES FollowListPage.qml
+  SOURCES followlistpagecontroller.h followlistpagecontroller.cpp
+  QML_FILES FollowUserInfoPage.qml
+  QML_FILES BaseInfoProperties.qml)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GST REQUIRED gstreamer-1.0 gstreamer-webrtc-1.0

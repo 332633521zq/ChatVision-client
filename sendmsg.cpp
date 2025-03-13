@@ -16,7 +16,8 @@ void SendMsg::Start()
 {
     auto uid = User::GetInstance()->GetUid();
     SendRequest("yes", uid, MSG_LOGIN);
-    SendRequest("test-----", 20000000, MSG_TEXT_CHAT);
+    // SendRequest("hello world", 20000000, MSG_TEXT_CHAT);
+    SendRequest("", 20000004, MSG_FOLLOWING);
 }
 
 void SendMsg::SetSocket(boost::asio::ip::tcp::socket* sock)
@@ -26,6 +27,8 @@ void SendMsg::SetSocket(boost::asio::ip::tcp::socket* sock)
 
 void SendMsg::SendRequest(std::string msg, unsigned int object_id, short msgid)
 {
+    // std::lock_guard<std::mutex> lock(_mutex);
+
     char send_data[MAX_LENGTH] = {0};
     memset(send_data, 0, MAX_LENGTH);
     int msgid_host = boost::asio::detail::socket_ops::host_to_network_short(msgid);
@@ -48,6 +51,8 @@ void SendMsg::SendRequest(std::string msg, unsigned int object_id, short msgid)
 
 void SendMsg::SendRequest(char* msg, size_t msg_len, unsigned int object_id, short msgid)
 {
+    // std::lock_guard<std::mutex> lock(_mutex);
+
     char send_data[MAX_LENGTH] = {0};
     int msgid_host = boost::asio::detail::socket_ops::host_to_network_short(msgid);
     memcpy(send_data, &msgid_host, 2);

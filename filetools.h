@@ -29,6 +29,7 @@ public:
     bool SaveRelation(unsigned int relation, unsigned int uid, json baseinfo);
     json GetRelations(unsigned int relation);
     void RemoveRelation(unsigned int relation, unsigned int uid);
+    void SaveChattedUsers(json baseinfo);
 
 private:
     FileTools();

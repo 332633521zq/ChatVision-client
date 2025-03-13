@@ -39,6 +39,7 @@ public:
     void AgreeAudioChatCallBack(const std::string& msg_data);
     void RefusedAudioChatCallBack(const std::string& msg_data);
     void RandomPushCallBack(const std::string& msg_data);
+    void ChattedUserCallBack(const std::string& msg_data);
 
 private:
     RecvMsg();

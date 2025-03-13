@@ -188,7 +188,8 @@ json FileTools::GetTextMsg(unsigned int& uid, std::string date_time)
     std::string line;
     json res;
     while (std::getline(file, line)) {
-        res.push_back(line);
+        json json_line = json::parse(line);
+        res.push_back(json_line);
     }
 
     file.close();
@@ -206,12 +207,19 @@ json FileTools::GetLatestMsg(unsigned int& uid)
 
     std::filesystem::path msg_dir = root_path / "chatmsgs" / std::to_string(uid) / "textmsg";
 
+    CreateDir(msg_dir);
     std::filesystem::path latest_file = msg_dir / GetLatestModifiedFile(msg_dir);
     std::ifstream file(latest_file);
     std::string line;
     json res;
+
+    if (!file.is_open()) {
+        std::cerr << "Failed to open file: " << latest_file << std::endl;
+        return false;
+    }
     while (std::getline(file, line)) {
-        res.push_back(line);
+        json json_line = json::parse(line);
+        res.push_back(json_line);
     }
     file.close();
     return res;
@@ -265,7 +273,9 @@ json FileTools::GetRelations(unsigned int relation)
     json res;
     std::string line;
     while (std::getline(file, line)) {
-        res.push_back(line);
+        json json_line = json::parse(line);
+
+        res.push_back(json_line);
     }
 
     file.close();
@@ -296,7 +306,7 @@ void FileTools::RemoveRelation(unsigned int relation, unsigned int uid)
         auto json_line = json::parse(line);
         if (json_line[uid] == uid)
             continue;
-        res.push_back(line);
+        res.push_back(json_line);
     }
     file.close();
 
@@ -307,4 +317,26 @@ void FileTools::RemoveRelation(unsigned int relation, unsigned int uid)
     // 写入修改后的内容
     outFile << res;
     outFile.close();
+}
+
+void FileTools::SaveChattedUsers(json baseinfo)
+{
+    unsigned int my_uid = User::GetInstance()->GetUid();
+
+    std::filesystem::path root_path
+        = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation).toStdString();
+    std::cout << "root_path:" << root_path;
+    root_path = root_path / "ChatVisionUserInfo" / std::to_string(my_uid);
+
+    auto file_path = root_path / "chatted.txt";
+
+    // 打开文件
+    std::ofstream file(file_path);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open file: " << file_path << std::endl;
+        return;
+    }
+
+    file << baseinfo << std::endl;
+    file.close();
 }
