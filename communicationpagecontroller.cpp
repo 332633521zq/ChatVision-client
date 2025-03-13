@@ -58,7 +58,27 @@ void CommunicationPageController::sendMessage(QString data)
 void CommunicationPageController::callRequest()
 {
     unsigned int object_id = m_friendId.toUInt();
-    SendMsg::GetInstance()->SendRequest("", object_id, MSG_VIDEO_CHAT);
+    PiplineBuild::m_object_id = object_id;
+    MediaThread *mediaThread = new MediaThread(true);
+    mediaThread->startThread();
+
+    // QObject::connect(mediaThread,
+    //                  &MediaThread::wasHangUp,
+    //                  &CommunicationPageController::getInstance(),
+    //                  &CommunicationPageController::onWasHangUp);
+    // SendMsg::GetInstance()->SendRequest("", object_id, MSG_VIDEO_CHAT);
+}
+
+void CommunicationPageController::getThrough()
+{
+    PiplineBuild::setPiplinePlaying();
+}
+
+void CommunicationPageController::hangUp()
+{
+    unsigned int object_id = m_friendId.toUInt();
+    SendMsg::GetInstance()->SendRequest("HangUp", object_id, MSG_VIDEO_CHAT);
+    PiplineBuild::cleanup_and_quit_loop("挂断", PEER_CALL_STOPPED);
 }
 
 void CommunicationPageController::saveMessage(QString msg, QString send_id)
@@ -116,4 +136,9 @@ void CommunicationPageController::setFriendId(const QString friendId)
 {
     qDebug() << "friend id was set" << friendId;
     m_friendId = friendId;
+}
+
+void CommunicationPageController::onWasHangUp()
+{
+    emit closeVideoWindow();
 }

@@ -62,7 +62,10 @@ qt_add_qml_module(
   filetools.cpp
   SOURCES
   singleton.h
-  singleton.cpp)
+  singleton.cpp
+  myimageprovider.h
+  myimageprovider.cpp
+  SOURCES findfriendpagecontroller.h findfriendpagecontroller.cpp)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GST REQUIRED gstreamer-1.0 gstreamer-webrtc-1.0

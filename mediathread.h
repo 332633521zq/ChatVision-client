@@ -10,9 +10,14 @@ class MediaThread : public QThread
 {
     Q_OBJECT
 public:
-    MediaThread();
+    MediaThread(bool is_offer);
     void startThread();
+signals:
+    void wasHangUp();
 
 protected:
     void run() override;
+
+private:
+    bool m_is_offer;
 };

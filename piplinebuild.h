@@ -1,10 +1,16 @@
 #pragma once
+#include <QImage>
+
+#undef signals
 #include "ConstValue.h"
+#include "sendmsg.h"
 #include <boost/asio.hpp>
+#include <gst/app/gstappsink.h>
 #include <gst/gst.h>
 #include <gst/gststructure.h>
 #include <gst/rtp/rtp.h>
 #include <gst/sdp/sdp.h>
+#include <gst/video/video.h>
 #include <gst/webrtc/nice/nice.h>
 #include <gst/webrtc/webrtc.h>
 #include <iostream>
@@ -13,6 +19,7 @@
 #include <json/reader.h>
 #include <json/value.h>
 #include <nlohmann/json.hpp>
+#define signals Q_SIGNALS
 
 #define RTP_OPUS_DEFAULT_PT 97
 #define RTP_VP8_DEFAULT_PT 96
@@ -64,16 +71,22 @@ public:
     static void on_answer_create(GstPromise *promise, gpointer user_data);
     static void on_offer_set(GstPromise *promise, gpointer user_data);
     static void on_offer_received(GstSDPMessage *sdp);
-    static boost::asio::ip::tcp::socket *m_socket;
+    static GstFlowReturn newSampleCallback(GstElement *appsink, gpointer user_data);
+    static bool setPiplinePlaying();
+    static void on_data_channel(GstElement *webrtc,
+                                GstWebRTCDataChannel *data_channel,
+                                gpointer user_data);
+    static void data_channel_on_close(GObject *dc, gpointer user_data);
+    static void data_channel_on_message_string(GObject *dc, gchar *str, gpointer user_data);
+
     static unsigned int m_object_id;
     static enum AppState app_state;
     static GstElement *m_webrtcbin;
     static GMainLoop *loop;
+    static QImage image;
 
 private:
     static GstElement *m_pipeline, *m_audio_bin, *m_video_bin;
-
-    static GObject *send_channel,
-        *receive_channel; //send_channel是由本地创建，receive_channel是由远程创建
+    static GstWebRTCDataChannel *send_channel;
     static gboolean is_offer;
 };

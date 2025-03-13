@@ -9,6 +9,7 @@
 #include <QObject>
 #include <QVector>
 #include "filetools.h"
+#include "mediathread.h"
 #include "sendmsg.h"
 #include "tool.h"
 
@@ -28,6 +29,8 @@ public:
     Q_INVOKABLE void saveMessage();
     Q_INVOKABLE void sendMessage(QString data);
     Q_INVOKABLE void callRequest();
+    Q_INVOKABLE void getThrough();
+    Q_INVOKABLE void hangUp();
     //保存我接收的消息，需要消息内容和发送者id
     void saveMessage(QString msg, QString send_id);
     QString myMessage() const;
@@ -48,6 +51,9 @@ signals:
     void myIdChanged();
     void friendIdChanged();
     void videoCallRequest();
+    void closeVideoWindow();
+public slots:
+    void onWasHangUp();
 
 private:
     QString m_myMessage;

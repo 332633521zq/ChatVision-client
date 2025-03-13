@@ -5,46 +5,22 @@
 
 #include "piplinebuild.h"
 
-unsigned int uid = 20000000;
 
 GstElement *PiplineBuild::m_audio_bin = nullptr;
 GstElement *PiplineBuild::m_pipeline = nullptr;
 GstElement *PiplineBuild::m_video_bin = nullptr;
 GstElement *PiplineBuild::m_webrtcbin = nullptr;
-GObject *PiplineBuild::receive_channel = nullptr;
-GObject *PiplineBuild::send_channel = nullptr;
+
 GMainLoop *PiplineBuild::loop = g_main_loop_new(NULL, FALSE);
 enum AppState PiplineBuild::app_state = APP_STATE_UNKNOWN;
 gboolean PiplineBuild::is_offer = FALSE;
 
-boost::asio::ip::tcp::socket *PiplineBuild::m_socket = nullptr;
 unsigned int PiplineBuild::m_object_id = NULL;
+GstWebRTCDataChannel *PiplineBuild::send_channel = nullptr;
+
+QImage PiplineBuild::image(640, 480, QImage::Format_ARGB32);
 
 PiplineBuild::PiplineBuild() {}
-/*******************************send-msg************/
-static void SendRequest(boost::asio::ip::tcp::socket &sock,
-                        std::string data,
-                        unsigned int object_id,
-                        unsigned int msg_id)
-{
-    char send_data[MAX_LENGTH] = {0};
-    int msgid_host = boost::asio::detail::socket_ops::host_to_network_short(msg_id);
-    memcpy(send_data, &msgid_host, 2);
-
-    nlohmann::json send_str;
-    send_str["uid"] = uid;
-    send_str["object_id"] = object_id;
-    send_str["data"] = data;
-    std::string temp_send_str = send_str.dump();
-
-    int request_host_length = boost::asio::detail::socket_ops::host_to_network_short(
-        temp_send_str.size());
-    memcpy(send_data + 2, &request_host_length, 2);
-    memcpy(send_data + 4, temp_send_str.c_str(), temp_send_str.size());
-    std::cout << "send_data: " << send_str.dump() << "length:" << sizeof(send_str.dump()) + 1
-              << std::endl;
-    boost::asio::write(sock, boost::asio::buffer(send_data, temp_send_str.size() + 4));
-}
 
 gboolean PiplineBuild::start_pipeline(gboolean create_offer)
 {
@@ -115,9 +91,9 @@ gboolean PiplineBuild::start_pipeline(gboolean create_offer)
     g_assert_nonnull(m_webrtcbin);
     g_print("webrtcbin create succeed");
 
-    g_object_set(m_webrtcbin, "rtcp-rsize", TRUE, NULL);
-    g_object_set(m_webrtcbin, "rtcp-rr-mode", 1, NULL);      // 启用RTCP反馈
-    g_object_set(m_webrtcbin, "jitterbuffer-mode", 1, NULL); // 启用抖动缓冲
+    // g_object_set(m_webrtcbin, "rtcp-rsize", TRUE, NULL);
+    // g_object_set(m_webrtcbin, "rtcp-rr-mode", 1, NULL);      // 启用RTCP反馈
+    // g_object_set(m_webrtcbin, "jitterbuffer-mode", 1, NULL); // 启用抖动缓冲
 
     //为webrtcbin设置bundle策略属性，值为max-bundle意思为尽可能将多个媒体流打包到单个的连接中，以减少网络延迟和带宽
     gst_util_set_object_arg(G_OBJECT(m_webrtcbin), "bundle-policy", "max-bundle");
@@ -141,6 +117,8 @@ gboolean PiplineBuild::start_pipeline(gboolean create_offer)
                      GINT_TO_POINTER(create_offer));
     g_signal_connect(m_webrtcbin, "on-ice-candidate", G_CALLBACK(send_ice_candidate_message), NULL);
 
+    // g_signal_connect(m_webrtcbin, "on-data-channel", G_CALLBACK(on_data_channel), NULL);
+
     //监听总线事件
     bus = gst_pipeline_get_bus(GST_PIPELINE(m_pipeline));
     gst_bus_add_watch(bus, bus_watch_cb, m_pipeline);
@@ -149,19 +127,30 @@ gboolean PiplineBuild::start_pipeline(gboolean create_offer)
     //将管道状态设置为ready
     gst_element_set_state(m_pipeline, GST_STATE_READY);
 
+    // if (create_offer) {
+    //     g_signal_emit_by_name(m_webrtcbin, "create-data-channel", "channel", NULL, &test);
+    //     if (send_channel) {
+    //         g_print("create channel succeed");
+    //         g_signal_connect(send_channel, "on-close", G_CALLBACK(data_channel_on_close), NULL);
+    //     } else {
+    //         g_print("crate channel failed");
+    //     }
+    // }
     //将webrtcbin元素的pad-added信号与处理媒体流的回调函数相连，动态添加元素decodebin
     g_signal_connect(m_webrtcbin, "pad-added", G_CALLBACK(on_incoming_stream), m_pipeline);
 
     gst_print("Starting pipline\n");
-    ret = gst_element_set_state(GST_ELEMENT(m_pipeline), GST_STATE_PLAYING);
-    if (ret == GST_STATE_CHANGE_FAILURE) {
-        g_print("start pipeline error");
-        if (m_pipeline)
-            g_clear_object(&m_pipeline);
-        if (m_webrtcbin)
-            m_webrtcbin = NULL;
-        return FALSE;
-    }
+
+    setPiplinePlaying();
+    // ret = gst_element_set_state(GST_ELEMENT(m_pipeline), GST_STATE_PLAYING);
+    // if (ret == GST_STATE_CHANGE_FAILURE) {
+    //     g_print("start pipeline error");
+    //     if (m_pipeline)
+    //         g_clear_object(&m_pipeline);
+    //     if (m_webrtcbin)
+    //         m_webrtcbin = NULL;
+    //     return FALSE;
+    // }
     return TRUE;
 }
 
@@ -176,14 +165,10 @@ void PiplineBuild::on_negotiation_needed(GstElement *element, gpointer user_data
         GstPromise *promise = gst_promise_new_with_change_func(on_offer_created, NULL, NULL);
         //m_webrtcbin发送信号"create_offer",并将promise作为参数传递，当m_webrtcbin异步创建offer完成后调用promise的回调函数
         g_signal_emit_by_name(m_webrtcbin, "create-offer", NULL, promise);
-    }
 
-    /***********************************************************
-    //远端创建offer,请求远端传教offer
-    if(!create_offer){
-        
+    } else {
+        gst_element_set_state(GST_ELEMENT(m_pipeline), GST_STATE_PAUSED);
     }
-************************************************************/
 }
 
 //当offer创建完成后作为promise的回调函数调用，提取offer,设置本地描述并向服务器发送sdp
@@ -198,11 +183,6 @@ void PiplineBuild::on_offer_created(GstPromise *promise, gpointer user_data)
     reply = gst_promise_get_reply(promise);
     gst_structure_get(reply, "offer", GST_TYPE_WEBRTC_SESSION_DESCRIPTION, &offer, NULL);
     gst_promise_unref(promise);
-
-    // //打印sdp
-    // gchar *sdp = gst_sdp_message_as_text(offer->sdp);
-    // g_print("Offer SDP:\n%s\n", sdp);
-    // g_free(sdp);
 
     // 设置本地描述
     GstPromise *local_promise = gst_promise_new();
@@ -244,7 +224,8 @@ void PiplineBuild::send_sdp_to_peer(GstWebRTCSessionDescription *desc)
     json_object_unref(msg);
 
     /*****************************************/
-    SendRequest(*m_socket, data, m_object_id, MSG_TEXT_CHAT);
+    SendMsg::GetInstance()->SendRequest(data, m_object_id, MSG_VIDEO_CHAT);
+    // SendRequest(*m_socket, data, m_object_id, MSG_TEXT_CHAT);
     /*向服务器发送消息的函数*******************/
     g_free(text);
     text = NULL;
@@ -287,7 +268,9 @@ void PiplineBuild::send_ice_candidate_message(GstElement *m_webrtcbin,
     json_object_unref(msg);
     std::string data = text;
     /**********************************************/
-    SendRequest(*m_socket, data, m_object_id, MSG_TEXT_CHAT);
+    sleep(1);
+    SendMsg::GetInstance()->SendRequest(data, m_object_id, MSG_VIDEO_CHAT);
+    // SendRequest(*m_socket, data, m_object_id, MSG_TEXT_CHAT);
     /* * 向信令服务器发送候选者text*******************/
     g_free(text);
     text = NULL;
@@ -329,9 +312,15 @@ gboolean PiplineBuild::bus_watch_cb(GstBus *bus, GstMessage *message, gpointer u
         g_free(debug);
         break;
     }
-    case GST_MESSAGE_LATENCY:
+    case GST_MESSAGE_LATENCY: {
         gst_bin_recalculate_latency(GST_BIN(pipeline));
         break;
+    }
+    case GST_MESSAGE_EOS: {
+        g_print("End of stream!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+        // g_main_loop_quit(loop);
+        break;
+    }
     default:
         break;
     }
@@ -342,6 +331,15 @@ gboolean PiplineBuild::bus_watch_cb(GstBus *bus, GstMessage *message, gpointer u
 //清理
 gboolean PiplineBuild::cleanup_and_quit_loop(const char *msg, enum AppState state)
 {
+    gst_element_set_state(GST_ELEMENT(m_pipeline), GST_STATE_NULL);
+
+    gst_object_unref(m_pipeline);
+
+    m_audio_bin = NULL;
+    m_video_bin = NULL;
+    m_pipeline = NULL;
+    m_webrtcbin = NULL;
+
     //在这里处理一下要是通道接收到错误信号怎么清理并退出程序
     /*****************...**********************/
     if (msg) {
@@ -392,9 +390,13 @@ void PiplineBuild::on_incoming_decodebin_stream(GstElement *decodebin, GstPad *p
 
     gst_print("the caps name:%s", name);
     if (g_str_has_prefix(name, "video")) {
-        handle_media_stream(pad, pipe, "videoconvert", "xvimagesink");
+        handle_media_stream(pad, pipe, "videoconvert", "appsink");
+        gst_print("添加视频箱！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！");
+
     } else if (g_str_has_prefix(name, "audio")) {
         handle_media_stream(pad, pipe, "audioconvert", "autoaudiosink");
+        gst_print("添加音频箱！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！");
+
     } else {
         gst_printerr("Unknown pad %s", GST_PAD_NAME(pad));
     }
@@ -410,14 +412,23 @@ void PiplineBuild::handle_media_stream(GstPad *pad,
     GstElement *q, *conv, *resample, *sink;
     GstPadLinkReturn ret;
 
-    gst_println("Tring to handle streame with %s ！ %s", convert_name, sink_name);
+    gst_println("Tring to handle streame with %s ！ %s！！！！！！！！！！！！！！！！！！！！！！",
+                convert_name,
+                sink_name);
 
     q = gst_element_factory_make("queue", NULL);
     g_assert_nonnull(q);
     conv = gst_element_factory_make(convert_name, NULL);
     g_assert_nonnull(conv);
+
     sink = gst_element_factory_make(sink_name, NULL);
     g_assert_nonnull(sink);
+    g_object_set(G_OBJECT(sink),
+                 "emit-signals",
+                 TRUE,
+                 "caps",
+                 gst_caps_from_string("video/x-raw, format=BGRA"),
+                 NULL);
 
     if (g_strcmp0(convert_name, "audioconvert") == 0) {
         resample = gst_element_factory_make("audioresample", NULL);
@@ -436,6 +447,9 @@ void PiplineBuild::handle_media_stream(GstPad *pad,
         gst_element_link_many(q, conv, sink, NULL);
     }
     qpad = gst_element_get_static_pad(q, "sink");
+
+    g_signal_connect(sink, "new-sample", G_CALLBACK(newSampleCallback), NULL);
+
     ret = gst_pad_link(pad, qpad);
     g_assert_cmphex(ret, ==, GST_PAD_LINK_OK);
 }
@@ -488,4 +502,107 @@ void PiplineBuild::on_offer_received(GstSDPMessage *sdp)
     g_signal_emit_by_name(m_webrtcbin, "set-remote-description", offer, promise);
 
     gst_webrtc_session_description_free(offer);
+}
+
+GstFlowReturn PiplineBuild::newSampleCallback(GstElement *appsink, gpointer user_data)
+{
+    qint8 count = 0;
+    GstSample *sample = nullptr;
+    GstBuffer *buffer = nullptr;
+    GstCaps *caps = nullptr;
+    GstMapInfo map;
+    GstVideoInfo video_info;
+    GstVideoFrame frame;
+    guchar *data;
+    gint width, height, stride;
+
+    // 从appsink拉取样本
+    g_signal_emit_by_name(appsink, "pull-sample", &sample);
+    if (!sample) {
+        // 没有样本，可能是EOS或错误
+        return GST_FLOW_ERROR;
+    }
+
+    // 获取样本中的缓冲区
+    buffer = gst_sample_get_buffer(sample);
+    if (!gst_buffer_map(buffer, &map, GST_MAP_READ)) {
+        // 无法映射缓冲区
+        gst_sample_unref(sample);
+        return GST_FLOW_ERROR;
+    }
+
+    caps = gst_sample_get_caps(sample); // 获取与样本关联的caps
+    // 获取appsink的视频信息（假设你已经在某处设置了caps）
+    // 这里我们假设caps已经设置为"video/x-raw, format=BGR, width=<WIDTH>, height=<HEIGHT>"
+    // 在实际应用中，你可能需要动态获取这些信息
+    gst_video_info_init(&video_info);
+    // GstPad *sink_pad = gst_element_get_static_pad(appsink, "sink");
+    // GstCaps *caps = gst_pad_query_caps(sink_pad, NULL);
+
+    if (!caps || !gst_video_info_from_caps(&video_info, caps)) {
+        g_printerr("Failed to get video info from caps.\n");
+        gst_buffer_unmap(buffer, &map);
+        gst_sample_unref(sample);
+        if (caps) {
+            gst_caps_unref(caps);
+            count--;
+        }
+        return GST_FLOW_ERROR;
+    }
+
+    // 初始化GstVideoFrame以访问视频帧数据
+    if (!gst_video_frame_map(&frame, &video_info, buffer, GST_MAP_READ)) {
+        g_printerr("Failed to map video frame.\n");
+        gst_buffer_unmap(buffer, &map);
+        gst_sample_unref(sample);
+        return GST_FLOW_ERROR;
+    }
+
+    // 获取视频帧的宽度、高度和行跨度
+    width = GST_VIDEO_FRAME_WIDTH(&frame);
+    height = GST_VIDEO_FRAME_HEIGHT(&frame);
+    stride = GST_VIDEO_FRAME_PLANE_STRIDE(&frame, 0);
+    // qDebug() << "width" << width;
+    // 获取BGR像素数据
+    data = static_cast<guchar *>(GST_VIDEO_FRAME_PLANE_DATA(&frame, 0));
+    // qDebug() << width;
+    // qDebug() << height;
+    image = QImage(data, width, height, stride, QImage::Format_ARGB32);
+    // QString filename = "output.png";
+    // bool suc = image.save(filename);
+    // if (!suc) {
+    //     qDebug() << "图片保存失败";
+    // }
+
+    // 如果你打算在QML中使用这个QImage，你可能需要将其转换为QByteArray或通过其他方式传递给QML
+    // 例如：QByteArray ba; QBuffer buffer(&ba); qimage.save(&buffer, "PNG"); // 但这会增加内存和CPU开销
+
+    // 取消映射视频帧和缓冲区
+    gst_video_frame_unmap(&frame);
+    gst_buffer_unmap(buffer, &map);
+
+    // 释放样本
+    gst_sample_unref(sample);
+    // gst_caps_unref(caps);
+    // 在这里，你可以使用qimage进行进一步的处理或显示
+    // ...
+    // emit videoFrameChanged();
+    // 返回GST_FLOW_OK表示成功处理样本
+    // qDebug() << "count" << count;
+    return GST_FLOW_OK;
+}
+
+bool PiplineBuild::setPiplinePlaying()
+{
+    GstStateChangeReturn ret;
+    ret = gst_element_set_state(GST_ELEMENT(m_pipeline), GST_STATE_PLAYING);
+    if (ret == GST_STATE_CHANGE_FAILURE) {
+        g_print("start pipeline error");
+        if (m_pipeline)
+            g_clear_object(&m_pipeline);
+        if (m_webrtcbin)
+            m_webrtcbin = NULL;
+        return FALSE;
+    }
+    return TRUE;
 }

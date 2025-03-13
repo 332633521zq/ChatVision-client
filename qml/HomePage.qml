@@ -6,6 +6,8 @@ Rectangle{
     id:homepagerec
     property string communication_name:"";
     property ListModel msglistmodel:rightloader.item.msglistmodel
+    property real randomNumber:0
+
     Row{
         id:homepagerow
         anchors.fill: parent
@@ -370,10 +372,21 @@ Rectangle{
             source: "qrc:/audio/callaudio.mp3"
             audioOutput: AudioOutput{}
         }
-        Image{
-            id:bgimage
+        Image {
+            id: vedio
             anchors.fill: parent
-            source:""
+            source: "image://pictures/avater"
+            cache: false
+        }
+        Timer{
+            id:t1
+            interval: 1
+            running: true
+            repeat: true
+            onTriggered: {
+                randomNumber++
+                vedio.source="image://pictures/"+randomNumber
+            }
         }
         Rectangle{
             id:answerRequestRec
@@ -395,9 +408,13 @@ Rectangle{
                 y: (parent.height-closebutton.height)-30
                 Text{
                     text:qsTr("接通")
+                    anchors.centerIn: parent
                 }
                 onClicked: {
                     //加载视频通话画面
+                    communicationPageControler.getThrough()
+                    answerRequestRec.visible=false
+                    onThePhoneRec.visible=true
                 }
             }
             Button{
@@ -408,9 +425,12 @@ Rectangle{
                 y: (parent.height-closebutton.height)-30
                 Text{
                     text:qsTr("挂断")
+                    anchors.centerIn: parent
+
                 }
                 onClicked: {
                     //停止并释放管道，将answerruequestrec的visible置为false,关闭通话窗口
+                    communicationPageControler.hangUp()
                     answerRequestRec.visible=false
                     mediaplayer.pause()
                     mediawindow.close()
@@ -438,10 +458,38 @@ Rectangle{
                 Text{
                     id:closetext
                     text: qsTr("结束通话")
+                    anchors.centerIn: parent
+
                 }
                 onClicked: {
                     requestCallRec.visible=false
+                    communicationPageControler.hangUp()
                     mediaplayer.pause()
+                    mediawindow.close()
+                }
+            }
+        }
+        Rectangle{
+            id:onThePhoneRec
+            anchors.fill: parent
+            color:"transparent"
+            visible: false
+            Button{
+                id:hangUpButton
+                width: 100
+                height: 30
+                x:(parent.width-closebutton.width)/2
+                y: (parent.height-closebutton.height)-30
+                Text{
+                    text: qsTr("结束通话")
+                    anchors.centerIn: parent
+                }
+                onClicked: {
+                    //停止媒体线程关闭管道
+                    communicationPageControler.hangUp()
+
+                    onThePhoneRec.visible=false
+
                     mediawindow.close()
                 }
             }
@@ -452,7 +500,15 @@ Rectangle{
         function onvideoCallRequest(){
             mediawindow.show()
             answerRequestRec.visible=true
-            mediaplayer.play()
+            // mediaplayer.play()
+        }
+    }
+    Connections{
+        target: communicationPageControler
+        function oncloseVideoWindow(){
+            mediawindow.close()
+            answerRequestRec.visible=false
+            // mediaplayer.play()
         }
     }
 }

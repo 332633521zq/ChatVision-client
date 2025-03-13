@@ -83,10 +83,8 @@ Rectangle{
                     rightloader.visible=true
                     console.log("conversation was clicked")
                     msglistmodel.clear()
-                    console.log("msglistmodel cleared. Current count:", msglistmodel.count);
-                    communicationPageControler.friendId=friendId
-                    communication_name=name
-                    communicationPageControler.initCommunicationPage()
+                    console.log("findlistmodel cleared. Current count:", findfriendlist.count);
+                    findfriendPageController.initFindFriendPage()
                 }
             }
         }
@@ -96,5 +94,16 @@ Rectangle{
         model: findfriendlist
         delegate: findfriendcomponent
     }
+    Connections{
+        target: findfriendPageController
+        function onInitFindPage(name,avater,friendId){
+            var addlist={};
+            addlist.name=name;
+            addlist.avater=avater;
+            addlist.friendId=friendId;
+            findfriendlist.append(addlist);
+        }
+    }
+
 
 }
