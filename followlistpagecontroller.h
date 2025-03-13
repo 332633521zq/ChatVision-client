@@ -28,7 +28,7 @@ public:
     QJsonObject GetMyinfo() const;
     void SetMyInfo(const json& data);
 
-    void InitRelationData();
+    Q_INVOKABLE void initRelationData();
 
 signals:
     void onFollowingChanged();

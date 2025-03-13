@@ -5,7 +5,7 @@
 FollowListPageController::FollowListPageController(QObject* parent)
     : QObject(parent)
 {
-    InitRelationData();
+    // InitRelationData();
 }
 
 FollowListPageController::~FollowListPageController() {}
@@ -57,7 +57,7 @@ void FollowListPageController::SetMyInfo(const json& data)
     emit onMyInfoChanged();
 }
 
-void FollowListPageController::InitRelationData()
+void FollowListPageController::initRelationData()
 {
     json res;
     const auto& followings = User::GetInstance()->GetFollowing();
@@ -117,6 +117,8 @@ void FollowListPageController::updateQmlFollowers()
 void FollowListPageController::updateQmlMyinfo()
 {
     // {"area":"重庆","avatar_path_":"path","gender":"女","memo":"85","nickname":"85","signature":"罪恶没有假期，正义便无暇休憩","uid":"20000000"}
+    if (m_myinfo.size() == 0)
+        return;
     std::string uid_str = m_myinfo["uid"];
     m_qmlMyinfo["uid"] = QString::fromStdString(uid_str);
     m_qmlMyinfo["gender"] = QString::fromStdString(m_myinfo["gender"]);

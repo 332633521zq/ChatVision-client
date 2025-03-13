@@ -16,7 +16,7 @@ Rectangle{
     Connections{
         target:centerloader.item
         function onLoadfollowinginfo() {
-            rightloader.source = "qrc:/FollowUserInfoPage.qml";
+            rightloader.source = "qrc:/qml/FollowUserInfoPage.qml";
         }
     }
 
@@ -78,7 +78,7 @@ Rectangle{
 
                             if(isfollowlistloadeed == true){
                                 console.log("tapped ")
-                                rightloader.source = "qrc:/FollowUserInfoPage.qml";
+                                rightloader.source = "qrc:/qml/FollowUserInfoPage.qml";
                             }
                         }
                     }
@@ -197,7 +197,8 @@ Rectangle{
                     }
                     TapHandler{
                         onTapped: {
-                            centerloader.source = "qrc:/FollowListPage.qml"
+                            centerloader.source = "qrc:/qml/FollowListPage.qml"
+                            followingPageController.initRelationData()
                             isfollowlistloadeed = true;
                             rightloader.source = ""
                         }

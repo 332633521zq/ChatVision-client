@@ -29,7 +29,7 @@ qt_add_qml_module(
   ConstValue.h
   # QML_FILES LoginPage.qml
   QML_FILES
-  HomePage.qml
+  # HomePage.qml
   RESOURCES
   RESOURCES
   assets.qrc
@@ -47,7 +47,7 @@ qt_add_qml_module(
   QML_FILES
   # CommunicationPage.qml
   QML_FILES
-  FindFriendPage.qml
+  # FindFriendPage.qml
   SOURCES
   client.h
   client.cpp
@@ -70,14 +70,14 @@ qt_add_qml_module(
   singleton.h
   singleton.cpp
   QML_FILES
-  FollowListPage.qml
+  # FollowListPage.qml
   SOURCES
   followlistpagecontroller.h
   followlistpagecontroller.cpp
   QML_FILES
-  FollowUserInfoPage.qml
+  # FollowUserInfoPage.qml
   QML_FILES
-  BaseInfoProperties.qml
+  # BaseInfoProperties.qml
   SOURCES
   myimageprovider.h
   myimageprovider.cpp
