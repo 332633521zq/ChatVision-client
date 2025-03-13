@@ -20,15 +20,19 @@ public:
 
     void InsertToFollowing(unsigned int uid, const json user_info);
     void RemoveFromFollowing(unsigned int uid);
+    std::map<unsigned int, json> &GetFollowing();
 
     void InsertToFollower(unsigned int uid, const json user_info);
     void RemoveFromFollower(unsigned int uid);
+    std::map<unsigned int, json> &GetFollower();
 
     void InsertToBlacklist(unsigned int uid, const json user_info);
     void RemoveFromBlacklist(unsigned int uid);
+    std::map<unsigned int, json> &GetBlackList();
 
     void InsertToChatted(unsigned int uid, const json user_info);
     void RemoveFromChatted(unsigned int uid);
+    std::map<unsigned int, json> &GetChatted();
 
 private:
     unsigned int _uid;

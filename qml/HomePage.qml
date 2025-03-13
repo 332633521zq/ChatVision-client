@@ -5,8 +5,27 @@ import QtMultimedia
 Rectangle{
     id:homepagerec
     property string communication_name:"";
+    property bool isfollowlistloadeed:false;
+
     property ListModel msglistmodel:rightloader.item.msglistmodel
     property real randomNumber:0
+
+    BaseInfoProperties{
+        id:bips
+    }
+    Connections{
+        target:centerloader.item
+        function onLoadfollowinginfo() {
+            rightloader.source = "qrc:/FollowUserInfoPage.qml";
+        }
+    }
+
+    Connections{
+        target: rightloader.item
+        function onLoadchatpage(){
+            rightloader.source = "CommunicationPage.qml";
+        }
+    }
 
     Row{
         id:homepagerow
@@ -47,6 +66,21 @@ Rectangle{
                     }
                     TapHandler{
                         id:avaterth
+                        onTapped: {
+                            var myinfo = followingPageController.myinfo
+                            bips.following_uid = myinfo.uid/* "2000000"*/
+                            bips.nickname = myinfo.nickname /*"85"*/
+                            bips.memo = myinfo.nickname /*"85"*/
+                            bips.signal_text = myinfo.signature/*"罪业的报偿"*/
+                            bips.area = myinfo.area/*"中国大陆 重庆"*/
+                            // bips.avatar_path = myinfo.avatar_path/*"../assets/Picture/avatar/cats.jpg"*/
+                            bips.gender = myinfo.gender
+
+                            if(isfollowlistloadeed == true){
+                                console.log("tapped ")
+                                rightloader.source = "qrc:/FollowUserInfoPage.qml";
+                            }
+                        }
                     }
                 }
 
@@ -85,6 +119,8 @@ Rectangle{
                     TapHandler{
                         onTapped: {
                             centerloader.source="qrc:/qml/ConversationListPage.qml"
+                            isfollowlistloadeed == false
+
                         }
                     }
                 }
@@ -157,6 +193,13 @@ Rectangle{
                             else{
                                 maskfocus.visible=false
                             }
+                        }
+                    }
+                    TapHandler{
+                        onTapped: {
+                            centerloader.source = "qrc:/FollowListPage.qml"
+                            isfollowlistloadeed = true;
+                            rightloader.source = ""
                         }
                     }
                 }
@@ -236,6 +279,7 @@ Rectangle{
                     TapHandler{
                         onTapped: {
                             settingpopup.open()
+                            isfollowlistloadeed == false
                         }
                     }
                 }
@@ -247,7 +291,7 @@ Rectangle{
             id:centerbar
             width:240
             height: parent.height
-            color:"#4C82A1"
+            color:"#74E6C4"
             Loader{
                 id:centerloader
                 anchors.fill: parent
@@ -260,7 +304,7 @@ Rectangle{
             id:rightbar
             width: 600
             height: parent.height
-            color: "#1D5B7F"
+            color: "#FFFFFF"
             Loader{
                 id:rightloader
                 anchors.fill: parent

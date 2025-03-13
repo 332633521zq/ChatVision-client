@@ -27,7 +27,9 @@ qt_add_qml_module(
   mediathread.cpp
   mediathread.h
   ConstValue.h
-  # QML_FILES LoginPage.qml QML_FILES HomePage.qml
+  # QML_FILES LoginPage.qml
+  QML_FILES
+  HomePage.qml
   RESOURCES
   RESOURCES
   assets.qrc
@@ -40,8 +42,12 @@ qt_add_qml_module(
   SOURCES
   tool.h
   tool.cpp
-  # QML_FILES ConversationListPage.qml QML_FILES CommunicationPage.qml QML_FILES
-  # FindFriendPage.qml
+  QML_FILES
+  # ConversationListPage.qml
+  QML_FILES
+  # CommunicationPage.qml
+  QML_FILES
+  FindFriendPage.qml
   SOURCES
   client.h
   client.cpp
@@ -63,9 +69,21 @@ qt_add_qml_module(
   SOURCES
   singleton.h
   singleton.cpp
+  QML_FILES
+  FollowListPage.qml
+  SOURCES
+  followlistpagecontroller.h
+  followlistpagecontroller.cpp
+  QML_FILES
+  FollowUserInfoPage.qml
+  QML_FILES
+  BaseInfoProperties.qml
+  SOURCES
   myimageprovider.h
   myimageprovider.cpp
-  SOURCES findfriendpagecontroller.h findfriendpagecontroller.cpp)
+  SOURCES
+  findfriendpagecontroller.h
+  findfriendpagecontroller.cpp)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GST REQUIRED gstreamer-1.0 gstreamer-webrtc-1.0

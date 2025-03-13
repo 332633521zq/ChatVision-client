@@ -30,6 +30,11 @@ void User::RemoveFromFollowing(unsigned int uid)
     _following.erase(uid);
 }
 
+std::map<unsigned int, json> &User::GetFollowing()
+{
+    return _following;
+}
+
 void User::InsertToFollower(unsigned int uid, const json user_info)
 {
     _follower[uid] = user_info;
@@ -37,6 +42,11 @@ void User::InsertToFollower(unsigned int uid, const json user_info)
 void User::RemoveFromFollower(unsigned int uid)
 {
     _follower.erase(uid);
+}
+
+std::map<unsigned int, json> &User::GetFollower()
+{
+    return _follower;
 }
 
 void User::InsertToBlacklist(unsigned int uid, const json user_info)
@@ -48,6 +58,11 @@ void User::RemoveFromBlacklist(unsigned int uid)
     _blacklist.erase(uid);
 }
 
+std::map<unsigned int, json> &User::GetBlackList()
+{
+    return _blacklist;
+}
+
 void User::InsertToChatted(unsigned int uid, const json user_info)
 {
     _chatted[uid] = user_info;
@@ -55,4 +70,9 @@ void User::InsertToChatted(unsigned int uid, const json user_info)
 void User::RemoveFromChatted(unsigned int uid)
 {
     _chatted.erase(uid);
+}
+
+std::map<unsigned int, json> &User::GetChatted()
+{
+    return _chatted;
 }

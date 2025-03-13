@@ -24,5 +24,9 @@
         <file>image/channel_icon_fire_v1_24.svg</file>
         <file>image/channel_selection_16.svg</file>
         <file>image/setting_24.svg</file>
+        <file>FollowListPage.qml</file>
+        <file>FollowUserInfoPage.qml</file>
+        <file>BaseInfoProperties.qml</file>
+        <file>qml/HomePage.qml.autosave</file>
     </qresource>
 </RCC>

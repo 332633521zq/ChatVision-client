@@ -4,6 +4,7 @@
 //现在先去搭建ui界面，后面再考虑这部分代码的调整
 
 #include "piplinebuild.h"
+#include "sendmsg.h"
 
 
 GstElement *PiplineBuild::m_audio_bin = nullptr;
@@ -268,9 +269,9 @@ void PiplineBuild::send_ice_candidate_message(GstElement *m_webrtcbin,
     json_object_unref(msg);
     std::string data = text;
     /**********************************************/
-    sleep(1);
+
     SendMsg::GetInstance()->SendRequest(data, m_object_id, MSG_VIDEO_CHAT);
-    // SendRequest(*m_socket, data, m_object_id, MSG_TEXT_CHAT);
+    sleep(1);
     /* * 向信令服务器发送候选者text*******************/
     g_free(text);
     text = NULL;

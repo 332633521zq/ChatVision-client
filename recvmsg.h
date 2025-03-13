@@ -19,20 +19,28 @@ class RecvMsg : public Singleton<RecvMsg>
 public:
     ~RecvMsg();
     void start();
+
     void SetSocket(boost::asio::ip::tcp::socket* sock);
     void ReceiveMsg();
     void DealMsg();
     void RegisterCallBacks();
     void HelloWorldCallBack(const std::string& msg_data);
+    void NotOnlineCallBack(const std::string& msg_data);
     void UserInfoCallBack(const std::string& msg_data);
     void GetFollowingCallBack(const std::string& msg_data);
     void GetFollowerCallBack(const std::string& msg_data);
     void GetBlacklistCallBack(const std::string& msg_data);
     void TextChatCallBack(const std::string& msg_data);
+    void TextChatRefusedCallBack(const std::string& msg_data);
     void FollowingCallBack(const std::string& msg_data);
     void CancelFollowCallBack(const std::string& msg_data);
     void VideoChatCallBack(const std::string& msg_data);
+    void AgreeVideoChatCallBack(const std::string& msg_data);
     void RefusedVideoChatCallBack(const std::string& msg_data);
+    void AudioChatCallBack(const std::string& msg_data);
+    void AgreeAudioChatCallBack(const std::string& msg_data);
+    void RefusedAudioChatCallBack(const std::string& msg_data);
+    void RandomPushCallBack(const std::string& msg_data);
     void ChattedUserCallBack(const std::string& msg_data);
 
 private:

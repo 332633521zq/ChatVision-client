@@ -15,6 +15,7 @@ class SendMsg : public Singleton<SendMsg>
 
 public:
     ~SendMsg();
+
     void SetSocket(boost::asio::ip::tcp::socket* sock);
     void SendRequest(char* msg, size_t msg_len, unsigned int object_id, short msgid);
     void SendRequest(std::string msg, unsigned int object_id, short msgid);
