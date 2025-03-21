@@ -8,8 +8,7 @@
 using namespace nlohmann;
 
 SendMsg::SendMsg()
-{
-}
+{}
 SendMsg::~SendMsg() {}
 
 void SendMsg::SetSocket(boost::asio::ip::tcp::socket* sock)
