@@ -86,9 +86,13 @@ Rectangle{
             TapHandler{
                 onTapped: {
                     rightloader.visible=true
+                    rightloader.source="qrc:/qml/CommunicationPage.qml"
                     console.log("conversation was clicked")
-                    msglistmodel.clear()
-                    console.log("msglistmodel cleared. Current count:", msglistmodel.count);
+                    if(msglistmodel===null){
+                    }else{
+                        msglistmodel.clear()
+                    }
+                    // console.log("msglistmodel cleared. Current count:", msglistmodel.count);
                     communicationPageControler.friendId=friendId
                     communication_name=name
                     communicationPageControler.initCommunicationPage()

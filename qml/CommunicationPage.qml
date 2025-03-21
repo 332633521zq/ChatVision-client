@@ -7,7 +7,9 @@ Rectangle{
     id:rightbar
     width: 600
     height: parent.height
-    color: "#1D5B7F"
+    // color: "#FFFFFF"
+
+    color: "#F2F2F2"
     //后面应该分开成一个组建加载
     Rectangle{
         id:chatrec
@@ -35,7 +37,7 @@ Rectangle{
                 width: parent.width
                 height:parent.height/5*3
                 color: "transparent"
-                border.color: "black"
+                border.color: "#E6E6E7"
                 ListModel{
                     id:msglistmodel
                     ListElement{
@@ -98,13 +100,16 @@ Rectangle{
                         Component.onCompleted: {
                             if(sender === communicationPageControler.myId){
                                 msgavaterRec.anchors.right=msgrec.right
+                                msgavaterRec.anchors.rightMargin=25
                                 textmsgrec.anchors.rightMargin=10
                                 textmsgrec.anchors.right=msgavaterRec.left
                             }
                             else{
                                 msgavaterRec.anchors.left=msgrec.left
+                                msgavaterRec.anchors.leftMargin=25
                                 textmsgrec.anchors.leftMargin=10
                                 textmsgrec.anchors.left=msgavaterRec.right
+                                textmsgrec.color="#FFFFFF"
                             }
                         }
                     }
@@ -240,6 +245,7 @@ Rectangle{
                             id:msginput
                             anchors.fill: parent
                             wrapMode: TextArea.Wrap
+                            color: "black"
                         }
                     }
                     Rectangle{
