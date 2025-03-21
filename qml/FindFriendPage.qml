@@ -13,6 +13,10 @@ Rectangle{
             name:"黄昏时风起"
             avater:"qrc:/image/avater.jpg"
             friendId:"20000001"
+            memo:""
+            signature:""
+            area:""
+            gender:""
         }
         ListElement{
             name:"坐看云起时"
@@ -81,10 +85,13 @@ Rectangle{
             TapHandler{
                 onTapped: {
                     rightloader.visible=true
-                    console.log("conversation was clicked")
-                    msglistmodel.clear()
-                    console.log("findlistmodel cleared. Current count:", findfriendlist.count);
-                    findfriendPageController.initFindFriendPage()
+                    rightloader.source="qrc:/qml/Main.qml"
+                    bips.nickname=name
+                    bips.memo=memo
+                    bips.area=area
+                    bips.signal_text=signature
+                    // rightloader.sourceComponent=findfriendInfoComponent
+
                 }
             }
         }
@@ -96,14 +103,23 @@ Rectangle{
     }
     Connections{
         target: findfriendPageController
-        function onInitFindPage(name,avater,friendId){
+        function onInitFindPage(area, gender, memo, nickname, signature, uid){
             var addlist={};
-            addlist.name=name;
-            addlist.avater=avater;
-            addlist.friendId=friendId;
+            addlist.name=memo;
+            addlist.avater="qrc:/image/avater.png"
+            addlist.gender=gender;
+            addlist.memo=memo;
+            addlist.nickname=nickname;
+            addlist.signature=signature;
+            addlist.uid=uid;
             findfriendlist.append(addlist);
         }
     }
-
+    Component{
+        id:findfriendInfoComponent
+        FollowUserInfoPage{
+            id:findInfoPage
+        }
+    }
 
 }

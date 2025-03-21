@@ -308,6 +308,8 @@ void RecvMsg::VideoChatCallBack(const std::string &msg_data)
     if (data == "HangUp") {
         CommunicationPageController::getInstance().closeVideoWindow();
         PiplineBuild::cleanup_and_quit_loop("接到对面挂断的信号", PEER_CALL_STOPPED);
+    } else if (data == "GetThrough") {
+        CommunicationPageController::getInstance().agreeCall();
     } else {
         const gchar *temp = data.c_str();
         gchar *text = g_strdup(temp);
@@ -439,7 +441,9 @@ void RecvMsg::RandomPushCallBack(const std::string &msg_data)
 
     json jsonmsg = json::parse(msg_data);
     std::cout << "jsonmsg:" << jsonmsg << std::endl;
-    json users_data = jsonmsg["data"];
+    std::string users_data = jsonmsg["data"];
+    json jsondata = json::parse(users_data);
+    FindFriendPageController::getInstance().initFindFriendPage(jsondata);
     // users_data是json数组，把数据转给前端
 }
 

@@ -34,7 +34,7 @@ Rectangle{
             id:leftbar
             width: 60
             height: parent.height
-            color: "#6BABD1"
+            color: "#F2F2F2"
             Column{
                 id:leftbarcolumn
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -106,6 +106,15 @@ Rectangle{
                         visible: false
                         radius: 5
                     }
+                    Rectangle{
+                        id:tapmaskconversation
+                        anchors.fill: parent
+                        color: "black"
+                        opacity: 0.2
+                        visible: false
+                        radius: 5
+                    }
+
                     HoverHandler{
                         onHoveredChanged: {
                             if(hovered){
@@ -118,9 +127,14 @@ Rectangle{
                     }
                     TapHandler{
                         onTapped: {
+                            tapmaskconversation.visible=true
+                            tapmaskfind.visible=false
+                            tapmaskfocus.visible=false
+                            tapmaskset.visible=false
+
+                            rightloader.visible=false
                             centerloader.source="qrc:/qml/ConversationListPage.qml"
                             isfollowlistloadeed == false
-
                         }
                     }
                 }
@@ -148,6 +162,14 @@ Rectangle{
                         visible: false
                         radius: 5
                     }
+                    Rectangle{
+                        id:tapmaskfind
+                        anchors.fill: parent
+                        color: "black"
+                        opacity: 0.2
+                        visible: false
+                        radius: 5
+                    }
                     HoverHandler{
                         onHoveredChanged: {
                             if(hovered){
@@ -160,6 +182,13 @@ Rectangle{
                     }
                     TapHandler{
                         onTapped: {
+                            tapmaskconversation.visible=false
+                            tapmaskfind.visible=true
+                            tapmaskfocus.visible=false
+                            tapmaskset.visible=false
+
+                            rightloader.visible=false
+                            findfriendPageController.sendRandowRequest()
                             centerloader.source="qrc:/qml/FindFriendPage.qml"
                         }
                     }
@@ -185,6 +214,14 @@ Rectangle{
                         visible: false
                         radius: 5
                     }
+                    Rectangle{
+                        id:tapmaskfocus
+                        anchors.fill: parent
+                        color: "black"
+                        opacity: 0.2
+                        visible: false
+                        radius: 5
+                    }
                     HoverHandler{
                         onHoveredChanged: {
                             if(hovered){
@@ -197,10 +234,16 @@ Rectangle{
                     }
                     TapHandler{
                         onTapped: {
-                            centerloader.source = "qrc:/qml/FollowListPage.qml"
+                            tapmaskconversation.visible=false
+                            tapmaskfind.visible=false
+                            tapmaskfocus.visible=true
+                            tapmaskset.visible=false
+
                             followingPageController.initRelationData()
                             isfollowlistloadeed = true;
                             rightloader.source = ""
+                            rightloader.visible=false
+                            centerloader.source = "qrc:/qml/FollowListPage.qml"
                         }
                     }
                 }
@@ -245,6 +288,7 @@ Rectangle{
                     height: 160
                     color:"transparent"
                 }
+
                 Rectangle{
                     id:settingrec
                     width:40
@@ -267,6 +311,14 @@ Rectangle{
                         visible: false
                         radius: 5
                     }
+                    Rectangle{
+                        id:tapmaskset
+                        anchors.fill: parent
+                        color: "black"
+                        opacity: 0.2
+                        visible: false
+                        radius: 5
+                    }
                     HoverHandler{
                         onHoveredChanged: {
                             if(hovered){
@@ -279,10 +331,107 @@ Rectangle{
                     }
                     TapHandler{
                         onTapped: {
+                            tapmaskconversation.visible=false
+                            tapmaskfind.visible=false
+                            tapmaskfocus.visible=false
+                            tapmaskset.visible=true
+
                             settingpopup.open()
                             isfollowlistloadeed == false
                         }
                     }
+                }
+            }
+        }
+        Popup{
+            id:settingpopup
+            width: 200
+            height: 120
+            x:leftbar.width+5
+            y:homepagerec.height-settingpopup.height-20
+            background: Rectangle{
+                color: "#368EB0"
+                radius: 5
+                clip: true
+            }
+            modal: true
+            closePolicy: Popup.CloseOnPressOutside
+            onClosed: console.log("popup was closed")
+            Rectangle{
+                id:poprec
+                anchors.fill: parent
+                radius: 5
+                clip: true
+                color:"transparent"
+                ListModel{
+                    id:exitlist
+                    ListElement{
+                        name:"退出"
+                    }
+                    ListElement{
+                        name:"关闭"
+                    }
+                    ListElement{
+                        name:"取消"
+                    }
+                }
+                Component{
+                    id:exitcomponent
+                    Rectangle{
+                        id:listrec
+                        width: poprec.width
+                        height: poprec.height/3
+                        radius:5
+                        color:"transparent"
+                        Text {
+                            id: textpoprec
+                            text: name
+                            anchors.centerIn: parent
+                            font.pixelSize: 15
+                        }
+                        Rectangle{
+                            id:masklistrec
+                            anchors.fill: parent
+                            color:"black"
+                            opacity: 0.2
+                            visible: false
+                        }
+                        HoverHandler{
+                            onHoveredChanged: {
+                                if(hovered){
+                                    masklistrec.visible=true
+                                }
+                                else{
+                                    masklistrec.visible=false
+                                }
+                            }
+                        }
+
+                        TapHandler{
+                            onTapped: {
+                                if(index===0){
+                                    console.log("1 was taped")
+                                    loginloader.source=""
+                                    loginpage.width=320
+                                    loginpage.height=420
+                                    sourceComponent=logincomponent
+                                }
+                                else if(index===1){
+                                    console.log("2 was taped")
+                                    Qt.quit()
+                                }
+                                else{
+                                    console.log("3 was taped")
+                                    settingpopup.close()
+                                }
+                            }
+                        }
+                    }
+                }
+                ListView{
+                    anchors.fill: parent
+                    model: exitlist
+                    delegate: exitcomponent
                 }
             }
         }
@@ -292,7 +441,7 @@ Rectangle{
             id:centerbar
             width:240
             height: parent.height
-            color:"#74E6C4"
+            color:"#FFFFFF"
             Loader{
                 id:centerloader
                 anchors.fill: parent
@@ -305,104 +454,12 @@ Rectangle{
             id:rightbar
             width: 600
             height: parent.height
-            color: "#FFFFFF"
+            color: "#F2F2F2"
             Loader{
                 id:rightloader
                 anchors.fill: parent
                 source: "qrc:/qml/CommunicationPage.qml"
                 visible: false
-            }
-        }
-    }
-    Popup{
-        id:settingpopup
-        width: 200
-        height: 120
-        x:leftbar.width+5
-        y:homepagerec.height-settingpopup.height-20
-        background: Rectangle{
-            color: "#368EB0"
-            radius: 5
-            clip: true
-        }
-        modal: true
-        closePolicy: Popup.CloseOnPressOutside
-        onClosed: console.log("popup was closed")
-        Rectangle{
-            id:poprec
-            anchors.fill: parent
-            radius: 5
-            clip: true
-            color:"transparent"
-            ListModel{
-                id:exitlist
-                ListElement{
-                    name:"退出"
-                }
-                ListElement{
-                    name:"关闭"
-                }
-                ListElement{
-                    name:"取消"
-                }
-            }
-            Component{
-                id:exitcomponent
-                Rectangle{
-                    id:listrec
-                    width: poprec.width
-                    height: poprec.height/3
-                    radius:5
-                    color:"transparent"
-                    Text {
-                        id: textpoprec
-                        text: name
-                        anchors.centerIn: parent
-                        font.pixelSize: 15
-                    }
-                    Rectangle{
-                        id:masklistrec
-                        anchors.fill: parent
-                        color:"black"
-                        opacity: 0.2
-                        visible: false
-                    }
-                    HoverHandler{
-                        onHoveredChanged: {
-                            if(hovered){
-                                masklistrec.visible=true
-                            }
-                            else{
-                                masklistrec.visible=false
-                            }
-                        }
-                    }
-
-                    TapHandler{
-                        onTapped: {
-                            if(index===0){
-                                console.log("1 was taped")
-                                loginloader.source=""
-                                loginpage.width=320
-                                loginpage.height=420
-                                sourceComponent=logincomponent
-                            }
-                            else if(index===1){
-                                console.log("2 was taped")
-                                Qt.quit()
-                            }
-                            else{
-                                console.log("3 was taped")
-                                settingpopup.close()
-                            }
-                        }
-                    }
-                }
-            }
-            ListView{
-                anchors.fill: parent
-                model: exitlist
-                delegate: exitcomponent
             }
         }
     }
@@ -418,7 +475,7 @@ Rectangle{
             audioOutput: AudioOutput{}
         }
         Image {
-            id: vedio
+            id: videoimage
             anchors.fill: parent
             source: "image://pictures/avater"
             cache: false
@@ -430,7 +487,7 @@ Rectangle{
             repeat: true
             onTriggered: {
                 randomNumber++
-                vedio.source="image://pictures/"+randomNumber
+                videoimage.source="image://pictures/"+randomNumber
             }
         }
         Rectangle{
@@ -479,6 +536,7 @@ Rectangle{
                     answerRequestRec.visible=false
                     mediaplayer.pause()
                     mediawindow.close()
+                    videoimage.source=""
                 }
             }
         }
@@ -554,6 +612,13 @@ Rectangle{
             mediawindow.close()
             answerRequestRec.visible=false
             // mediaplayer.play()
+        }
+    }
+    Connections{
+        target: communicationPageControler
+        function onagreeCall(){
+            requestCallRec.visible=false;
+            onThePhoneRec.visible=true;
         }
     }
 }

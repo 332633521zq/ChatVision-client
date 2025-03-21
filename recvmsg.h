@@ -2,6 +2,7 @@
 
 // #include "recvnode.h"
 #include "communicationpagecontroller.h"
+#include "findfriendpagecontroller.h"
 #include "mediathread.h"
 #include "msgnode.h"
 #include "singleton.h"

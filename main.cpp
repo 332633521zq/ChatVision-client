@@ -18,8 +18,8 @@
 using namespace boost::asio::ip;
 
 // #define IPADDRESS "192.168.253.186"
-#define IPADDRESS "127.0.0.1"
-#define PORT 10086
+// #define IPADDRESS "127.0.0.1"
+// #define PORT 10086
 
 int main(int argc, char* argv[])
 {

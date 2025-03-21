@@ -52,6 +52,7 @@ signals:
     void friendIdChanged();
     void videoCallRequest();
     void closeVideoWindow();
+    void agreeCall();
 public slots:
     void onWasHangUp();
 

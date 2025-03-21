@@ -8,6 +8,8 @@ ApplicationWindow{
     height:420
     visible:true
 
+    // flags: Qt.Window|Qt.FramelessWindowHint
+
     title:qsTr("ChatVision")
     Loader{
         id:loginloader

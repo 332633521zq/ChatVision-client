@@ -72,6 +72,9 @@ void CommunicationPageController::callRequest()
 void CommunicationPageController::getThrough()
 {
     PiplineBuild::setPiplinePlaying();
+
+    unsigned int object_id = m_friendId.toUInt();
+    SendMsg::GetInstance()->SendRequest("GetThrough", object_id, MSG_VIDEO_CHAT);
 }
 
 void CommunicationPageController::hangUp()

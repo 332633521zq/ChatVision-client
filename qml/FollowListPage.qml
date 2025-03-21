@@ -123,7 +123,7 @@ Rectangle{
         anchors.horizontalCenter: parent.horizontalCenter
         y:select_part.height + parent.height * 0.03
         // color:"#060"
-        opacity: 0.5
+        opacity: 0.8
         ListView{
             id:user_list
             anchors.fill: parent
@@ -199,6 +199,7 @@ Rectangle{
 
                 TapHandler{
                     onTapped: {
+                        rightloader.visible=true
                         bips.following_uid = modelData.uid/* "2000000"*/
                         bips.nickname = modelData.nickname /*"85"*/
                         bips.memo = modelData.nickname /*"85"*/
