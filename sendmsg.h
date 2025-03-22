@@ -3,6 +3,7 @@
 // #include "sendnode.h"
 #include "msgnode.h"
 #include "singleton.h"
+#include "tokenbucket.h"
 #include <boost/asio.hpp>
 #include <queue>
 #include <thread>
@@ -29,4 +30,6 @@ private:
     std::thread _send_thread;
     bool _b_stop = false;
     std::queue<std::shared_ptr<SendNode>> _send_que;
+
+    std::shared_ptr<TokenBucket> _token_bucket;
 };

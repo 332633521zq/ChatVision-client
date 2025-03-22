@@ -271,7 +271,7 @@ void PiplineBuild::send_ice_candidate_message(GstElement *m_webrtcbin,
     /**********************************************/
 
     SendMsg::GetInstance()->SendRequest(data, m_object_id, MSG_VIDEO_CHAT);
-    sleep(1);
+    // sleep(1);
     /* * 向信令服务器发送候选者text*******************/
     g_free(text);
     text = NULL;

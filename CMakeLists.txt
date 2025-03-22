@@ -83,7 +83,8 @@ qt_add_qml_module(
   myimageprovider.cpp
   SOURCES
   findfriendpagecontroller.h
-  findfriendpagecontroller.cpp)
+  findfriendpagecontroller.cpp
+  SOURCES tokenbucket.h tokenbucket.cpp)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GST REQUIRED gstreamer-1.0 gstreamer-webrtc-1.0

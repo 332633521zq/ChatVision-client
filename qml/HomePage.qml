@@ -514,9 +514,12 @@ Rectangle{
                 }
                 onClicked: {
                     //加载视频通话画面
+                    t1.running=true
                     communicationPageControler.getThrough()
                     answerRequestRec.visible=false
                     onThePhoneRec.visible=true
+                    mediaplayer.stop()
+                    mediaplayer.pause()
                 }
             }
             Button{
@@ -566,6 +569,8 @@ Rectangle{
                 }
                 onClicked: {
                     requestCallRec.visible=false
+                    videoimage.source=""
+                    t1.running=false
                     communicationPageControler.hangUp()
                     mediaplayer.pause()
                     mediawindow.close()
@@ -590,9 +595,9 @@ Rectangle{
                 onClicked: {
                     //停止媒体线程关闭管道
                     communicationPageControler.hangUp()
-
+                    videoimage.source=""
+                    t1.running=false
                     onThePhoneRec.visible=false
-
                     mediawindow.close()
                 }
             }
@@ -603,13 +608,17 @@ Rectangle{
         function onvideoCallRequest(){
             mediawindow.show()
             answerRequestRec.visible=true
-            // mediaplayer.play()
+            mediaplayer.play()
         }
     }
     Connections{
         target: communicationPageControler
         function oncloseVideoWindow(){
             mediawindow.close()
+            videoimage.source=""
+            t1.running=false
+            onThePhoneRec.visible=false
+            requestCallRec.visible=false
             answerRequestRec.visible=false
             // mediaplayer.play()
         }
@@ -617,6 +626,7 @@ Rectangle{
     Connections{
         target: communicationPageControler
         function onagreeCall(){
+            t1.running=true
             requestCallRec.visible=false;
             onThePhoneRec.visible=true;
         }

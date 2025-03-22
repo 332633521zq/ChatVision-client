@@ -4,9 +4,9 @@
 using namespace std;
 using namespace boost::asio::ip;
 
-// #define IPADDRESS "127.0.0.1"
+#define IPADDRESS "127.0.0.1"
 // #define IPADDRESS "10.252.153.239"
-#define IPADDRESS "192.168.204.113"
+// #define IPADDRESS "192.168.204.113"
 
 // #define IPADDRESS "192.168.83.113"
 
@@ -20,8 +20,6 @@ Client::Client()
     tcp::endpoint remote_ep(make_address(IPADDRESS), PORT);
     _sock = new tcp::socket(ioc);
     (*_sock).connect(remote_ep);
-
-    // User::GetInstance()->SetUid(20000000);
 
     _logic_thread = std::thread(&Client::Start, this);
 }
