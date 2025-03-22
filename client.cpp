@@ -6,7 +6,7 @@ using namespace boost::asio::ip;
 
 // #define IPADDRESS "127.0.0.1"
 // #define IPADDRESS "192.168.83.113"
-#define IPADDRESS "192.168.204.113"
+#define IPADDRESS "10.253.134.218"
 
 #define PORT 10086
 

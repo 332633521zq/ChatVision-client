@@ -435,19 +435,84 @@ Rectangle{
                 }
             }
         }
-
-       //中间的会话列表
-        Rectangle{
-            id:centerbar
-            width:240
+        Column{
             height: parent.height
-            color:"#FFFFFF"
-            Loader{
-                id:centerloader
-                anchors.fill: parent
-                source: "qrc:/qml/ConversationListPage.qml"
+            Rectangle{
+                id:searchbar
+                width: 240
+                height: centerbar.width/7*2-10
+                color: "transparent"
+                Row{
+                    anchors.fill: parent
+                    Rectangle{
+                        id:spacer
+                        width: 20
+                        height: 20
+                        // color:"red"
+                    }
+
+                    Rectangle{
+                        id:iamgerec
+                        width: 25
+                        height: 25
+                        color: "#F2F2F2"
+                        anchors.verticalCenter: parent.verticalCenter
+                        Image{
+                            width: 15
+                            height: 15
+                            anchors.centerIn: parent
+                            fillMode: Image.PreserveAspectCrop
+                            source: "qrc:/image/Search.svg"
+                        }
+                    }
+
+                    Rectangle{
+                        id:searchrec
+                        width: 150
+                        height: 25
+                        color: "#F2F2F2"
+                        anchors.verticalCenter: parent.verticalCenter
+                        opacity: 0.8
+                        Text{
+                            anchors.fill: parent
+                            text: "搜索"
+
+                            verticalAlignment: Text.AlignVCenter
+                            visible: !searchInput.focus && searchInput.text === ""
+                        }
+
+                        TextInput{
+                            id:searchInput
+                            anchors.fill: parent
+                            color: "green"
+                            wrapMode: Text.WordWrap
+                            autoScroll: false
+                            verticalAlignment: TextInput.AlignVCenter
+                            validator: RegularExpressionValidator{
+                                regularExpression: /\b[1-9]\d{7}\b/
+                            }
+                            focus: false
+                            // focusPolicy: Qt.StrongFocus
+                        }
+                    }
+                }
             }
+
+            //中间的会话列表
+             Rectangle{
+                 id:centerbar
+                 width:240
+                 height: parent.height-searchrec.height
+                 color:"#FFFFFF"
+                 Loader{
+                     id:centerloader
+                     anchors.fill: parent
+                     source: "qrc:/qml/ConversationListPage.qml"
+                 }
+             }
+
         }
+
 
     //右边的矩形
         Rectangle{
@@ -514,6 +579,7 @@ Rectangle{
                 }
                 onClicked: {
                     //加载视频通话画面
+                    t1.running=true
                     communicationPageControler.getThrough()
                     answerRequestRec.visible=false
                     onThePhoneRec.visible=true
@@ -566,6 +632,8 @@ Rectangle{
                 }
                 onClicked: {
                     requestCallRec.visible=false
+                    videoimage.source=""
+                    t1.running=false
                     communicationPageControler.hangUp()
                     mediaplayer.pause()
                     mediawindow.close()
@@ -590,14 +658,15 @@ Rectangle{
                 onClicked: {
                     //停止媒体线程关闭管道
                     communicationPageControler.hangUp()
-
+                    videoimage.source=""
+                    t1.running=false
                     onThePhoneRec.visible=false
-
                     mediawindow.close()
                 }
             }
         }
     }
+    //对方发来通话请求
     Connections{
         target: communicationPageControler
         function onvideoCallRequest(){
@@ -606,19 +675,36 @@ Rectangle{
             // mediaplayer.play()
         }
     }
+    //点击结束通话
     Connections{
         target: communicationPageControler
         function oncloseVideoWindow(){
             mediawindow.close()
+            videoimage.source=""
+            t1.running=false
+            onThePhoneRec.visible=false
+            requestCallRec.visible=false
             answerRequestRec.visible=false
             // mediaplayer.play()
         }
     }
+    //向对方发去通话请求后，对方点击同意接听
     Connections{
         target: communicationPageControler
         function onagreeCall(){
+            t1.running=true
             requestCallRec.visible=false;
             onThePhoneRec.visible=true;
+            mediaplayer.stop()
+            mediaplayer.pause()
+        }
+    }
+    //鼠标点击搜索框外时搜索框的focus为false
+    TapHandler{
+        onTapped: {
+            if(!searchInput.contains(point.scenePosition)){
+                searchInput.focus=false;
+            }
         }
     }
 }
