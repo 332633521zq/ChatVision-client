@@ -35,6 +35,8 @@ public:
     Q_INVOKABLE void callRequest();
     Q_INVOKABLE void getThrough();
     Q_INVOKABLE void hangUp();
+    Q_INVOKABLE void initMsgDate();
+
     //保存我接收的消息，需要消息内容和发送者id
     void saveMessage(QString msg, QString send_id);
     QString myMessage() const;
@@ -54,6 +56,7 @@ public:
     QString GetMsgDate() const;
     void setMsgDate(const QString datetime);
 
+    void addDayMsg(const QString datetime);
 signals:
     void myMessageChanged();
     void friendMessageChanged();

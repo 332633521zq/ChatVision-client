@@ -165,6 +165,7 @@ Window{
 
                         }
                         Rectangle{
+                            id:right_rec
                             width: single_msg.width - avatar_rec.width - 20
                             height:single_msg.height
                             opacity: 0.8
@@ -203,6 +204,7 @@ Window{
                                         font.pixelSize: 20
                                     }
                                 }
+
                             }
                             Rectangle{
                                 width: parent.width
@@ -211,16 +213,27 @@ Window{
                             }
                         }
                     }
+                    Text{
+                        id:remind_text
+                        text: qsTr("已经到底了哦～")
+                        visible: false
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.bottom: parent.bottom
+                    }
+                    Component.onCompleted: {
+                        if(index === ListView.view.count - 1){
+                            remind_text.visible = true;
+                        }
+                    }
                 }
             }
 
-
-            // Text{
-            //     id:remind_text
-            //     y:remind_text_pos
-            //     text: qsTr("已经到底了哦～")
-            //     anchors.horizontalCenter: parent.horizontalCenter
-            // }
+            Text{
+                id:rt
+                text: qsTr("已经到底了哦～")
+                visible: msg_list.count === 0
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
         }
     }
 }

@@ -151,12 +151,39 @@ QString CommunicationPageController::GetMsgDate() const
     return m_msg_date;
 }
 
+void CommunicationPageController::initMsgDate()
+{
+    m_history_msgs.clear();
+    auto now = std::chrono::system_clock::now();
+
+    for (int i = 1; i <= 30; i++) {
+        auto past_day = now - std::chrono::hours(24 * i);
+        std::time_t time = std::chrono::system_clock::to_time_t(past_day);
+        std::tm localTime = *std::localtime(&time);
+
+        std::stringstream ss;
+        ss << std::put_time(&localTime, "%Y-%m-%d");
+        std::string curdate_str = ss.str();
+        addDayMsg(QString::fromStdString(curdate_str));
+    }
+    emit historyMsgChanged();
+}
+
 void CommunicationPageController::setMsgDate(const QString datetime)
 {
     qDebug() << "-------------setMsgDate------------";
-    m_msg_date = datetime;
 
     m_history_msgs.clear();
+
+    addDayMsg(datetime);
+
+    emit msgDateChanged();
+    emit historyMsgChanged();
+}
+
+void CommunicationPageController::addDayMsg(const QString datetime)
+{
+    m_msg_date = datetime;
     unsigned int friend_id = m_friendId.toUInt();
     nlohmann::json history_msgs = FileTools::GetInstance()->GetTextMsg(friend_id,
                                                                        m_msg_date.toStdString());
@@ -188,8 +215,6 @@ void CommunicationPageController::setMsgDate(const QString datetime)
         jo["datetime"] = QString::fromStdString(msg["datetime"]);
         m_history_msgs.push_back(jo);
     }
-    emit msgDateChanged();
-    emit historyMsgChanged();
 }
 
 void CommunicationPageController::onWasHangUp()

@@ -249,7 +249,6 @@ Rectangle{
                                 width: 30
                                 height: 30
                                 color:"transparent"
-                                // anchors.right: parent.right
                                 Image {
                                     anchors.centerIn: parent
                                     source: "qrc:/image/Phone.svg"
@@ -276,6 +275,7 @@ Rectangle{
                                 TapHandler{
                                     onTapped: {
                                         hp.show();
+                                        communicationPageControler.initMsgDate();
                                     }
                                 }
                             }
