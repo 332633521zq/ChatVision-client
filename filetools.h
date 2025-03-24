@@ -31,6 +31,10 @@ public:
     void RemoveRelation(unsigned int relation, unsigned int uid);
     void SaveChattedUsers(json baseinfo);
 
+    void GetFiles(const std::string& directory,
+                  std::vector<std::string>& files,
+                  const std::string& datetime);
+
 private:
     FileTools();
     std::map<unsigned int, std::string> _relation;

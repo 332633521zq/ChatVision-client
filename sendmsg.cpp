@@ -8,7 +8,7 @@
 using namespace nlohmann;
 
 SendMsg::SendMsg()
-    : _token_bucket(std::make_shared<TokenBucket>(10, 5))
+    : _token_bucket(std::make_shared<TokenBucket>(3, 2))
 {}
 
 SendMsg::~SendMsg() {}

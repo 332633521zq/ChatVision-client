@@ -1,4 +1,5 @@
 #include "filetools.h"
+#include <QFileInfo>
 #include <QStandardPaths>
 #include "ConstValue.h"
 #include "user.h"
@@ -40,6 +41,27 @@ bool FileTools::CreateFile(std::filesystem::path file_path)
 
     file.close();
     return true;
+}
+
+bool compare(std::string datetime1, std::string datetime2)
+{
+    return datetime1.compare(datetime2) < 0;
+}
+
+// 查找目录中所有更改时间在datetime之后的文件
+void FileTools::GetFiles(const std::string& directory,
+                         std::vector<std::string>& files,
+                         const std::string& datetime)
+{
+    for (const auto& entry : std::filesystem::directory_iterator(directory)) {
+        // std::cout << entry.path() << std::endl;
+        auto last_modify = std::format("{:%Y-%m-%d %H:%M:%S}",
+                                       std::chrono::system_clock::from_time_t(
+                                           GetFileLatestModifyTime(entry.path())));
+        if (last_modify.compare(datetime) > 0) { // 检查是否为子目录
+            files.push_back(entry.path().c_str());
+        }
+    }
 }
 
 void FileTools::InitUserDirectory()
@@ -183,10 +205,18 @@ json FileTools::GetTextMsg(unsigned int& uid, std::string date_time)
 
     std::filesystem::path msg_dir = root_path / "chatmsgs" / std::to_string(uid) / "textmsg";
 
+    CreateDir(msg_dir);
+
     std::filesystem::path object_file = msg_dir / (date_time + ".txt");
+
+    json res;
+
+    QFileInfo fileInfo(object_file);
+    if (!fileInfo.exists())
+        return res;
+
     std::ifstream file(object_file);
     std::string line;
-    json res;
     while (std::getline(file, line)) {
         json json_line = json::parse(line);
         res.push_back(json_line);
@@ -337,6 +367,8 @@ void FileTools::SaveChattedUsers(json baseinfo)
         return;
     }
 
-    file << baseinfo << std::endl;
+    for (json info : baseinfo) {
+        file << info << std::endl;
+    }
     file.close();
 }

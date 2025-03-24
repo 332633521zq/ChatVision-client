@@ -27,5 +27,10 @@
         <file>qml/FollowListPage.qml</file>
         <file>qml/FollowUserInfoPage.qml</file>
         <file>qml/BaseInfoProperties.qml</file>
+        <file>qml/HistoryPage.qml</file>
+        <file>image/filter.svg</file>
+        <file>qml/CalendarModule.qml</file>
+        <file>image/next.svg</file>
+        <file>image/previous.svg</file>
     </qresource>
 </RCC>

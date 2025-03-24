@@ -12,6 +12,7 @@
 #include "mediathread.h"
 #include "sendmsg.h"
 #include "tool.h"
+#include "user.h"
 
 class CommunicationPageController : public QObject
 {
@@ -20,7 +21,10 @@ class CommunicationPageController : public QObject
     Q_PROPERTY(QString friendMessage READ friendMessage WRITE setFriendMessage NOTIFY
                    friendMessageChanged FINAL)
     Q_PROPERTY(QString myId READ myId WRITE setMyId NOTIFY myIdChanged FINAL)
-    Q_PROPERTY(QString friendId READ friendId WRITE setFriendId NOTIFY friendIdChanged FINAL)
+    Q_PROPERTY(QString friendId READ friendId WRITE setFriendId NOTIFY msgDateChanged FINAL)
+    Q_PROPERTY(QString msgDate READ GetMsgDate WRITE setMsgDate NOTIFY friendIdChanged FINAL)
+    Q_PROPERTY(QList<QJsonObject> history_msgs READ GetHistoryMsgs NOTIFY historyMsgChanged FINAL)
+
 public:
     static CommunicationPageController &getInstance();
     void setMssages();
@@ -45,6 +49,11 @@ public:
     QString friendId() const;
     void setFriendId(const QString friendId);
 
+    QList<QJsonObject> GetHistoryMsgs() const;
+
+    QString GetMsgDate() const;
+    void setMsgDate(const QString datetime);
+
 signals:
     void myMessageChanged();
     void friendMessageChanged();
@@ -53,6 +62,9 @@ signals:
     void videoCallRequest();
     void closeVideoWindow();
     void agreeCall();
+    void historyMsgChanged();
+    void msgDateChanged();
+
 public slots:
     void onWasHangUp();
 
@@ -62,5 +74,7 @@ private:
     QString m_myId;
     QString m_friendId;
     QVector<QJsonObject> messages;
+    QString m_msg_date;
+    QList<QJsonObject> m_history_msgs;
     CommunicationPageController(QObject *parent = nullptr);
 };

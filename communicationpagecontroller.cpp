@@ -141,6 +141,57 @@ void CommunicationPageController::setFriendId(const QString friendId)
     m_friendId = friendId;
 }
 
+QList<QJsonObject> CommunicationPageController::GetHistoryMsgs() const
+{
+    return m_history_msgs;
+}
+
+QString CommunicationPageController::GetMsgDate() const
+{
+    return m_msg_date;
+}
+
+void CommunicationPageController::setMsgDate(const QString datetime)
+{
+    qDebug() << "-------------setMsgDate------------";
+    m_msg_date = datetime;
+
+    m_history_msgs.clear();
+    unsigned int friend_id = m_friendId.toUInt();
+    nlohmann::json history_msgs = FileTools::GetInstance()->GetTextMsg(friend_id,
+                                                                       m_msg_date.toStdString());
+    qDebug() << m_msg_date << ":" << friend_id << history_msgs.dump();
+
+    for (json msg : history_msgs) {
+        std::string str = msg.dump();
+        if (str[0] != '[' && str[0] != '{')
+            continue;
+
+        // std::cout << msg << std::endl;
+        QJsonObject jo;
+        json sender_name;
+        auto iter = (User::GetInstance()->GetChatted()).find(friend_id);
+        json friendinfo = iter->second;
+        std::string avatar_path = friendinfo["avatar_path_"];
+        json myinfo = User::GetInstance()->GetMyInfo();
+        sender_name = friendinfo["nickname"];
+        unsigned int uid = msg["uid"];
+        if (uid == m_myId.toUInt()) {
+            sender_name = myinfo["nickname"];
+            avatar_path = myinfo["avatar_path_"];
+        }
+        jo["sender_id"] = QString::fromStdString(std::to_string(uid));
+        jo["sender_nickname"] = QString::fromStdString(sender_name);
+        jo["friend_nickname"] = QString::fromStdString(friendinfo["nickname"]);
+        jo["avatar_path"] = QString::fromStdString(avatar_path);
+        jo["data"] = QString::fromStdString(msg["data"]);
+        jo["datetime"] = QString::fromStdString(msg["datetime"]);
+        m_history_msgs.push_back(jo);
+    }
+    emit msgDateChanged();
+    emit historyMsgChanged();
+}
+
 void CommunicationPageController::onWasHangUp()
 {
     emit closeVideoWindow();
