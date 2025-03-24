@@ -8,7 +8,22 @@ Rectangle{
     property bool isfollowlistloadeed:false;
 
     property ListModel msglistmodel:rightloader.item.msglistmodel
+    property ListModel searchmodel
+    property ListModel conversationlist:chattedListModel
     property real randomNumber:0
+    property bool isNetSearch: false
+    ListModel{
+        id:chattedListModel
+        // ListElement{
+        //     obid:"20000001"
+        //     memo:"ts"
+        //     nickname:""
+        //     area:""
+        //     gender:""
+        //     signature:""
+        //     avatar_path:""
+        // }
+    }
 
     BaseInfoProperties{
         id:bips
@@ -476,7 +491,6 @@ Rectangle{
                         Text{
                             anchors.fill: parent
                             text: "搜索"
-
                             verticalAlignment: Text.AlignVCenter
                             visible: !searchInput.focus && searchInput.text === ""
                         }
@@ -493,9 +507,28 @@ Rectangle{
                             }
                             focus: false
                             // focusPolicy: Qt.StrongFocus
+                            onTextEdited: {
+                                searchController.searchID=text;
+                                filterModel(text);
+                                console.log("text is changed");
+                            }
+                            onAccepted: {
+                                console.log("enter was pressed");
+                                searchController.searchUser();
+                            }
+
+                            TapHandler{
+                                onTapped: {
+                                    centerloader.source="qrc:/qml/SearchPage.qml"
+                                    searchmodel=centerloader.item.searchmodel
+
+                                }
+                            }
                         }
                     }
                 }
+////////////////////////////////////////////////////////////////////////
+
             }
 
             //中间的会话列表
@@ -583,6 +616,8 @@ Rectangle{
                     communicationPageControler.getThrough()
                     answerRequestRec.visible=false
                     onThePhoneRec.visible=true
+                    mediaplayer.stop()
+                    mediaplayer.pause()
                 }
             }
             Button{
@@ -672,7 +707,7 @@ Rectangle{
         function onvideoCallRequest(){
             mediawindow.show()
             answerRequestRec.visible=true
-            // mediaplayer.play()
+            mediaplayer.play()
         }
     }
     //点击结束通话
@@ -699,12 +734,54 @@ Rectangle{
             mediaplayer.pause()
         }
     }
+
+
     //鼠标点击搜索框外时搜索框的focus为false
     TapHandler{
         onTapped: {
             if(!searchInput.contains(point.scenePosition)){
                 searchInput.focus=false;
             }
+        }
+    }
+    function filterModel(searchID){
+        searchmodel.clear();
+        if(searchID!==""){
+            for(var i=0;i<chattedListModel.count;i++){
+                var item=chattedListModel.get(i);
+                if(item.obid.includes(searchID)){
+                    searchmodel.append(item);
+                }
+            }
+        }
+    }
+    Connections{
+        target: communicationPageControler
+        function onAddListElement(id,memo,nickname, area, gender, signature, avatar_path){
+            var listelement={};
+            listelement.obid=id;
+            listelement.memo=memo;
+            listelement.nickname=nickname;
+            listelement.area=area;
+            listelement.gender=gender;
+            listelement.signature=signature;
+            listelement.avatar_path=avatar_path;
+            chattedListModel.append(listelement)
+        }
+    }
+    Connections{
+        target: searchController
+        function onAddSearchUserList(id,memo,nickname, area, gender, signature, avatar_path){
+            var listelement={};
+            listelement.obid=id;
+            listelement.memo=memo;
+            listelement.nickname=nickname;
+            listelement.area=area;
+            listelement.gender=gender;
+            listelement.signature=signature;
+            listelement.avatar_path=avatar_path;
+            searchmodel.append(listelement);
+            isNetSearch=true;
         }
     }
 }

@@ -4,10 +4,10 @@
 #include "client.h"
 #include "communicationpagecontroller.h"
 #include "findfriendpagecontroller.h"
-#include "myimageprovider.h"
 #include "followlistpagecontroller.h"
+#include "myimageprovider.h"
 #include "personalpagecontroller.h"
-
+#include "searchcontroller.h"
 // #include "ConstValue.h"
 // #include "mediathread.h"
 // #include <boost/asio.hpp>
@@ -40,6 +40,8 @@ int main(int argc, char* argv[])
 
     engine.rootContext()->setContextProperty("findfriendPageController",
                                              &FindFriendPageController::getInstance());
+
+    engine.rootContext()->setContextProperty("searchController", &SearchController::getInstance());
 
     MyImageProvider *myImageProvider = MyImageProvider::getInstance();
     engine.addImageProvider("pictures", myImageProvider);

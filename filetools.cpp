@@ -340,3 +340,22 @@ void FileTools::SaveChattedUsers(json baseinfo)
     file << baseinfo << std::endl;
     file.close();
 }
+
+// std::vector<std::string> FileTools::GetCommunicationDir(std::string pattern)
+// {
+//     std::filesystem::path root_path
+//         = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation).toStdString();
+//     std::cout << "root_path:" << root_path;
+//     root_path = root_path / "ChatVisionUserInfo";
+//     std::vector<std::string> communicatonDir;
+//     bool ret;
+//     for (const auto& entry : std::filesystem::directory_iterator(root_path)) {
+//         const auto path = entry.path().filename().string();
+//         std::cout << "File: " << path << std::endl;
+//         ret = (path.find(pattern) != std::string::npos);
+//         if (ret) {
+//             communicatonDir.push_back(path);
+//         }
+//     }
+//     return communicatonDir;
+// }

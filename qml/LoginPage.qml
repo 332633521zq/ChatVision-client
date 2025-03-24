@@ -138,6 +138,8 @@ ApplicationWindow{
 
                            loginloader.sourceComponent=null
                            loginloader.source="HomePage.qml"
+
+                           communicationPageControler.initChattedList()
                        }
                    }
                 }

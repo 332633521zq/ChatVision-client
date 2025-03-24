@@ -27,5 +27,6 @@
         <file>qml/FollowListPage.qml</file>
         <file>qml/FollowUserInfoPage.qml</file>
         <file>qml/BaseInfoProperties.qml</file>
+        <file>qml/SearchPage.qml</file>
     </qresource>
 </RCC>

@@ -12,7 +12,7 @@
 #include "mediathread.h"
 #include "sendmsg.h"
 #include "tool.h"
-
+#include "user.h"
 class CommunicationPageController : public QObject
 {
     Q_OBJECT
@@ -31,6 +31,7 @@ public:
     Q_INVOKABLE void callRequest();
     Q_INVOKABLE void getThrough();
     Q_INVOKABLE void hangUp();
+    Q_INVOKABLE void initChattedList();
     //保存我接收的消息，需要消息内容和发送者id
     void saveMessage(QString msg, QString send_id);
     QString myMessage() const;
@@ -53,6 +54,13 @@ signals:
     void videoCallRequest();
     void closeVideoWindow();
     void agreeCall();
+    void addListElement(QString id,
+                        QString memo,
+                        QString nickname,
+                        QString area,
+                        QString gender,
+                        QString signature,
+                        QString avatar_path);
 public slots:
     void onWasHangUp();
 

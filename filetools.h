@@ -30,6 +30,7 @@ public:
     json GetRelations(unsigned int relation);
     void RemoveRelation(unsigned int relation, unsigned int uid);
     void SaveChattedUsers(json baseinfo);
+    // std::vector<std::string> GetCommunicationDir(std::string pattern);
 
 private:
     FileTools();
