@@ -251,7 +251,7 @@ Rectangle{
                                 color:"transparent"
                                 Image {
                                     anchors.centerIn: parent
-                                    source: "qrc:/image/Phone.svg"
+                                    source: "qrc:/image/history.svg"
                                     sourceSize: Qt.size(parent.width-10,parent.height-10)
                                 }
                                 Rectangle{

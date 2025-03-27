@@ -11,6 +11,7 @@ GstElement *PiplineBuild::m_audio_bin = nullptr;
 GstElement *PiplineBuild::m_pipeline = nullptr;
 GstElement *PiplineBuild::m_video_bin = nullptr;
 GstElement *PiplineBuild::m_webrtcbin = nullptr;
+GstElement *PiplineBuild::probe = nullptr;
 
 GMainLoop *PiplineBuild::loop = g_main_loop_new(NULL, FALSE);
 enum AppState PiplineBuild::app_state = APP_STATE_UNKNOWN;
@@ -38,29 +39,85 @@ gboolean PiplineBuild::start_pipeline(gboolean create_offer)
 
     //创建管道
     m_pipeline = gst_pipeline_new("webrtc-pipeline");
+    probe = gst_element_factory_make("webrtcechoprobe", NULL);
 
-    //创建音频箱
-    audio_desc = g_strdup_printf(
-        "autoaudiosrc ! audioconvert ! audio/x-raw,format=S16LE ! audioresample ! "
-        "audio/x-raw,rate=48000 ! volume volume=0.5 ! queue ! "
-        "capsfilter caps=audio/x-raw,rate=48000 ! opusenc "
-        "perfect-timestamp=true bitrate=64000 ! rtpopuspay name=audiopay pt=%u "
-        "! application/x-rtp, media=audio, encoding-name=OPUS, payload=%u, clock-rate=48000 ! "
-        "queue",
-        RTP_OPUS_DEFAULT_PT,
-        RTP_OPUS_DEFAULT_PT);
-    m_audio_bin = gst_parse_bin_from_description(audio_desc, TRUE, &audio_erro);
-    g_free(audio_desc);
-    if (audio_erro) {
-        gst_printerr("Failed to parse m_audio_bin from audio_desc:%s\n", audio_erro->message);
-        g_error_free(audio_erro);
-        if (m_pipeline) {
-            g_clear_object(&m_pipeline);
-        }
-        if (m_webrtcbin) {
-            m_webrtcbin = NULL;
-        }
-        return FALSE;
+    GstElement *autoaudiosrc, *audioconvert, *capsfilter1, *audioresample, *webrtcdsp, *opusenc,
+        *rtpopuspay, *queue2;
+
+    // 创建所有元素
+    autoaudiosrc = gst_element_factory_make("autoaudiosrc", "src");
+    audioconvert = gst_element_factory_make("audioconvert", "converter");
+    capsfilter1 = gst_element_factory_make("capsfilter", "caps1");
+    audioresample = gst_element_factory_make("audioresample", "resampler");
+    webrtcdsp = gst_element_factory_make("webrtcdsp", "dsp");
+    opusenc = gst_element_factory_make("opusenc", "encoder");
+    rtpopuspay = gst_element_factory_make("rtpopuspay", "payloader");
+    queue2 = gst_element_factory_make("queue", "queue2");
+
+    // 检查元素是否创建成功
+    if (!autoaudiosrc || !audioconvert || !capsfilter1 || !audioresample || !webrtcdsp || !opusenc
+        || !rtpopuspay || !queue2) {
+        // g_set_error(error, GST_CORE_ERROR, GST_CORE_ERROR_FAILED, "Failed to create elements");
+        return -1;
+    }
+
+    // 将元素添加到 Bin
+    gst_bin_add_many(GST_BIN(m_pipeline),
+                     autoaudiosrc,
+                     audioconvert,
+                     capsfilter1,
+                     audioresample,
+                     webrtcdsp,
+                     opusenc,
+                     rtpopuspay,
+                     queue2,
+                     NULL);
+
+    // 设置 CapsFilter 的 Caps
+    GstCaps *caps1 = gst_caps_new_simple("audio/x-raw",
+                                         "format",
+                                         G_TYPE_STRING,
+                                         "S16LE",
+                                         "channels",
+                                         G_TYPE_INT,
+                                         1,
+                                         "rate",
+                                         G_TYPE_INT,
+                                         48000,
+                                         NULL);
+    g_object_set(capsfilter1, "caps", caps1, NULL);
+    gst_caps_unref(caps1);
+
+    g_object_set(webrtcdsp,
+                 "noise-suppression",
+                 TRUE,
+                 "noise-suppression-level",
+                 3,
+                 "high-pass-filter",
+                 TRUE,
+                 "gain-control",
+                 TRUE, // 启用自动增益控制
+                 "echo-cancel",
+                 TRUE, // 确保启用回声消除
+                 "extended-filter",
+                 TRUE, // 使用扩展滤波器
+                 "voice-detection",
+                 FALSE,
+                 NULL);
+
+    g_object_set(rtpopuspay, "pt", RTP_OPUS_DEFAULT_PT, NULL);
+    if (!gst_element_link_many(autoaudiosrc,
+                               audioconvert,
+                               capsfilter1,
+                               audioresample,
+                               webrtcdsp,
+                               opusenc,
+                               rtpopuspay,
+                               queue2,
+                               NULL)) {
+        // g_set_error(error, GST_CORE_ERROR, GST_CORE_ERROR_FAILED, "Failed to link elements");
+        g_print("link erro");
+        return -1;
     }
 
     //创建视频箱
@@ -100,9 +157,9 @@ gboolean PiplineBuild::start_pipeline(gboolean create_offer)
     gst_util_set_object_arg(G_OBJECT(m_webrtcbin), "bundle-policy", "max-bundle");
 
     //将元素添加到管道中去
-    gst_bin_add_many(GST_BIN(m_pipeline), m_audio_bin, m_video_bin, m_webrtcbin, NULL);
+    gst_bin_add_many(GST_BIN(m_pipeline), m_video_bin, m_webrtcbin, NULL);
 
-    if (!gst_element_link(m_audio_bin, m_webrtcbin))
+    if (!gst_element_link(queue2, m_webrtcbin))
         gst_printerr("Failed to link m_audio_bin with m_webrtcbin \n");
     if (!gst_element_link(m_video_bin, m_webrtcbin))
         gst_printerr("Failed to link m_video bin with m_webrtcbin \n");
@@ -403,6 +460,30 @@ void PiplineBuild::on_incoming_decodebin_stream(GstElement *decodebin, GstPad *p
     }
 }
 
+static GstElement *find_webrtcechoprobe(GstBin *bin)
+{
+    GstIterator *it = gst_bin_iterate_elements(bin);
+    GValue val = G_VALUE_INIT;
+    GstElement *echoprobe = NULL;
+
+    while (gst_iterator_next(it, &val) == GST_ITERATOR_OK) {
+        GstElement *elem = GST_ELEMENT(g_value_get_object(&val));
+        GstElementFactory *factory = gst_element_get_factory(elem);
+
+        if (factory) {
+            const gchar *name = gst_plugin_feature_get_name(GST_PLUGIN_FEATURE(factory));
+            if (g_strcmp0(name, "webrtcechoprobe") == 0) {
+                echoprobe = elem;
+                gst_object_ref(echoprobe);
+                break;
+            }
+        }
+        g_value_unset(&val);
+    }
+    gst_iterator_free(it);
+    return echoprobe;
+}
+
 //媒体流处理函数，将媒体流与剩下的管道元素连接，处理媒体流
 void PiplineBuild::handle_media_stream(GstPad *pad,
                                        GstElement *pipe,
@@ -413,11 +494,23 @@ void PiplineBuild::handle_media_stream(GstPad *pad,
     GstElement *q, *conv, *resample, *sink;
     GstPadLinkReturn ret;
 
+    GstElement *echoprobe = find_webrtcechoprobe(GST_BIN(m_audio_bin));
+    GstPad *aec_ref = gst_element_get_static_pad(echoprobe, "aec-ref");
+    g_object_set(echoprobe,
+                 "voice-detection",
+                 TRUE, // 启用语音检测
+                 "extended-filter",
+                 TRUE, // 使用扩展滤波器
+                 "delay-agnostic",
+                 FALSE, // 适应延迟变化
+                 NULL);
+    // GstElement *dspoutput = gst_element_factory_make("webrtcdsp", "dspoutput");
     gst_println("Tring to handle streame with %s ！ %s！！！！！！！！！！！！！！！！！！！！！！",
                 convert_name,
                 sink_name);
 
     q = gst_element_factory_make("queue", NULL);
+    g_object_set(q, "max-size-buffers", 10, "max-size-time", 200000000, NULL);
     g_assert_nonnull(q);
     conv = gst_element_factory_make(convert_name, NULL);
     g_assert_nonnull(conv);
@@ -434,12 +527,16 @@ void PiplineBuild::handle_media_stream(GstPad *pad,
     if (g_strcmp0(convert_name, "audioconvert") == 0) {
         resample = gst_element_factory_make("audioresample", NULL);
         g_assert_nonnull(resample);
-        gst_bin_add_many(GST_BIN(pipe), q, conv, resample, sink, NULL);
+        gst_bin_add_many(GST_BIN(pipe), q, conv, resample, probe, sink, NULL);
         gst_element_sync_state_with_parent(q);
         gst_element_sync_state_with_parent(conv);
         gst_element_sync_state_with_parent(resample);
         gst_element_sync_state_with_parent(sink);
-        gst_element_link_many(q, conv, sink, NULL);
+        gst_element_sync_state_with_parent(probe);
+
+        GstPad *remote_src = gst_element_get_static_pad(resample, "src");
+        gst_pad_link(remote_src, aec_ref);
+        gst_element_link_many(q, conv, resample, probe, sink, NULL);
     } else {
         gst_bin_add_many(GST_BIN(pipe), q, conv, sink, NULL);
         gst_element_sync_state_with_parent(q);

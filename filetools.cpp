@@ -266,18 +266,14 @@ bool FileTools::SaveRelation(unsigned int relation, unsigned int uid, json basei
 
     auto file_path = root_path / (_relation[relation] + ".txt");
 
-    json relation_json;
-    relation_json[std::to_string(uid)] = uid;
-    relation_json["baseinfo"] = baseinfo;
-
     // 打开文件
-    std::ofstream file(file_path, std::ios::app);
+    std::ofstream file(file_path);
     if (!file.is_open()) {
         std::cerr << "Failed to open file: " << file_path << std::endl;
         return false;
     }
 
-    file << relation_json << std::endl;
+    file << baseinfo << std::endl;
     file.close();
     return true;
 }

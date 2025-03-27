@@ -32,5 +32,6 @@
         <file>qml/CalendarModule.qml</file>
         <file>image/next.svg</file>
         <file>image/previous.svg</file>
+        <file>image/history.svg</file>
     </qresource>
 </RCC>
