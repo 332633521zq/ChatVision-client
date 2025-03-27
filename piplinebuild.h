@@ -86,7 +86,7 @@ public:
     static QImage image;
 
 private:
-    static GstElement *m_pipeline, *m_audio_bin, *m_video_bin;
+    static GstElement *m_pipeline, *m_audio_bin, *m_video_bin, *probe;
     static GstWebRTCDataChannel *send_channel;
     static gboolean is_offer;
 };

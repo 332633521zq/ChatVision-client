@@ -6,11 +6,11 @@
 #include "piplinebuild.h"
 #include "sendmsg.h"
 
-
 GstElement *PiplineBuild::m_audio_bin = nullptr;
 GstElement *PiplineBuild::m_pipeline = nullptr;
 GstElement *PiplineBuild::m_video_bin = nullptr;
 GstElement *PiplineBuild::m_webrtcbin = nullptr;
+GstElement *PiplineBuild::probe = nullptr;
 
 GMainLoop *PiplineBuild::loop = g_main_loop_new(NULL, FALSE);
 enum AppState PiplineBuild::app_state = APP_STATE_UNKNOWN;
@@ -38,29 +38,87 @@ gboolean PiplineBuild::start_pipeline(gboolean create_offer)
 
     //创建管道
     m_pipeline = gst_pipeline_new("webrtc-pipeline");
+    probe = gst_element_factory_make("webrtcechoprobe", NULL);
 
-    //创建音频箱
-    audio_desc = g_strdup_printf(
-        "autoaudiosrc ! audioconvert ! audio/x-raw,format=S16LE ! audioresample ! "
-        "audio/x-raw,rate=48000 ! volume volume=0.5 ! queue ! "
-        "capsfilter caps=audio/x-raw,rate=48000 ! opusenc "
-        "perfect-timestamp=true bitrate=64000 ! rtpopuspay name=audiopay pt=%u "
-        "! application/x-rtp, media=audio, encoding-name=OPUS, payload=%u, clock-rate=48000 ! "
-        "queue",
-        RTP_OPUS_DEFAULT_PT,
-        RTP_OPUS_DEFAULT_PT);
-    m_audio_bin = gst_parse_bin_from_description(audio_desc, TRUE, &audio_erro);
-    g_free(audio_desc);
-    if (audio_erro) {
-        gst_printerr("Failed to parse m_audio_bin from audio_desc:%s\n", audio_erro->message);
-        g_error_free(audio_erro);
-        if (m_pipeline) {
-            g_clear_object(&m_pipeline);
-        }
-        if (m_webrtcbin) {
-            m_webrtcbin = NULL;
-        }
-        return FALSE;
+    GstElement *autoaudiosrc, *audioconvert, *capsfilter1, *audioresample, *webrtcdsp, *opusenc,
+        *rtpopuspay, *queue2;
+
+    // 创建所有元素
+    autoaudiosrc = gst_element_factory_make("autoaudiosrc", "src");
+    audioconvert = gst_element_factory_make("audioconvert", "converter");
+    capsfilter1 = gst_element_factory_make("capsfilter", "caps1");
+    audioresample = gst_element_factory_make("audioresample", "resampler");
+    webrtcdsp = gst_element_factory_make("webrtcdsp", "dsp");
+    opusenc = gst_element_factory_make("opusenc", "encoder");
+    rtpopuspay = gst_element_factory_make("rtpopuspay", "payloader");
+    queue2 = gst_element_factory_make("queue", "queue2");
+
+    // 检查元素是否创建成功
+    if (!autoaudiosrc || !audioconvert || !capsfilter1 || !audioresample || !webrtcdsp || !opusenc
+        || !rtpopuspay || !queue2) {
+        // g_set_error(error, GST_CORE_ERROR, GST_CORE_ERROR_FAILED, "Failed to create elements");
+        return -1;
+    }
+
+    // 将元素添加到 Bin
+    gst_bin_add_many(GST_BIN(m_pipeline),
+                     autoaudiosrc,
+                     audioconvert,
+                     capsfilter1,
+                     audioresample,
+                     webrtcdsp,
+                     opusenc,
+                     rtpopuspay,
+                     queue2,
+                     NULL);
+
+    // 设置 CapsFilter 的 Caps
+    GstCaps *caps1 = gst_caps_new_simple("audio/x-raw",
+                                         "format",
+                                         G_TYPE_STRING,
+                                         "S16LE",
+                                         "channels",
+                                         G_TYPE_INT,
+                                         1,
+                                         "rate",
+                                         G_TYPE_INT,
+                                         48000,
+                                         NULL);
+    g_object_set(capsfilter1, "caps", caps1, NULL);
+    gst_caps_unref(caps1);
+
+    g_object_set(webrtcdsp,
+                 "noise-suppression",
+                 TRUE,
+                 "noise-suppression-level",
+                 3,
+                 "high-pass-filter",
+                 TRUE,
+                 "gain-control",
+                 TRUE, // 启用自动增益控制
+                 "echo-cancel",
+                 TRUE, // 确保启用回声消除
+                 "extended-filter",
+                 TRUE, // 使用扩展滤波器
+                 "voice-detection",
+                 FALSE,
+                 // "probe",
+                 // probe,
+                 NULL);
+
+    g_object_set(rtpopuspay, "pt", RTP_OPUS_DEFAULT_PT, NULL);
+    if (!gst_element_link_many(autoaudiosrc,
+                               audioconvert,
+                               capsfilter1,
+                               audioresample,
+                               webrtcdsp,
+                               opusenc,
+                               rtpopuspay,
+                               queue2,
+                               NULL)) {
+        // g_set_error(error, GST_CORE_ERROR, GST_CORE_ERROR_FAILED, "Failed to link elements");
+        g_print("link erro");
+        return -1;
     }
 
     //创建视频箱
@@ -92,33 +150,22 @@ gboolean PiplineBuild::start_pipeline(gboolean create_offer)
     g_assert_nonnull(m_webrtcbin);
     g_print("webrtcbin create succeed");
 
-    // g_object_set(m_webrtcbin, "rtcp-rsize", TRUE, NULL);
-    // g_object_set(m_webrtcbin, "rtcp-rr-mode", 1, NULL);      // 启用RTCP反馈
-    // g_object_set(m_webrtcbin, "jitterbuffer-mode", 1, NULL); // 启用抖动缓冲
-
     //为webrtcbin设置bundle策略属性，值为max-bundle意思为尽可能将多个媒体流打包到单个的连接中，以减少网络延迟和带宽
     gst_util_set_object_arg(G_OBJECT(m_webrtcbin), "bundle-policy", "max-bundle");
 
     //将元素添加到管道中去
-    gst_bin_add_many(GST_BIN(m_pipeline), m_audio_bin, m_video_bin, m_webrtcbin, NULL);
+    gst_bin_add_many(GST_BIN(m_pipeline), m_video_bin, m_webrtcbin, NULL);
 
-    if (!gst_element_link(m_audio_bin, m_webrtcbin))
+    if (!gst_element_link(queue2, m_webrtcbin))
         gst_printerr("Failed to link m_audio_bin with m_webrtcbin \n");
     if (!gst_element_link(m_video_bin, m_webrtcbin))
         gst_printerr("Failed to link m_video bin with m_webrtcbin \n");
-    /************************************************************  
-    //如果我是作为answer 即create_offer为false{}
-    
-    //如果我是作为offer,考虑是否写头部扩展
-*************************************************************/
 
     g_signal_connect(m_webrtcbin,
                      "on-negotiation-needed",
                      G_CALLBACK(on_negotiation_needed),
                      GINT_TO_POINTER(create_offer));
     g_signal_connect(m_webrtcbin, "on-ice-candidate", G_CALLBACK(send_ice_candidate_message), NULL);
-
-    // g_signal_connect(m_webrtcbin, "on-data-channel", G_CALLBACK(on_data_channel), NULL);
 
     //监听总线事件
     bus = gst_pipeline_get_bus(GST_PIPELINE(m_pipeline));
@@ -128,30 +175,13 @@ gboolean PiplineBuild::start_pipeline(gboolean create_offer)
     //将管道状态设置为ready
     gst_element_set_state(m_pipeline, GST_STATE_READY);
 
-    // if (create_offer) {
-    //     g_signal_emit_by_name(m_webrtcbin, "create-data-channel", "channel", NULL, &test);
-    //     if (send_channel) {
-    //         g_print("create channel succeed");
-    //         g_signal_connect(send_channel, "on-close", G_CALLBACK(data_channel_on_close), NULL);
-    //     } else {
-    //         g_print("crate channel failed");
-    //     }
-    // }
     //将webrtcbin元素的pad-added信号与处理媒体流的回调函数相连，动态添加元素decodebin
     g_signal_connect(m_webrtcbin, "pad-added", G_CALLBACK(on_incoming_stream), m_pipeline);
 
     gst_print("Starting pipline\n");
 
     setPiplinePlaying();
-    // ret = gst_element_set_state(GST_ELEMENT(m_pipeline), GST_STATE_PLAYING);
-    // if (ret == GST_STATE_CHANGE_FAILURE) {
-    //     g_print("start pipeline error");
-    //     if (m_pipeline)
-    //         g_clear_object(&m_pipeline);
-    //     if (m_webrtcbin)
-    //         m_webrtcbin = NULL;
-    //     return FALSE;
-    // }
+
     return TRUE;
 }
 
@@ -301,7 +331,7 @@ gboolean PiplineBuild::bus_watch_cb(GstBus *bus, GstMessage *message, gpointer u
         g_error_free(error);
         g_free(debug);
         cleanup_and_quit_loop("bus have some erro", APP_STATE_UNKNOWN);
-        break; 
+        break;
     }
     case GST_MESSAGE_WARNING: {
         GError *error = NULL;
@@ -327,7 +357,6 @@ gboolean PiplineBuild::bus_watch_cb(GstBus *bus, GstMessage *message, gpointer u
     }
     return G_SOURCE_CONTINUE;
 }
-
 
 //清理
 gboolean PiplineBuild::cleanup_and_quit_loop(const char *msg, enum AppState state)
@@ -403,6 +432,30 @@ void PiplineBuild::on_incoming_decodebin_stream(GstElement *decodebin, GstPad *p
     }
 }
 
+static GstElement *find_webrtcechoprobe(GstBin *bin)
+{
+    GstIterator *it = gst_bin_iterate_elements(bin);
+    GValue val = G_VALUE_INIT;
+    GstElement *echoprobe = NULL;
+
+    while (gst_iterator_next(it, &val) == GST_ITERATOR_OK) {
+        GstElement *elem = GST_ELEMENT(g_value_get_object(&val));
+        GstElementFactory *factory = gst_element_get_factory(elem);
+
+        if (factory) {
+            const gchar *name = gst_plugin_feature_get_name(GST_PLUGIN_FEATURE(factory));
+            if (g_strcmp0(name, "webrtcechoprobe") == 0) {
+                echoprobe = elem;
+                gst_object_ref(echoprobe);
+                break;
+            }
+        }
+        g_value_unset(&val);
+    }
+    gst_iterator_free(it);
+    return echoprobe;
+}
+
 //媒体流处理函数，将媒体流与剩下的管道元素连接，处理媒体流
 void PiplineBuild::handle_media_stream(GstPad *pad,
                                        GstElement *pipe,
@@ -413,11 +466,21 @@ void PiplineBuild::handle_media_stream(GstPad *pad,
     GstElement *q, *conv, *resample, *sink;
     GstPadLinkReturn ret;
 
+    g_object_set(probe,
+                 "voice-detection",
+                 TRUE, // 启用语音检测
+                 "extended-filter",
+                 TRUE, // 使用扩展滤波器
+                 "delay-agnostic",
+                 FALSE, // 适应延迟变化
+                 NULL);
+
     gst_println("Tring to handle streame with %s ！ %s！！！！！！！！！！！！！！！！！！！！！！",
                 convert_name,
                 sink_name);
 
     q = gst_element_factory_make("queue", NULL);
+    g_object_set(q, "max-size-buffers", 10, "max-size-time", 200000000, NULL);
     g_assert_nonnull(q);
     conv = gst_element_factory_make(convert_name, NULL);
     g_assert_nonnull(conv);
@@ -434,12 +497,13 @@ void PiplineBuild::handle_media_stream(GstPad *pad,
     if (g_strcmp0(convert_name, "audioconvert") == 0) {
         resample = gst_element_factory_make("audioresample", NULL);
         g_assert_nonnull(resample);
-        gst_bin_add_many(GST_BIN(pipe), q, conv, resample, sink, NULL);
+        gst_bin_add_many(GST_BIN(pipe), q, conv, resample, probe, sink, NULL);
         gst_element_sync_state_with_parent(q);
         gst_element_sync_state_with_parent(conv);
         gst_element_sync_state_with_parent(resample);
         gst_element_sync_state_with_parent(sink);
-        gst_element_link_many(q, conv, sink, NULL);
+        gst_element_sync_state_with_parent(probe);
+        gst_element_link_many(q, conv, resample, probe, sink, NULL);
     } else {
         gst_bin_add_many(GST_BIN(pipe), q, conv, sink, NULL);
         gst_element_sync_state_with_parent(q);
