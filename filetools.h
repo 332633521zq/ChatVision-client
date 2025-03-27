@@ -32,6 +32,10 @@ public:
     void SaveChattedUsers(json baseinfo);
     // std::vector<std::string> GetCommunicationDir(std::string pattern);
 
+    void GetFiles(const std::string& directory,
+                  std::vector<std::string>& files,
+                  const std::string& datetime);
+
 private:
     FileTools();
     std::map<unsigned int, std::string> _relation;

@@ -13,6 +13,7 @@
 #include "sendmsg.h"
 #include "tool.h"
 #include "user.h"
+
 class CommunicationPageController : public QObject
 {
     Q_OBJECT
@@ -20,7 +21,10 @@ class CommunicationPageController : public QObject
     Q_PROPERTY(QString friendMessage READ friendMessage WRITE setFriendMessage NOTIFY
                    friendMessageChanged FINAL)
     Q_PROPERTY(QString myId READ myId WRITE setMyId NOTIFY myIdChanged FINAL)
-    Q_PROPERTY(QString friendId READ friendId WRITE setFriendId NOTIFY friendIdChanged FINAL)
+    Q_PROPERTY(QString friendId READ friendId WRITE setFriendId NOTIFY msgDateChanged FINAL)
+    Q_PROPERTY(QString msgDate READ GetMsgDate WRITE setMsgDate NOTIFY friendIdChanged FINAL)
+    Q_PROPERTY(QList<QJsonObject> history_msgs READ GetHistoryMsgs NOTIFY historyMsgChanged FINAL)
+
 public:
     static CommunicationPageController &getInstance();
     void setMssages();
@@ -32,6 +36,8 @@ public:
     Q_INVOKABLE void getThrough();
     Q_INVOKABLE void hangUp();
     Q_INVOKABLE void initChattedList();
+    Q_INVOKABLE void initMsgDate();
+
     //保存我接收的消息，需要消息内容和发送者id
     void saveMessage(QString msg, QString send_id);
     QString myMessage() const;
@@ -46,6 +52,12 @@ public:
     QString friendId() const;
     void setFriendId(const QString friendId);
 
+    QList<QJsonObject> GetHistoryMsgs() const;
+
+    QString GetMsgDate() const;
+    void setMsgDate(const QString datetime);
+
+    void addDayMsg(const QString datetime);
 signals:
     void myMessageChanged();
     void friendMessageChanged();
@@ -61,6 +73,9 @@ signals:
                         QString gender,
                         QString signature,
                         QString avatar_path);
+    void historyMsgChanged();
+    void msgDateChanged();
+
 public slots:
     void onWasHangUp();
 
@@ -70,5 +85,7 @@ private:
     QString m_myId;
     QString m_friendId;
     QVector<QJsonObject> messages;
+    QString m_msg_date;
+    QList<QJsonObject> m_history_msgs;
     CommunicationPageController(QObject *parent = nullptr);
 };

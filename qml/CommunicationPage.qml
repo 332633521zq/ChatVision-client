@@ -10,6 +10,11 @@ Rectangle{
     // color: "#FFFFFF"
 
     color: "#F2F2F2"
+
+    HistoryPage{
+        id:hp
+    }
+
     //后面应该分开成一个组建加载
     Rectangle{
         id:chatrec
@@ -233,6 +238,48 @@ Rectangle{
                                     }
                                 }
                             }
+
+                            Rectangle{
+                                width: textEditRec.width - 220
+                                height:1
+                                opacity: 0
+                            }
+
+                            Rectangle{
+                                width: 30
+                                height: 30
+                                color:"transparent"
+                                Image {
+                                    anchors.centerIn: parent
+                                    source: "qrc:/image/Phone.svg"
+                                    sourceSize: Qt.size(parent.width-10,parent.height-10)
+                                }
+                                Rectangle{
+                                    id:mk4
+                                    anchors.fill: parent
+                                    color:"black"
+                                    radius: 5
+                                    opacity: 0.2
+                                    visible: false
+                                }
+                                HoverHandler{
+                                    onHoveredChanged: {
+                                        if(hovered){
+                                            mk4.visible=true
+                                        }
+                                        else{
+                                            mk4.visible=false
+                                        }
+                                    }
+                                }
+                                TapHandler{
+                                    onTapped: {
+                                        hp.show();
+                                        communicationPageControler.initMsgDate();
+                                    }
+                                }
+                            }
+
                         }
                     }
 
