@@ -97,6 +97,24 @@ void CommunicationPageController::saveMessage(QString msg, QString send_id)
         setFriendMessage(msg);
     }
 }
+void CommunicationPageController::initChattedList()
+{
+    std::map<unsigned int, json> ts;
+    ts = User::GetInstance()->GetChatted();
+    std::cout << "ts.begin is" << ts.size() << std::endl;
+    for (auto it = ts.begin(); it != ts.end(); ++it) {
+        std::cout << it->first << " " << it->second << std::endl;
+        QString id = QString::number(it->first);
+        json data = it->second;
+        QString memo = QString::fromStdString(data["memo"]);
+        QString nickname = QString::fromStdString(data["nickname"]);
+        QString area = QString::fromStdString(data["area"]);
+        QString gender = QString::fromStdString(data["gender"]);
+        QString signature = QString::fromStdString(data["signature"]);
+        QString avatar_path = QString::fromStdString(data["avatar_path_"]);
+        emit addListElement(id, memo, nickname, area, gender, signature, avatar_path);
+    }
+}
 
 QString CommunicationPageController::myMessage() const
 {

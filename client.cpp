@@ -5,10 +5,10 @@ using namespace std;
 using namespace boost::asio::ip;
 
 #define IPADDRESS "127.0.0.1"
-// #define IPADDRESS "10.252.153.239"
-// #define IPADDRESS "192.168.204.113"
+// #define IPADDRESS "10.252.78.90"
+// #define IPADDRESS "10.253.5.10"
 
-// #define IPADDRESS "192.168.83.113"
+// #define IPADDRESS "192.168.83.186"
 
 #define PORT 10086
 

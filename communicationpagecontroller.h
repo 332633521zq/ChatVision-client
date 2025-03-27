@@ -35,6 +35,7 @@ public:
     Q_INVOKABLE void callRequest();
     Q_INVOKABLE void getThrough();
     Q_INVOKABLE void hangUp();
+    Q_INVOKABLE void initChattedList();
     Q_INVOKABLE void initMsgDate();
 
     //保存我接收的消息，需要消息内容和发送者id
@@ -65,6 +66,13 @@ signals:
     void videoCallRequest();
     void closeVideoWindow();
     void agreeCall();
+    void addListElement(QString id,
+                        QString memo,
+                        QString nickname,
+                        QString area,
+                        QString gender,
+                        QString signature,
+                        QString avatar_path);
     void historyMsgChanged();
     void msgDateChanged();
 

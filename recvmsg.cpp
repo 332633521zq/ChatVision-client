@@ -177,6 +177,9 @@ void RecvMsg::RegisterCallBacks()
     _fun_callbacks[MSG_CHATTED_USER] = std::bind(&RecvMsg::ChattedUserCallBack,
                                                  this,
                                                  std::placeholders::_1);
+    _fun_callbacks[MSG_SEARCH] = std::bind(&RecvMsg::SearchUserCallBack,
+                                           this,
+                                           std::placeholders::_1);
 }
 
 void RecvMsg::HelloWorldCallBack(const std::string &msg_data)
@@ -462,6 +465,27 @@ void RecvMsg::ChattedUserCallBack(const std::string &msg_data)
         std::string str = item["uid"];
         User::GetInstance()->InsertToChatted(std::stoul(str), item);
     }
-
+    // CommunicationPageController::getInstance().initChattedList();
     FileTools::GetInstance()->SaveChattedUsers(users_data);
+}
+
+void RecvMsg::SearchUserCallBack(const std::string &msg_data)
+{
+    qDebug() << "SearcUSerCallBack----------------";
+
+    json jsonmsg = json::parse(msg_data);
+    if (jsonmsg["data"].size() != 0) {
+        std::cout << "data is not null:" << jsonmsg["data"] << std::endl;
+        jsonmsg = jsonmsg["data"];
+
+        QString area = QString::fromStdString(jsonmsg["area"]);
+        QString avatar_path = QString::fromStdString(jsonmsg["avatar_path_"]);
+        QString gender = QString::fromStdString(jsonmsg["gender"]);
+        QString memo = QString::fromStdString(jsonmsg["memo"]);
+        QString nickname = QString::fromStdString(jsonmsg["nickname"]);
+        QString signature = QString::fromStdString(jsonmsg["signature"]);
+        QString id = QString::fromStdString(jsonmsg["uid"]);
+        SearchController::getInstance()
+            .addSearchUserList(id, memo, nickname, area, gender, signature, avatar_path);
+    }
 }

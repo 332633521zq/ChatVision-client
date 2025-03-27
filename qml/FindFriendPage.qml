@@ -100,6 +100,7 @@ Rectangle{
         anchors.fill: parent
         model: findfriendlist
         delegate: findfriendcomponent
+        clip: true
     }
     Connections{
         target: findfriendPageController

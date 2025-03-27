@@ -84,7 +84,8 @@ qt_add_qml_module(
   SOURCES
   findfriendpagecontroller.h
   findfriendpagecontroller.cpp
-  SOURCES tokenbucket.h tokenbucket.cpp)
+  SOURCES tokenbucket.h tokenbucket.cpp
+  SOURCES searchcontroller.h searchcontroller.cpp)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GST REQUIRED gstreamer-1.0 gstreamer-webrtc-1.0

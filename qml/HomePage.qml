@@ -8,7 +8,22 @@ Rectangle{
     property bool isfollowlistloadeed:false;
 
     property ListModel msglistmodel:rightloader.item.msglistmodel
+    property ListModel searchmodel
+    property ListModel conversationlist:chattedListModel
     property real randomNumber:0
+    property bool isNetSearch: false
+    ListModel{
+        id:chattedListModel
+        // ListElement{
+        //     obid:"20000001"
+        //     memo:"ts"
+        //     nickname:""
+        //     area:""
+        //     gender:""
+        //     signature:""
+        //     avatar_path:""
+        // }
+    }
 
     BaseInfoProperties{
         id:bips
@@ -76,9 +91,9 @@ Rectangle{
                             // bips.avatar_path = myinfo.avatar_path/*"../assets/Picture/avatar/cats.jpg"*/
                             bips.gender = myinfo.gender
 
-                            if(isfollowlistloadeed == true){
-                                console.log("tapped ")
+                            if(isfollowlistloadeed === true){
                                 rightloader.source = "qrc:/qml/FollowUserInfoPage.qml";
+                                rightloader.visible = true;
                             }
                         }
                     }
@@ -134,7 +149,7 @@ Rectangle{
 
                             rightloader.visible=false
                             centerloader.source="qrc:/qml/ConversationListPage.qml"
-                            isfollowlistloadeed == false
+                            isfollowlistloadeed = false
                         }
                     }
                 }
@@ -190,6 +205,7 @@ Rectangle{
                             rightloader.visible=false
                             findfriendPageController.sendRandowRequest()
                             centerloader.source="qrc:/qml/FindFriendPage.qml"
+                            isfollowlistloadeed = false
                         }
                     }
                 }
@@ -240,8 +256,8 @@ Rectangle{
                             tapmaskset.visible=false
 
                             followingPageController.initRelationData()
-                            isfollowlistloadeed = true;
                             rightloader.source = ""
+                            isfollowlistloadeed = true;
                             rightloader.visible=false
                             centerloader.source = "qrc:/qml/FollowListPage.qml"
                         }
@@ -337,7 +353,7 @@ Rectangle{
                             tapmaskset.visible=true
 
                             settingpopup.open()
-                            isfollowlistloadeed == false
+                            isfollowlistloadeed = false
                         }
                     }
                 }
@@ -435,19 +451,102 @@ Rectangle{
                 }
             }
         }
-
-       //中间的会话列表
-        Rectangle{
-            id:centerbar
-            width:240
+        Column{
             height: parent.height
-            color:"#FFFFFF"
-            Loader{
-                id:centerloader
-                anchors.fill: parent
-                source: "qrc:/qml/ConversationListPage.qml"
+            Rectangle{
+                id:searchbar
+                width: 240
+                height: centerbar.width/7*2-10
+                color: "transparent"
+                Row{
+                    anchors.fill: parent
+                    Rectangle{
+                        id:spacer
+                        width: 20
+                        height: 20
+                        // color:"red"
+                    }
+
+                    Rectangle{
+                        id:iamgerec
+                        width: 25
+                        height: 25
+                        color: "#F2F2F2"
+                        anchors.verticalCenter: parent.verticalCenter
+                        Image{
+                            width: 15
+                            height: 15
+                            anchors.centerIn: parent
+                            fillMode: Image.PreserveAspectCrop
+                            source: "qrc:/image/Search.svg"
+                        }
+                    }
+
+                    Rectangle{
+                        id:searchrec
+                        width: 150
+                        height: 25
+                        color: "#F2F2F2"
+                        anchors.verticalCenter: parent.verticalCenter
+                        opacity: 0.8
+                        Text{
+                            anchors.fill: parent
+                            text: "搜索"
+                            verticalAlignment: Text.AlignVCenter
+                            visible: !searchInput.focus && searchInput.text === ""
+                        }
+
+                        TextInput{
+                            id:searchInput
+                            anchors.fill: parent
+                            color: "green"
+                            wrapMode: Text.WordWrap
+                            autoScroll: false
+                            verticalAlignment: TextInput.AlignVCenter
+                            validator: RegularExpressionValidator{
+                                regularExpression: /\b[1-9]\d{7}\b/
+                            }
+                            focus: false
+                            // focusPolicy: Qt.StrongFocus
+                            onTextEdited: {
+                                searchController.searchID=text;
+                                filterModel(text);
+                                console.log("text is changed");
+                            }
+                            onAccepted: {
+                                console.log("enter was pressed");
+                                searchController.searchUser();
+                            }
+
+                            TapHandler{
+                                onTapped: {
+                                    centerloader.source="qrc:/qml/SearchPage.qml"
+                                    searchmodel=centerloader.item.searchmodel
+
+                                }
+                            }
+                        }
+                    }
+                }
+////////////////////////////////////////////////////////////////////////
+
             }
+
+            //中间的会话列表
+             Rectangle{
+                 id:centerbar
+                 width:240
+                 height: parent.height-searchrec.height
+                 color:"#FFFFFF"
+                 Loader{
+                     id:centerloader
+                     anchors.fill: parent
+                     source: "qrc:/qml/ConversationListPage.qml"
+                 }
+             }
+
         }
+
 
     //右边的矩形
         Rectangle{
@@ -603,6 +702,7 @@ Rectangle{
             }
         }
     }
+    //对方发来通话请求
     Connections{
         target: communicationPageControler
         function onvideoCallRequest(){
@@ -611,6 +711,7 @@ Rectangle{
             mediaplayer.play()
         }
     }
+    //点击结束通话
     Connections{
         target: communicationPageControler
         function oncloseVideoWindow(){
@@ -623,12 +724,66 @@ Rectangle{
             // mediaplayer.play()
         }
     }
+    //向对方发去通话请求后，对方点击同意接听
     Connections{
         target: communicationPageControler
         function onagreeCall(){
             t1.running=true
             requestCallRec.visible=false;
             onThePhoneRec.visible=true;
+            mediaplayer.stop()
+            mediaplayer.pause()
+        }
+    }
+
+
+    //鼠标点击搜索框外时搜索框的focus为false
+    TapHandler{
+        onTapped: {
+            if(!searchInput.contains(point.scenePosition)){
+                searchInput.focus=false;
+            }
+        }
+    }
+    function filterModel(searchID){
+        searchmodel.clear();
+        if(searchID!==""){
+            for(var i=0;i<chattedListModel.count;i++){
+                var item=chattedListModel.get(i);
+                if(item.obid.includes(searchID)){
+                    searchmodel.append(item);
+                }
+            }
+        }
+    }
+    Connections{
+        target: communicationPageControler
+        function onAddListElement(id,memo,nickname, area, gender, signature, avatar_path){
+            console.log("add was touched")
+            var listelement={};
+            listelement.obid=id;
+            listelement.memo=memo;
+            listelement.nickname=nickname;
+            listelement.area=area;
+            listelement.gender=gender;
+            listelement.signature=signature;
+            listelement.avatar_path=avatar_path;
+            chattedListModel.append(listelement)
+        }
+    }
+    Connections{
+        target: searchController
+        function onAddSearchUserList(id,memo,nickname, area, gender, signature, avatar_path){
+            var listelement={};
+            listelement.obid=id;
+            listelement.memo=memo;
+            listelement.nickname=nickname;
+            listelement.area=area;
+            listelement.gender=gender;
+            listelement.signature=signature;
+            listelement.avatar_path=avatar_path;
+            searchmodel.append(listelement);
+            isNetSearch=true;
         }
     }
 }

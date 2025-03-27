@@ -120,6 +120,7 @@ Window{
                 id:msg_list
                 model:communicationPageControler.history_msgs
                 anchors.fill: parent
+                clip:true
                 delegate: Rectangle{
                     id:single_msg
 

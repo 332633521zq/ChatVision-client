@@ -234,7 +234,7 @@ Rectangle{
                                         communicationPageControler.callRequest();
                                         mediawindow.show()
                                         requestCallRec.visible=true
-                                        // mediaplayer.play()
+                                        mediaplayer.play()
                                     }
                                 }
                             }

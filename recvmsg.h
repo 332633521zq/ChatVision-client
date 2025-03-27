@@ -5,6 +5,7 @@
 #include "findfriendpagecontroller.h"
 #include "mediathread.h"
 #include "msgnode.h"
+#include "searchcontroller.h"
 #include "singleton.h"
 #include <boost/asio.hpp>
 #include <queue>
@@ -43,6 +44,7 @@ public:
     void RefusedAudioChatCallBack(const std::string& msg_data);
     void RandomPushCallBack(const std::string& msg_data);
     void ChattedUserCallBack(const std::string& msg_data);
+    void SearchUserCallBack(const std::string& msg_data);
 
 private:
     RecvMsg();

@@ -7,24 +7,24 @@ Rectangle{
     width:240
     height: parent.height
     color:"transparent"
-    ListModel{
-        id:conversationlist
-        ListElement{
-            name:"沐树01"
-            avater:"qrc:/image/avater.jpg"
-            friendId:"20000001"
-        }
-        ListElement{
-            name:"亦已00"
-            avater:"qrc:/image/avater.png"
-            friendId:"20000000"
-        }
-        ListElement{
-            name:"幻蓝02"
-            avater:"qrc:/image/avater.png"
-            friendId:"20000002"
-        }
-    }
+    // ListModel{
+    //     id:conversationlist
+    //     ListElement{
+    //         name:"沐树01"
+    //         avater:"qrc:/image/avater.jpg"
+    //         friendId:"20000001"
+    //     }
+    //     ListElement{
+    //         name:"亦已00"
+    //         avater:"qrc:/image/avater.png"
+    //         friendId:"20000000"
+    //     }
+    //     ListElement{
+    //         name:"幻蓝02"
+    //         avater:"qrc:/image/avater.png"
+    //         friendId:"20000002"
+    //     }
+    // }
     Component{
         id:conversationcomponent
         Rectangle{
@@ -42,7 +42,7 @@ Rectangle{
                     color:"transparent"
                     Image{
                         id:listavaterimage
-                        source:avater
+                        source:"qrc:/image/avater.jpg"
                         sourceSize: Qt.size(parent.width,parent.height)
                         visible: false
                     }
@@ -61,7 +61,7 @@ Rectangle{
 
                 Text {
                     id: nametext
-                    text: name
+                    text: memo
                 }
             }
             Rectangle{
@@ -93,8 +93,8 @@ Rectangle{
                         msglistmodel.clear()
                     }
                     // console.log("msglistmodel cleared. Current count:", msglistmodel.count);
-                    communicationPageControler.friendId=friendId
-                    communication_name=name
+                    communicationPageControler.friendId=obid
+                    communication_name=memo
                     communicationPageControler.initCommunicationPage()
                 }
             }

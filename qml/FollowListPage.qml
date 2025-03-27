@@ -127,6 +127,7 @@ Rectangle{
         ListView{
             id:user_list
             anchors.fill: parent
+            clip:true
             model: followingPageController.followings
             delegate: Rectangle{
                 id: model_rec
