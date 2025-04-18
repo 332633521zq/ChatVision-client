@@ -41,6 +41,7 @@ Window{
             anchors.horizontalCenter: parent.horizontalCenter
 
             Row{
+                anchors.fill: parent
                 spacing:10
                 Image{
                     id:search_icon
@@ -120,6 +121,7 @@ Window{
                 id:msg_list
                 model:communicationPageControler.history_msgs
                 anchors.fill: parent
+                clip:true
                 delegate: Rectangle{
                     id:single_msg
 

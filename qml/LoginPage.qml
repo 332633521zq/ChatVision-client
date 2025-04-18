@@ -140,6 +140,8 @@ ApplicationWindow{
                            loginloader.source="HomePage.qml"
 
                            communicationPageControler.initChattedList()
+                           followingPageController.initRelationData()
+
                        }
                    }
                 }

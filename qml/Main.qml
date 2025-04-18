@@ -229,6 +229,7 @@ Rectangle{
                     radius: 10
                     color:"#ccc"
                     Text{
+                        id:foucustext
                         text:"关注"
                         font.pixelSize: 17
                         anchors.horizontalCenter: parent.horizontalCenter
@@ -237,10 +238,19 @@ Rectangle{
 
                     TapHandler{
                         onTapped: {
-                            var uid = bips.uid;
-                            currentuid(uid);
-                            loadchatlistpage();
-                            loadchatpage();
+                            var uid = bips.following_uid;
+                            if(foucustext.text === "关注"){
+
+                                console.log("uid is"+uid);
+                                findfriendPageController.addFocus(uid);
+                                foucustext.text="已关注";
+                                followingPageController.addFollowing(bips.following_uid,bips.avatar_path,bips.gender,bips.nickname,bips.area,bips.signal_text);
+                            }
+                            else{
+                                //取关的函数
+                                foucustext.text="关注";
+                            }
+
                         }
                     }
                 }

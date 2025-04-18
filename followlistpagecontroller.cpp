@@ -127,3 +127,35 @@ void FollowListPageController::updateQmlMyinfo()
     m_qmlMyinfo["area"] = QString::fromStdString(m_myinfo["area"]);
     m_qmlMyinfo["signature"] = QString::fromStdString(m_myinfo["signature"]);
 }
+void FollowListPageController::addFollowing(QString uid,
+                                            QString avatar_path,
+                                            QString gender,
+                                            QString nickname,
+                                            QString area,
+                                            QString signature)
+{
+    QJsonObject qjsonObj;
+    qjsonObj["uid"] = uid;
+    qjsonObj["gender"] = gender;
+    qjsonObj["avatar_path_"] = avatar_path;
+    qjsonObj["nickname"] = nickname;
+    qjsonObj["area"] = area;
+    qjsonObj["signature"] = signature;
+
+    m_qmlFollowings.append(qjsonObj);
+    emit onFollowingChanged();
+}
+
+void FollowListPageController::cancelFocus(QString uid)
+{
+    unsigned int id = uid.toUInt();
+    User::GetInstance()->RemoveFromFollowing(id);
+    json res;
+    const auto& followings = User::GetInstance()->GetFollowing();
+    for (const auto& pair : followings) {
+        const json& baseinfo = pair.second;
+        res.push_back(baseinfo);
+    }
+    SetFollowings(res);
+    SendMsg::GetInstance()->SendRequest("", id, MSG_CANCEL_FOLLOW);
+}

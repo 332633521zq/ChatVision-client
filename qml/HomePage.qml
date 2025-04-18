@@ -12,6 +12,7 @@ Rectangle{
     property ListModel conversationlist:chattedListModel
     property real randomNumber:0
     property bool isNetSearch: false
+    property var startTime
     ListModel{
         id:chattedListModel
         // ListElement{
@@ -254,7 +255,7 @@ Rectangle{
                             tapmaskfocus.visible=true
                             tapmaskset.visible=false
 
-                            followingPageController.initRelationData()
+                            // followingPageController.initRelationData()
                             isfollowlistloadeed = true;
                             rightloader.source = ""
                             rightloader.visible=false
@@ -577,6 +578,7 @@ Rectangle{
             anchors.fill: parent
             source: "image://pictures/avater"
             cache: false
+
         }
         Timer{
             id:t1
@@ -588,6 +590,8 @@ Rectangle{
                 videoimage.source="image://pictures/"+randomNumber
             }
         }
+
+
         Rectangle{
             id:answerRequestRec
             anchors.fill: parent
@@ -599,7 +603,6 @@ Rectangle{
                 font.pixelSize: 20
                 anchors.centerIn: parent
             }
-
             Button{
                 id:get_through_Button
                 width: 100
@@ -618,6 +621,7 @@ Rectangle{
                     onThePhoneRec.visible=true
                     mediaplayer.stop()
                     mediaplayer.pause()
+                    startTime=new Date()
                 }
             }
             Button{
@@ -697,6 +701,7 @@ Rectangle{
                     t1.running=false
                     onThePhoneRec.visible=false
                     mediawindow.close()
+                    callTime(startTime)
                 }
             }
         }
@@ -710,7 +715,7 @@ Rectangle{
             mediaplayer.play()
         }
     }
-    //点击结束通话
+    //对面点击结束通话
     Connections{
         target: communicationPageControler
         function oncloseVideoWindow(){
@@ -720,6 +725,7 @@ Rectangle{
             onThePhoneRec.visible=false
             requestCallRec.visible=false
             answerRequestRec.visible=false
+            callTime(startTime)
             // mediaplayer.play()
         }
     }
@@ -784,5 +790,38 @@ Rectangle{
             isNetSearch=true;
         }
     }
+    function callTime(beginTime){
+        var hour=beginTime.getHours();  var minute=beginTime.getMinutes();
+        var second=beginTime.getSeconds();  var flagsecond=0;
+        var flagminute=0; var now=new Date();
+        var endhour=now.getHours(); var endminute=now.getMinutes();
+        var endsecond=now.getSeconds(); var elapsedhour=endhour-hour;
+        var elapsedminute;  var elapsedsecond;
+        if(endsecond < second){
+            flagsecond=1;
+            elapsedsecond=endsecond+60-second;
+        }else{
+            elapsedsecond=endsecond-second;
+        }
+        if(endminute < minute){
+            flagminute=1;
+            if(flagsecond===1)
+                elapsedminute=endminute+60-minute-1;
+            else
+                elapsedminute=endminute+60-minute;
+        }
+        else{
+            if(flagsecond===1)
+                elapsedminute=endminute-minute-1;
+            else
+                elapsedminute=endminute-minute;
+        }
+        console.log("hour:"+elapsedhour,"minute:"+elapsedminute,"seconds:"+elapsedsecond)
+        var textmsg="通话时长"+elapsedhour+":"+elapsedminute+":"+elapsedsecond+" ☎️"
+
+        communicationPageControler.myMessage=textmsg;
+        communicationPageControler.saveMessage();
+    }
+
 }
 

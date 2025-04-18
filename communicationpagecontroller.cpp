@@ -51,7 +51,7 @@ void CommunicationPageController::sendMessage(QString data)
 {
     std::string s_data = data.toStdString();
     unsigned int object_id = m_friendId.toUInt();
-    SendMsg::GetInstance()->SendRequest("", object_id, MSG_FOLLOWING);
+    // SendMsg::GetInstance()->SendRequest("", object_id, MSG_FOLLOWING);
     SendMsg::GetInstance()->SendRequest(s_data, object_id, MSG_TEXT_CHAT);
 }
 
@@ -216,6 +216,7 @@ void CommunicationPageController::addDayMsg(const QString datetime)
         QJsonObject jo;
         json sender_name;
         auto iter = (User::GetInstance()->GetChatted()).find(friend_id);
+        std::cout << "it is :" << iter->first << std::endl;
         json friendinfo = iter->second;
         std::string avatar_path = friendinfo["avatar_path_"];
         json myinfo = User::GetInstance()->GetMyInfo();

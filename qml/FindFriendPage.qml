@@ -9,20 +9,20 @@ Rectangle{
     color:"transparent"
     ListModel{
         id:findfriendlist
-        ListElement{
-            name:"黄昏时风起"
-            avater:"qrc:/image/avater.jpg"
-            friendId:"20000001"
-            memo:""
-            signature:""
-            area:""
-            gender:""
-        }
-        ListElement{
-            name:"坐看云起时"
-            avater:"qrc:/image/avater.png"
-            friendId:"20000000"
-        }
+        // ListElement{
+        //     name:"黄昏时风起"
+        //     avater:"qrc:/image/avater.jpg"
+        //     friendId:"20000001"
+        //     memo:""
+        //     signature:""
+        //     area:""
+        //     gender:""
+        // }
+        // ListElement{
+        //     name:"坐看云起时"
+        //     avater:"qrc:/image/avater.png"
+        //     friendId:"20000000"
+        // }
     }
     Component{
         id:findfriendcomponent
@@ -60,7 +60,7 @@ Rectangle{
 
                 Text {
                     id: nametext
-                    text: name
+                    text: memo
                 }
             }
             Rectangle{
@@ -86,9 +86,10 @@ Rectangle{
                 onTapped: {
                     rightloader.visible=true
                     rightloader.source="qrc:/qml/Main.qml"
-                    bips.nickname=name
+                    bips.nickname=nickname
                     bips.memo=memo
                     bips.area=area
+                    bips.following_uid=uid
                     bips.signal_text=signature
                     // rightloader.sourceComponent=findfriendInfoComponent
 
@@ -106,8 +107,8 @@ Rectangle{
         target: findfriendPageController
         function onInitFindPage(area, gender, memo, nickname, signature, uid){
             var addlist={};
-            addlist.name=memo;
-            addlist.avater="qrc:/image/avater.png"
+            addlist.area=area;
+            addlist.avater="qrc:/image/avater.png";
             addlist.gender=gender;
             addlist.memo=memo;
             addlist.nickname=nickname;

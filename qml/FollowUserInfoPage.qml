@@ -208,32 +208,74 @@ Rectangle{
             width: up_rec.width
             height:(fuipage.height - up_rec.height)*0.55
             // color:"red"
-
-            Rectangle{
-                id:chat_botton
-
-                width:120
-                height:40
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.verticalCenter: parent.verticalCenter
-                radius: 10
-                color:"#ccc"
-                Text{
-                    text:"发消息"
-                    font.pixelSize: 17
-                    anchors.horizontalCenter: parent.horizontalCenter
+            Row{
+                anchors.fill: parent
+                spacing: 20
+                Rectangle{
+                    id:space
+                    width:120
+                    height:40
                     anchors.verticalCenter: parent.verticalCenter
+                    radius: 10
+                    // color:"#ccc"
+                }
+                Rectangle{
+                    id:cancel_focus
+                    width:120
+                    height:40
+                    anchors.verticalCenter: parent.verticalCenter
+                    radius: 10
+                    color:"#ccc"
+                    Text{
+                        text:"取关"
+                        font.pixelSize: 17
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                    TapHandler{
+                        onTapped: {
+                            var uid = bips.following_uid;
+                            console.log(uid)
+                            followingPageController.cancelFocus(uid);
+
+                        }
+                    }
                 }
 
-                TapHandler{
-                    onTapped: {
-                        var uid = bips.uid;
-                        currentuid(uid);
-                        loadchatlistpage();
-                        loadchatpage();
+
+                Rectangle{
+                    id:chat_botton
+                    width:120
+                    height:40
+                    anchors.verticalCenter: parent.verticalCenter
+                    radius: 10
+                    color:"#ccc"
+                    Text{
+                        text:"发消息"
+                        font.pixelSize: 17
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+
+                    TapHandler{
+                        onTapped: {
+                            var uid = bips.following_uid;
+                            currentuid(uid);
+                            loadchatlistpage();
+                            loadchatpage();
+                            communicationPageControler.friendId=uid
+                            communication_name=bips.memo
+                            if(msglistmodel===null){
+                            }else{
+                                msglistmodel.clear()
+                            }
+                            communicationPageControler.initCommunicationPage()
+                        }
                     }
                 }
             }
+
+
         }
     }
 

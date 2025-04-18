@@ -66,7 +66,7 @@ gboolean PiplineBuild::start_pipeline(gboolean create_offer)
                      audioconvert,
                      capsfilter1,
                      audioresample,
-                     webrtcdsp,
+                     // webrtcdsp,
                      opusenc,
                      rtpopuspay,
                      queue2,
@@ -111,7 +111,7 @@ gboolean PiplineBuild::start_pipeline(gboolean create_offer)
                                audioconvert,
                                capsfilter1,
                                audioresample,
-                               webrtcdsp,
+                               // webrtcdsp,
                                opusenc,
                                rtpopuspay,
                                queue2,
@@ -369,6 +369,7 @@ gboolean PiplineBuild::cleanup_and_quit_loop(const char *msg, enum AppState stat
     m_video_bin = NULL;
     m_pipeline = NULL;
     m_webrtcbin = NULL;
+    probe = NULL;
 
     //在这里处理一下要是通道接收到错误信号怎么清理并退出程序
     /*****************...**********************/
@@ -497,13 +498,13 @@ void PiplineBuild::handle_media_stream(GstPad *pad,
     if (g_strcmp0(convert_name, "audioconvert") == 0) {
         resample = gst_element_factory_make("audioresample", NULL);
         g_assert_nonnull(resample);
-        gst_bin_add_many(GST_BIN(pipe), q, conv, resample, probe, sink, NULL);
+        gst_bin_add_many(GST_BIN(pipe), q, conv, resample, /*probe,*/ sink, NULL);
         gst_element_sync_state_with_parent(q);
         gst_element_sync_state_with_parent(conv);
         gst_element_sync_state_with_parent(resample);
         gst_element_sync_state_with_parent(sink);
-        gst_element_sync_state_with_parent(probe);
-        gst_element_link_many(q, conv, resample, probe, sink, NULL);
+        // gst_element_sync_state_with_parent(probe);
+        gst_element_link_many(q, conv, resample, /*probe,*/ sink, NULL);
     } else {
         gst_bin_add_many(GST_BIN(pipe), q, conv, sink, NULL);
         gst_element_sync_state_with_parent(q);
@@ -597,13 +598,7 @@ GstFlowReturn PiplineBuild::newSampleCallback(GstElement *appsink, gpointer user
     }
 
     caps = gst_sample_get_caps(sample); // 获取与样本关联的caps
-    // 获取appsink的视频信息（假设你已经在某处设置了caps）
-    // 这里我们假设caps已经设置为"video/x-raw, format=BGR, width=<WIDTH>, height=<HEIGHT>"
-    // 在实际应用中，你可能需要动态获取这些信息
     gst_video_info_init(&video_info);
-    // GstPad *sink_pad = gst_element_get_static_pad(appsink, "sink");
-    // GstCaps *caps = gst_pad_query_caps(sink_pad, NULL);
-
     if (!caps || !gst_video_info_from_caps(&video_info, caps)) {
         g_printerr("Failed to get video info from caps.\n");
         gst_buffer_unmap(buffer, &map);
@@ -627,22 +622,11 @@ GstFlowReturn PiplineBuild::newSampleCallback(GstElement *appsink, gpointer user
     width = GST_VIDEO_FRAME_WIDTH(&frame);
     height = GST_VIDEO_FRAME_HEIGHT(&frame);
     stride = GST_VIDEO_FRAME_PLANE_STRIDE(&frame, 0);
-    // qDebug() << "width" << width;
     // 获取BGR像素数据
     data = static_cast<guchar *>(GST_VIDEO_FRAME_PLANE_DATA(&frame, 0));
-    // qDebug() << width;
-    // qDebug() << height;
+
     image = QImage(data, width, height, stride, QImage::Format_ARGB32);
-    // QString filename = "output.png";
-    // bool suc = image.save(filename);
-    // if (!suc) {
-    //     qDebug() << "图片保存失败";
-    // }
 
-    // 如果你打算在QML中使用这个QImage，你可能需要将其转换为QByteArray或通过其他方式传递给QML
-    // 例如：QByteArray ba; QBuffer buffer(&ba); qimage.save(&buffer, "PNG"); // 但这会增加内存和CPU开销
-
-    // 取消映射视频帧和缓冲区
     gst_video_frame_unmap(&frame);
     gst_buffer_unmap(buffer, &map);
 

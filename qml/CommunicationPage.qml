@@ -173,6 +173,7 @@ Rectangle{
                                         }
                                     }
                                 }
+
                             }
                             Rectangle{
                                 width: 30
@@ -231,6 +232,7 @@ Rectangle{
                                 }
                                 TapHandler{
                                     onTapped: {
+                                        startTime=new Date();
                                         communicationPageControler.callRequest();
                                         mediawindow.show()
                                         requestCallRec.visible=true

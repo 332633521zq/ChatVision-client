@@ -73,11 +73,6 @@ public:
     static void on_offer_received(GstSDPMessage *sdp);
     static GstFlowReturn newSampleCallback(GstElement *appsink, gpointer user_data);
     static bool setPiplinePlaying();
-    static void on_data_channel(GstElement *webrtc,
-                                GstWebRTCDataChannel *data_channel,
-                                gpointer user_data);
-    static void data_channel_on_close(GObject *dc, gpointer user_data);
-    static void data_channel_on_message_string(GObject *dc, gchar *str, gpointer user_data);
 
     static unsigned int m_object_id;
     static enum AppState app_state;

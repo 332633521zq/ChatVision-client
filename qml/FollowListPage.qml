@@ -128,6 +128,7 @@ Rectangle{
             id:user_list
             anchors.fill: parent
             model: followingPageController.followings
+            clip:true
             delegate: Rectangle{
                 id: model_rec
 

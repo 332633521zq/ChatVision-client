@@ -85,6 +85,7 @@ Rectangle{
             }
             TapHandler{
                 onTapped: {
+                    conversationlistview.currentIndex=index
                     rightloader.visible=true
                     rightloader.source="qrc:/qml/CommunicationPage.qml"
                     console.log("conversation was clicked")
@@ -101,9 +102,15 @@ Rectangle{
         }
     }
     ListView{
+        id:conversationlistview
         anchors.fill: parent
         model: conversationlist
         delegate: conversationcomponent
+
+        highlight: Rectangle {
+            color: "#5EB6E8"
+        }
+        highlightFollowsCurrentItem: true
     }
 
 }

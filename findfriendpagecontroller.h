@@ -9,6 +9,7 @@ public:
     static FindFriendPageController &getInstance();
     Q_INVOKABLE void initFindFriendPage(json &jsondata);
     Q_INVOKABLE void sendRandowRequest();
+    Q_INVOKABLE void addFocus(QString obid);
 
 private:
     explicit FindFriendPageController(QObject *parent = nullptr);

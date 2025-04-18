@@ -2,6 +2,7 @@
 #include <QJsonObject>
 #include <QList>
 #include <QObject>
+#include "sendmsg.h"
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
@@ -29,7 +30,13 @@ public:
     void SetMyInfo(const json& data);
 
     Q_INVOKABLE void initRelationData();
-
+    Q_INVOKABLE void addFollowing(QString uid,
+                                  QString avatar,
+                                  QString gender,
+                                  QString nickname,
+                                  QString area,
+                                  QString signature);
+    Q_INVOKABLE void cancelFocus(QString uid);
 signals:
     void onFollowingChanged();
     void onFollowerChanged();

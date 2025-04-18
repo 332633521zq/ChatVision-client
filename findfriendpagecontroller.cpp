@@ -1,5 +1,5 @@
 #include "findfriendpagecontroller.h"
-
+#include <QDebug>
 FindFriendPageController &FindFriendPageController::getInstance()
 {
     static FindFriendPageController ffc;
@@ -18,7 +18,7 @@ void FindFriendPageController::initFindFriendPage(json &jsondata)
         // QString avater = QString::fromStdString(value["avater_path_"]);
         QString gender = QString::fromStdString(value["gender"]);
         QString memo = QString::fromStdString(value["memo"]);
-        QString nickname = QString::fromStdString(value["area"]);
+        QString nickname = QString::fromStdString(value["nickname"]);
         QString signature = QString::fromStdString(value["signature"]);
         QString uid = QString::fromStdString(value["uid"]);
         emit initFindPage(area, gender, memo, nickname, signature, uid);
@@ -29,4 +29,11 @@ void FindFriendPageController::sendRandowRequest()
 {
     unsigned int uid = User::GetInstance()->GetUid();
     SendMsg::GetInstance()->SendRequest("", uid, MSG_RANDOM_PUSH);
+}
+
+void FindFriendPageController::addFocus(QString obid)
+{
+    qDebug() << "obid is:" << obid;
+    unsigned int object_id = obid.toUInt();
+    SendMsg::GetInstance()->SendRequest("", object_id, MSG_FOLLOWING);
 }
