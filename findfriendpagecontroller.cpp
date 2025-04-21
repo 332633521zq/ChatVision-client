@@ -28,5 +28,5 @@ void FindFriendPageController::initFindFriendPage(json &jsondata)
 void FindFriendPageController::sendRandowRequest()
 {
     unsigned int uid = User::GetInstance()->GetUid();
-    SendMsg::GetInstance()->SendRequest("", uid, MSG_RANDOM_PUSH);
+    MsgSender::GetInstance()->SendRequest("", uid, MSG_RANDOM_PUSH);
 }

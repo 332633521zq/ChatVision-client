@@ -4,7 +4,8 @@
 //现在先去搭建ui界面，后面再考虑这部分代码的调整
 
 #include "piplinebuild.h"
-#include "msgsender.h"
+#include "sendmsg.h"
+
 
 GstElement *PiplineBuild::m_audio_bin = nullptr;
 GstElement *PiplineBuild::m_pipeline = nullptr;
@@ -66,7 +67,7 @@ gboolean PiplineBuild::start_pipeline(gboolean create_offer)
                      audioconvert,
                      capsfilter1,
                      audioresample,
-                     // webrtcdsp,
+                     webrtcdsp,
                      opusenc,
                      rtpopuspay,
                      queue2,
@@ -102,8 +103,6 @@ gboolean PiplineBuild::start_pipeline(gboolean create_offer)
                  TRUE, // 使用扩展滤波器
                  "voice-detection",
                  FALSE,
-                 // "probe",
-                 // probe,
                  NULL);
 
     g_object_set(rtpopuspay, "pt", RTP_OPUS_DEFAULT_PT, NULL);
@@ -111,7 +110,7 @@ gboolean PiplineBuild::start_pipeline(gboolean create_offer)
                                audioconvert,
                                capsfilter1,
                                audioresample,
-                               // webrtcdsp,
+                               webrtcdsp,
                                opusenc,
                                rtpopuspay,
                                queue2,
@@ -150,6 +149,10 @@ gboolean PiplineBuild::start_pipeline(gboolean create_offer)
     g_assert_nonnull(m_webrtcbin);
     g_print("webrtcbin create succeed");
 
+    // g_object_set(m_webrtcbin, "rtcp-rsize", TRUE, NULL);
+    // g_object_set(m_webrtcbin, "rtcp-rr-mode", 1, NULL);      // 启用RTCP反馈
+    // g_object_set(m_webrtcbin, "jitterbuffer-mode", 1, NULL); // 启用抖动缓冲
+
     //为webrtcbin设置bundle策略属性，值为max-bundle意思为尽可能将多个媒体流打包到单个的连接中，以减少网络延迟和带宽
     gst_util_set_object_arg(G_OBJECT(m_webrtcbin), "bundle-policy", "max-bundle");
 
@@ -160,12 +163,19 @@ gboolean PiplineBuild::start_pipeline(gboolean create_offer)
         gst_printerr("Failed to link m_audio_bin with m_webrtcbin \n");
     if (!gst_element_link(m_video_bin, m_webrtcbin))
         gst_printerr("Failed to link m_video bin with m_webrtcbin \n");
+    /************************************************************  
+    //如果我是作为answer 即create_offer为false{}
+    
+    //如果我是作为offer,考虑是否写头部扩展
+*************************************************************/
 
     g_signal_connect(m_webrtcbin,
                      "on-negotiation-needed",
                      G_CALLBACK(on_negotiation_needed),
                      GINT_TO_POINTER(create_offer));
     g_signal_connect(m_webrtcbin, "on-ice-candidate", G_CALLBACK(send_ice_candidate_message), NULL);
+
+    // g_signal_connect(m_webrtcbin, "on-data-channel", G_CALLBACK(on_data_channel), NULL);
 
     //监听总线事件
     bus = gst_pipeline_get_bus(GST_PIPELINE(m_pipeline));
@@ -175,13 +185,30 @@ gboolean PiplineBuild::start_pipeline(gboolean create_offer)
     //将管道状态设置为ready
     gst_element_set_state(m_pipeline, GST_STATE_READY);
 
+    // if (create_offer) {
+    //     g_signal_emit_by_name(m_webrtcbin, "create-data-channel", "channel", NULL, &test);
+    //     if (send_channel) {
+    //         g_print("create channel succeed");
+    //         g_signal_connect(send_channel, "on-close", G_CALLBACK(data_channel_on_close), NULL);
+    //     } else {
+    //         g_print("crate channel failed");
+    //     }
+    // }
     //将webrtcbin元素的pad-added信号与处理媒体流的回调函数相连，动态添加元素decodebin
     g_signal_connect(m_webrtcbin, "pad-added", G_CALLBACK(on_incoming_stream), m_pipeline);
 
     gst_print("Starting pipline\n");
 
     setPiplinePlaying();
-
+    // ret = gst_element_set_state(GST_ELEMENT(m_pipeline), GST_STATE_PLAYING);
+    // if (ret == GST_STATE_CHANGE_FAILURE) {
+    //     g_print("start pipeline error");
+    //     if (m_pipeline)
+    //         g_clear_object(&m_pipeline);
+    //     if (m_webrtcbin)
+    //         m_webrtcbin = NULL;
+    //     return FALSE;
+    // }
     return TRUE;
 }
 
@@ -255,7 +282,7 @@ void PiplineBuild::send_sdp_to_peer(GstWebRTCSessionDescription *desc)
     json_object_unref(msg);
 
     /*****************************************/
-    MsgSender::GetInstance()->SendRequest(data, m_object_id, MSG_VIDEO_CHAT);
+    SendMsg::GetInstance()->SendRequest(data, m_object_id, MSG_VIDEO_CHAT);
     // SendRequest(*m_socket, data, m_object_id, MSG_TEXT_CHAT);
     /*向服务器发送消息的函数*******************/
     g_free(text);
@@ -300,7 +327,7 @@ void PiplineBuild::send_ice_candidate_message(GstElement *m_webrtcbin,
     std::string data = text;
     /**********************************************/
 
-    MsgSender::GetInstance()->SendRequest(data, m_object_id, MSG_VIDEO_CHAT);
+    SendMsg::GetInstance()->SendRequest(data, m_object_id, MSG_VIDEO_CHAT);
     // sleep(1);
     /* * 向信令服务器发送候选者text*******************/
     g_free(text);
@@ -331,7 +358,7 @@ gboolean PiplineBuild::bus_watch_cb(GstBus *bus, GstMessage *message, gpointer u
         g_error_free(error);
         g_free(debug);
         cleanup_and_quit_loop("bus have some erro", APP_STATE_UNKNOWN);
-        break;
+        break; 
     }
     case GST_MESSAGE_WARNING: {
         GError *error = NULL;
@@ -358,6 +385,7 @@ gboolean PiplineBuild::bus_watch_cb(GstBus *bus, GstMessage *message, gpointer u
     return G_SOURCE_CONTINUE;
 }
 
+
 //清理
 gboolean PiplineBuild::cleanup_and_quit_loop(const char *msg, enum AppState state)
 {
@@ -369,7 +397,7 @@ gboolean PiplineBuild::cleanup_and_quit_loop(const char *msg, enum AppState stat
     m_video_bin = NULL;
     m_pipeline = NULL;
     m_webrtcbin = NULL;
-    probe = NULL;
+
     //在这里处理一下要是通道接收到错误信号怎么清理并退出程序
     /*****************...**********************/
     if (msg) {
@@ -466,7 +494,9 @@ void PiplineBuild::handle_media_stream(GstPad *pad,
     GstElement *q, *conv, *resample, *sink;
     GstPadLinkReturn ret;
 
-    g_object_set(probe,
+    GstElement *echoprobe = find_webrtcechoprobe(GST_BIN(m_audio_bin));
+    GstPad *aec_ref = gst_element_get_static_pad(echoprobe, "aec-ref");
+    g_object_set(echoprobe,
                  "voice-detection",
                  TRUE, // 启用语音检测
                  "extended-filter",
@@ -474,7 +504,7 @@ void PiplineBuild::handle_media_stream(GstPad *pad,
                  "delay-agnostic",
                  FALSE, // 适应延迟变化
                  NULL);
-
+    // GstElement *dspoutput = gst_element_factory_make("webrtcdsp", "dspoutput");
     gst_println("Tring to handle streame with %s ！ %s！！！！！！！！！！！！！！！！！！！！！！",
                 convert_name,
                 sink_name);
@@ -497,13 +527,16 @@ void PiplineBuild::handle_media_stream(GstPad *pad,
     if (g_strcmp0(convert_name, "audioconvert") == 0) {
         resample = gst_element_factory_make("audioresample", NULL);
         g_assert_nonnull(resample);
-        gst_bin_add_many(GST_BIN(pipe), q, conv, resample, /* probe, */ sink, NULL);
+        gst_bin_add_many(GST_BIN(pipe), q, conv, resample, probe, sink, NULL);
         gst_element_sync_state_with_parent(q);
         gst_element_sync_state_with_parent(conv);
         gst_element_sync_state_with_parent(resample);
         gst_element_sync_state_with_parent(sink);
-        // gst_element_sync_state_with_parent(probe);
-        gst_element_link_many(q, conv, resample, /* probe,*/ sink, NULL);
+        gst_element_sync_state_with_parent(probe);
+
+        GstPad *remote_src = gst_element_get_static_pad(resample, "src");
+        gst_pad_link(remote_src, aec_ref);
+        gst_element_link_many(q, conv, resample, probe, sink, NULL);
     } else {
         gst_bin_add_many(GST_BIN(pipe), q, conv, sink, NULL);
         gst_element_sync_state_with_parent(q);

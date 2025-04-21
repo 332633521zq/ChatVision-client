@@ -7,28 +7,28 @@
 #include "filetools.h"
 
 #include "followlistpagecontroller.h"
-#include "recvmsg.h"
+#include "msgreceiver.h"
 #include "user.h"
 #include <iostream>
 #include <nlohmann/json.hpp>
 
 using namespace nlohmann;
 
-RecvMsg::~RecvMsg() {}
-RecvMsg::RecvMsg() {}
-void RecvMsg::start()
+MsgReceiver::~MsgReceiver() {}
+MsgReceiver::MsgReceiver() {}
+void MsgReceiver::start()
 {
-    _recv_thread = std::thread(&RecvMsg::DealMsg, this);
+    _recv_thread = std::thread(&MsgReceiver::DealMsg, this);
     RegisterCallBacks();
     ReceiveMsg();
 }
 
-void RecvMsg::SetSocket(boost::asio::ip::tcp::socket *sock)
+void MsgReceiver::SetSocket(boost::asio::ip::tcp::socket *sock)
 {
     _sock = sock;
 }
 
-void RecvMsg::ReceiveMsg()
+void MsgReceiver::ReceiveMsg()
 {
     for (;;) {
         char head[HEAD_TOTAL_LENGTH];
@@ -63,7 +63,7 @@ void RecvMsg::ReceiveMsg()
     }
 }
 
-void RecvMsg::DealMsg()
+void MsgReceiver::DealMsg()
 {
     for (;;) {
         std::cout << "DealMsg-----------------------------------\n";
@@ -104,97 +104,106 @@ void RecvMsg::DealMsg()
     }
 }
 
-void RecvMsg::RegisterCallBacks()
+void MsgReceiver::RegisterCallBacks()
 {
-    _fun_callbacks[MSG_HELLO_WORLD] = std::bind(&RecvMsg::HelloWorldCallBack,
+    _fun_callbacks[MSG_HELLO_WORLD] = std::bind(&MsgReceiver::HelloWorldCallBack,
                                                 this,
                                                 std::placeholders::_1);
 
-    _fun_callbacks[MSG_NOT_ONLINE] = std::bind(&RecvMsg::NotOnlineCallBack,
+    _fun_callbacks[MSG_NOT_ONLINE] = std::bind(&MsgReceiver::NotOnlineCallBack,
                                                this,
                                                std::placeholders::_1);
 
-    _fun_callbacks[MSG_USER_INFO] = std::bind(&RecvMsg::UserInfoCallBack,
+    _fun_callbacks[MSG_USER_INFO] = std::bind(&MsgReceiver::UserInfoCallBack,
                                               this,
                                               std::placeholders::_1);
 
-    _fun_callbacks[MSG_GET_FOLLOWINGS] = std::bind(&RecvMsg::GetFollowingCallBack,
+    _fun_callbacks[MSG_GET_FOLLOWINGS] = std::bind(&MsgReceiver::GetFollowingCallBack,
                                                    this,
                                                    std::placeholders::_1);
 
-    _fun_callbacks[MSG_GET_FOLLOWERS] = std::bind(&RecvMsg::GetFollowerCallBack,
+    _fun_callbacks[MSG_GET_FOLLOWERS] = std::bind(&MsgReceiver::GetFollowerCallBack,
                                                   this,
                                                   std::placeholders::_1);
 
-    _fun_callbacks[MSG_GET_BLACKLIST] = std::bind(&RecvMsg::GetBlacklistCallBack,
+    _fun_callbacks[MSG_GET_BLACKLIST] = std::bind(&MsgReceiver::GetBlacklistCallBack,
                                                   this,
                                                   std::placeholders::_1);
 
-    _fun_callbacks[MSG_TEXT_CHAT] = std::bind(&RecvMsg::TextChatCallBack,
+    _fun_callbacks[MSG_TEXT_CHAT] = std::bind(&MsgReceiver::TextChatCallBack,
                                               this,
                                               std::placeholders::_1);
 
-    _fun_callbacks[MSG_TEXT_CHAT_REFUSED] = std::bind(&RecvMsg::TextChatRefusedCallBack,
+    _fun_callbacks[MSG_TEXT_CHAT_REFUSED] = std::bind(&MsgReceiver::TextChatRefusedCallBack,
                                                       this,
                                                       std::placeholders::_1);
 
-    _fun_callbacks[MSG_FOLLOWING] = std::bind(&RecvMsg::FollowingCallBack,
+    _fun_callbacks[MSG_FOLLOWING] = std::bind(&MsgReceiver::FollowingCallBack,
                                               this,
                                               std::placeholders::_1);
 
-    _fun_callbacks[MSG_CANCEL_FOLLOW] = std::bind(&RecvMsg::CancelFollowCallBack,
+    _fun_callbacks[MSG_CANCEL_FOLLOW] = std::bind(&MsgReceiver::CancelFollowCallBack,
                                                   this,
                                                   std::placeholders::_1);
 
-    _fun_callbacks[MSG_VIDEO_CHAT] = std::bind(&RecvMsg::VideoChatCallBack,
+    _fun_callbacks[MSG_VIDEO_CHAT] = std::bind(&MsgReceiver::VideoChatCallBack,
                                                this,
                                                std::placeholders::_1);
 
-    _fun_callbacks[MSG_AGREE_VIDEO] = std::bind(&RecvMsg::AgreeVideoChatCallBack,
+    _fun_callbacks[MSG_AGREE_VIDEO] = std::bind(&MsgReceiver::AgreeVideoChatCallBack,
                                                 this,
                                                 std::placeholders::_1);
 
-    _fun_callbacks[MSG_VIDEO_CHAT_REFUSED] = std::bind(&RecvMsg::RefusedVideoChatCallBack,
+    _fun_callbacks[MSG_VIDEO_CHAT_REFUSED] = std::bind(&MsgReceiver::RefusedVideoChatCallBack,
                                                        this,
                                                        std::placeholders::_1);
 
-    _fun_callbacks[MSG_AUDIO_CHAT] = std::bind(&RecvMsg::AudioChatCallBack,
+    _fun_callbacks[MSG_AUDIO_CHAT] = std::bind(&MsgReceiver::AudioChatCallBack,
                                                this,
                                                std::placeholders::_1);
 
-    _fun_callbacks[MSG_AGREE_AUDIO] = std::bind(&RecvMsg::AgreeAudioChatCallBack,
+    _fun_callbacks[MSG_AGREE_AUDIO] = std::bind(&MsgReceiver::AgreeAudioChatCallBack,
                                                 this,
                                                 std::placeholders::_1);
 
-    _fun_callbacks[MSG_AUDIO_CHAT_REFUSED] = std::bind(&RecvMsg::RefusedAudioChatCallBack,
+    _fun_callbacks[MSG_AUDIO_CHAT_REFUSED] = std::bind(&MsgReceiver::RefusedAudioChatCallBack,
                                                        this,
                                                        std::placeholders::_1);
 
-    _fun_callbacks[MSG_RANDOM_PUSH] = std::bind(&RecvMsg::RandomPushCallBack,
+    _fun_callbacks[MSG_RANDOM_PUSH] = std::bind(&MsgReceiver::RandomPushCallBack,
                                                 this,
                                                 std::placeholders::_1);
 
-    _fun_callbacks[MSG_CHATTED_USER] = std::bind(&RecvMsg::ChattedUserCallBack,
+    _fun_callbacks[MSG_CHATTED_USER] = std::bind(&MsgReceiver::ChattedUserCallBack,
                                                  this,
                                                  std::placeholders::_1);
-    _fun_callbacks[MSG_SEARCH] = std::bind(&RecvMsg::SearchUserCallBack,
+
+    _fun_callbacks[MSG_SEARCH] = std::bind(&MsgReceiver::SearchUserCallBack,
+                                           this,
+                                           std::placeholders::_1);
+
+    _fun_callbacks[MSG_ONLINE_STATE] = std::bind(&MsgReceiver::OnlineStateCallBack,
+                                           this,
+                                           std::placeholders::_1);
+
+    _fun_callbacks[MSG_FILE] = std::bind(&MsgReceiver::FileCallBack,
                                            this,
                                            std::placeholders::_1);
 }
 
-void RecvMsg::HelloWorldCallBack(const std::string &msg_data)
+void MsgReceiver::HelloWorldCallBack(const std::string &msg_data)
 {
     qDebug() << "HelloWorldCallBack----------------";
 }
 
-void RecvMsg::NotOnlineCallBack(const std::string &msg_data)
+void MsgReceiver::NotOnlineCallBack(const std::string &msg_data)
 {
     qDebug() << "NotOnlineCallBack----------------";
 
     // 发信号给前端提醒对方不在线
 }
 
-void RecvMsg::UserInfoCallBack(const std::string &msg_data)
+void MsgReceiver::UserInfoCallBack(const std::string &msg_data)
 {
     qDebug() << "UserInfoCallBack----------------" << msg_data;
 
@@ -205,7 +214,7 @@ void RecvMsg::UserInfoCallBack(const std::string &msg_data)
     User::GetInstance()->SetMyInfo(jsonmsg);
 }
 
-void RecvMsg::GetFollowingCallBack(const std::string &msg_data)
+void MsgReceiver::GetFollowingCallBack(const std::string &msg_data)
 {
     qDebug() << "GetFollowingCallBack----------------";
 
@@ -219,7 +228,7 @@ void RecvMsg::GetFollowingCallBack(const std::string &msg_data)
     }
 }
 
-void RecvMsg::GetFollowerCallBack(const std::string &msg_data)
+void MsgReceiver::GetFollowerCallBack(const std::string &msg_data)
 {
     qDebug() << "GetFollowerCallBack----------------" << msg_data;
 
@@ -234,7 +243,7 @@ void RecvMsg::GetFollowerCallBack(const std::string &msg_data)
     }
 }
 
-void RecvMsg::GetBlacklistCallBack(const std::string &msg_data)
+void MsgReceiver::GetBlacklistCallBack(const std::string &msg_data)
 {
     qDebug() << "GetBlacklistCallBack----------------";
 
@@ -249,7 +258,7 @@ void RecvMsg::GetBlacklistCallBack(const std::string &msg_data)
     }
 }
 
-void RecvMsg::TextChatCallBack(const std::string &msg_data)
+void MsgReceiver::TextChatCallBack(const std::string &msg_data)
 {
     qDebug() << "TextChatCallBack----------------";
 
@@ -266,14 +275,14 @@ void RecvMsg::TextChatCallBack(const std::string &msg_data)
     FileTools::GetInstance()->GetLatestMsg(object_id);
 }
 
-void RecvMsg::TextChatRefusedCallBack(const std::string &msg_data)
+void MsgReceiver::TextChatRefusedCallBack(const std::string &msg_data)
 {
     qDebug() << "TextChatRefusedCallBack----------------";
 
     // 发信号给前端：你现在不能给对方发送消息，因为对方尚未回复/对方将你拉黑/你已拉黑对方
 }
 
-void RecvMsg::FollowingCallBack(const std::string &msg_data)
+void MsgReceiver::FollowingCallBack(const std::string &msg_data)
 {
     qDebug() << "FollowingCallBack----------------";
 
@@ -287,7 +296,7 @@ void RecvMsg::FollowingCallBack(const std::string &msg_data)
     // 发个信号给通知前端有新的关注者
 }
 
-void RecvMsg::CancelFollowCallBack(const std::string &msg_data)
+void MsgReceiver::CancelFollowCallBack(const std::string &msg_data)
 {
     qDebug() << "CancelFollowCallBack----------------";
 
@@ -301,7 +310,7 @@ void RecvMsg::CancelFollowCallBack(const std::string &msg_data)
     // 发个信号给通知前端失去一个关注者
 }
 
-void RecvMsg::VideoChatCallBack(const std::string &msg_data)
+void MsgReceiver::VideoChatCallBack(const std::string &msg_data)
 {
     json jsonmsg = json::parse(msg_data);
 
@@ -402,14 +411,14 @@ void RecvMsg::VideoChatCallBack(const std::string &msg_data)
     }
 }
 
-void RecvMsg::AgreeVideoChatCallBack(const std::string &msg_data)
+void MsgReceiver::AgreeVideoChatCallBack(const std::string &msg_data)
 {
     qDebug() << "AgreeVideoChatCallBack----------------";
 
     // 发信号给前端：视频通话请求已同意
 }
 
-void RecvMsg::RefusedVideoChatCallBack(const std::string &msg_data)
+void MsgReceiver::RefusedVideoChatCallBack(const std::string &msg_data)
 {
     qDebug() << "RefusedVideoChatCallBack----------------";
 
@@ -418,19 +427,19 @@ void RecvMsg::RefusedVideoChatCallBack(const std::string &msg_data)
     // 断开管道连接
 }
 
-void RecvMsg::AudioChatCallBack(const std::string &msg_data)
+void MsgReceiver::AudioChatCallBack(const std::string &msg_data)
 {
     qDebug() << "AudioChatCallBack----------------";
     // 发信号给前端：视频通话请求已同意
 }
 
-void RecvMsg::AgreeAudioChatCallBack(const std::string &msg_data)
+void MsgReceiver::AgreeAudioChatCallBack(const std::string &msg_data)
 {
     qDebug() << "AgreeAudioChatCallBack----------------";
     // 发信号给前端：视频通话请求已同意
 }
 
-void RecvMsg::RefusedAudioChatCallBack(const std::string &msg_data)
+void MsgReceiver::RefusedAudioChatCallBack(const std::string &msg_data)
 {
     qDebug() << "RefusedAudioChatCallBack----------------";
     // 发信号给前端：视频通话请求被拒绝
@@ -438,7 +447,7 @@ void RecvMsg::RefusedAudioChatCallBack(const std::string &msg_data)
     // 断开管道连接
 }
 
-void RecvMsg::RandomPushCallBack(const std::string &msg_data)
+void MsgReceiver::RandomPushCallBack(const std::string &msg_data)
 {
     qDebug() << "RandomPushCallBack----------------";
 
@@ -450,7 +459,7 @@ void RecvMsg::RandomPushCallBack(const std::string &msg_data)
     // users_data是json数组，把数据转给前端
 }
 
-void RecvMsg::ChattedUserCallBack(const std::string &msg_data)
+void MsgReceiver::ChattedUserCallBack(const std::string &msg_data)
 {
     qDebug() << "ChattedUserCallBack----------------";
 
@@ -469,7 +478,7 @@ void RecvMsg::ChattedUserCallBack(const std::string &msg_data)
     FileTools::GetInstance()->SaveChattedUsers(users_data);
 }
 
-void RecvMsg::SearchUserCallBack(const std::string &msg_data)
+void MsgReceiver::SearchUserCallBack(const std::string &msg_data)
 {
     qDebug() << "SearcUSerCallBack----------------";
 
@@ -488,4 +497,30 @@ void RecvMsg::SearchUserCallBack(const std::string &msg_data)
         SearchController::getInstance()
             .addSearchUserList(id, memo, nickname, area, gender, signature, avatar_path);
     }
+}
+
+void MsgReceiver::OnlineStateCallBack(const std::string &msg_data)
+{
+    qDebug() << "OnlineStateCallBack----------------";
+
+    json jsonmsg = json::parse(msg_data);
+    bool isonline = jsonmsg["data"];
+    FollowListPageController::getInstance().SetOnlineState(isonline);
+}
+
+void MsgReceiver::FileCallBack(const std::string &msg_data)
+{
+    qDebug() << "FileCallBack----------------";
+
+    json jsonmsg = json::parse(msg_data);
+    unsigned int obj_id = jsonmsg["uid"];
+    std::string str_data = jsonmsg["data"];
+    json data = json::parse(str_data);
+
+    std::filesystem::path filename = data["filename"];
+    size_t data_size = data["data_size"];
+    std::string chunk_data=data["chunk_data"];
+
+    FileTools::GetInstance()->SaveFileMsg(obj_id,filename,chunk_data,data_size);    // 将文件存入本地
+
 }

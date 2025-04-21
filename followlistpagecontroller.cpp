@@ -1,4 +1,5 @@
 #include "followlistpagecontroller.h"
+#include "msgsender.h"
 #include <QJsonDocument>
 #include "user.h"
 
@@ -55,6 +56,22 @@ void FollowListPageController::SetMyInfo(const json& data)
     m_myinfo = data;
     updateQmlMyinfo();
     emit onMyInfoChanged();
+}
+
+bool FollowListPageController::GetOnlineState() const
+{
+    return m_isonline;
+}
+
+void FollowListPageController::SetOnlineState(const bool onlinestate)
+{
+    m_isonline = onlinestate;
+}
+
+void FollowListPageController::getOnlineState(const unsigned int& uid)
+{
+    std::cout<<"getOnlineState sendrequest--------"<<std::endl;
+    MsgSender::GetInstance()->SendRequest("",uid,MSG_ONLINE_STATE);
 }
 
 void FollowListPageController::initRelationData()

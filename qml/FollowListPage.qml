@@ -209,6 +209,7 @@ Rectangle{
                         // bips.avatar_path = modelData.avatar_path/*"../assets/Picture/avatar/cats.jpg"*/
                         bips.gender = modelData.gender
 
+                        followingPageController.getOnlineState(modelData.uid)
                         loadfollowinginfo();
                     }
                 }

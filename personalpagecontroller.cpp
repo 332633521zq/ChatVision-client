@@ -41,5 +41,5 @@ void PersonalPageController::init()
     if (fileInfo.exists())
         is_first_login = "no";
 
-    SendMsg::GetInstance()->SendRequest(is_first_login, m_number, MSG_LOGIN);
+    MsgSender::GetInstance()->SendRequest(is_first_login, m_number, MSG_LOGIN);
 }

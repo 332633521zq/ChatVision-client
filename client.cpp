@@ -26,8 +26,8 @@ Client::Client()
 
 void Client::Start()
 {
-    _send_msg = SendMsg::GetInstance();
-    _recv_msg = RecvMsg::GetInstance();
+    _send_msg = MsgSender::GetInstance();
+    _recv_msg = MsgReceiver::GetInstance();
     _send_msg->SetSocket(_sock);
     _recv_msg->SetSocket(_sock);
     _recv_msg->start();

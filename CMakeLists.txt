@@ -6,6 +6,7 @@ project(
   LANGUAGES CXX)
 
 find_package(Qt6 6.4 REQUIRED COMPONENTS Quick Multimedia)
+find_package(OpenSSL 1.1 REQUIRED)
 
 add_subdirectory(json)
 
@@ -52,11 +53,11 @@ qt_add_qml_module(
   client.h
   client.cpp
   SOURCES
-  sendmsg.h
-  sendmsg.cpp
+  msgsender.h
+  msgsender.cpp
   SOURCES
-  recvmsg.h
-  recvmsg.cpp
+  msgreceiver.h
+  msgreceiver.cpp
   SOURCES
   msgnode.h
   msgnode.cpp
@@ -112,7 +113,10 @@ set_target_properties(
 target_link_libraries(
   appChatVision-client
   PRIVATE Qt6::Quick Qt6::quickmultimedia ${GST_LIBRARIES} # 链接GStreamer库
-          gstvideo-1.0 ${JSON_GLIB_LIBRARIES} nlohmann_json)
+          gstvideo-1.0 ${JSON_GLIB_LIBRARIES} nlohmann_json
+          OpenSSL::SSL
+          OpenSSL::Crypto
+      )
 
 include(GNUInstallDirs)
 install(

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "recvmsg.h"
-#include "sendmsg.h"
+#include "msgreceiver.h"
+#include "msgsender.h"
 #include "user.h"
 #include <boost/asio.hpp>
 
@@ -16,6 +16,6 @@ public:
 private:
     tcp::socket* _sock = nullptr;
     std::thread _logic_thread;
-    std::shared_ptr<SendMsg> _send_msg;
-    std::shared_ptr<RecvMsg> _recv_msg;
+    std::shared_ptr<MsgSender> _send_msg;
+    std::shared_ptr<MsgReceiver> _recv_msg;
 };

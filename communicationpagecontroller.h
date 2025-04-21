@@ -10,7 +10,7 @@
 #include <QVector>
 #include "filetools.h"
 #include "mediathread.h"
-#include "sendmsg.h"
+#include "msgsender.h"
 #include "tool.h"
 #include "user.h"
 

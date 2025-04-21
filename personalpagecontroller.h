@@ -5,7 +5,7 @@
 #include <QObject>
 #include <QQmlEngine>
 #include <QStandardPaths>
-#include "sendmsg.h"
+#include "msgsender.h"
 #include "user.h"
 
 class PersonalPageController : public QObject

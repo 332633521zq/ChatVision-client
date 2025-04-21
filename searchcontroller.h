@@ -1,6 +1,6 @@
 #pragma once
 #include <QObject>
-#include "sendmsg.h"
+#include "msgsender.h"
 class SearchController : public QObject
 {
     Q_OBJECT

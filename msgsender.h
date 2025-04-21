@@ -7,22 +7,24 @@
 #include <boost/asio.hpp>
 #include <queue>
 #include <thread>
+#include <filesystem>
 
 using boost::asio::ip::tcp;
 
-class SendMsg : public Singleton<SendMsg>
+class MsgSender : public Singleton<MsgSender>
 {
-    friend class Singleton<SendMsg>;
+    friend class Singleton<MsgSender>;
 
 public:
-    ~SendMsg();
+    ~MsgSender();
 
     void SetSocket(boost::asio::ip::tcp::socket* sock);
     void SendRequest(char* msg, size_t msg_len, unsigned int object_id, short msgid);
     void SendRequest(std::string msg, unsigned int object_id, short msgid);
+    void SendFile(std::filesystem::path file_path, unsigned int object_id);
 
 private:
-    SendMsg();
+    MsgSender();
 
     tcp::socket* _sock;
     std::mutex _mutex;
