@@ -26,6 +26,7 @@ void SendMsg::SendRequest(std::string msg, unsigned int object_id, short msgid)
     send_str["uid"] = User::GetInstance()->GetUid();
     send_str["object_id"] = object_id;
     send_str["data"] = msg;
+    send_str["msgid"] = msgid;
     std::string temp_send_str = send_str.dump();
 
     std::shared_ptr<SendNode> new_node = std::make_shared<SendNode>(temp_send_str.c_str(),

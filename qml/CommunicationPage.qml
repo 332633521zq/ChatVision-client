@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls 2.15
+import QtQuick.Dialogs
 import Qt5Compat.GraphicalEffects
 //右边的矩形
 Rectangle{
@@ -48,6 +49,7 @@ Rectangle{
                     ListElement{
                         textmsg:"你好木薯"
                         sender:"20000000"
+                        type:1004
                     }
                     ListElement{
                         textmsg:"你好一一"
@@ -102,12 +104,39 @@ Rectangle{
                                 font.pixelSize: 15
                             }
                         }
+                        Rectangle{
+                            id:filemsgrec
+                            width: 120
+                            height: 60
+                            color: "white"
+                            radius: 5
+                            visible: false
+                            Text {
+                                id: file_msg
+                                width: parent.width
+                                anchors.centerIn: parent.Center
+                                text: textmsg
+                                padding: 5
+                                wrapMode: Text.Wrap
+                                font.pixelSize: 15
+                            }
+                        }
+
                         Component.onCompleted: {
                             if(sender === communicationPageControler.myId){
                                 msgavaterRec.anchors.right=msgrec.right
                                 msgavaterRec.anchors.rightMargin=25
-                                textmsgrec.anchors.rightMargin=10
-                                textmsgrec.anchors.right=msgavaterRec.left
+
+                                if(type===1005){
+                                    filemsgrec.visible=true
+                                    textmsgrec.visible=false
+                                    filemsgrec.anchors.rightMargin=10
+                                    filemsgrec.anchors.right=msgavaterRec.left
+                                }
+                                else{
+                                    textmsgrec.anchors.rightMargin=10
+                                    textmsgrec.anchors.right=msgavaterRec.left
+                                }
                             }
                             else{
                                 msgavaterRec.anchors.left=msgrec.left
@@ -173,7 +202,146 @@ Rectangle{
                                         }
                                     }
                                 }
-
+                            }
+                            Popup{
+                                id:emojiPop
+                                width: 230
+                                height: 100
+                                y:-100
+                                background: Rectangle{
+                                    color: "white"
+                                    clip: true
+                                    border.color: "black"
+                                }
+                                ListModel{
+                                    id:mod
+                                    ListElement{
+                                        emoji:"🥺"
+                                    }
+                                    ListElement{
+                                        emoji:"🤣"
+                                    }
+                                    ListElement{
+                                        emoji:"🫠"
+                                    }
+                                    ListElement{
+                                        emoji:"🥰"
+                                    }
+                                    ListElement{
+                                        emoji:"🤩"
+                                    }
+                                    ListElement{
+                                        emoji:"🥲"
+                                    }
+                                    ListElement{
+                                        emoji:"🤑"
+                                    }
+                                    ListElement{
+                                        emoji:"🤭"
+                                    }
+                                    ListElement{
+                                        emoji:"🫢"
+                                    }
+                                    ListElement{
+                                        emoji:"🤗"
+                                    }
+                                    ListElement{
+                                        emoji:"🤔"
+                                    }
+                                    ListElement{
+                                        emoji:"🫡"
+                                    }
+                                    ListElement{
+                                        emoji:"🫥"
+                                    }
+                                    ListElement{
+                                        emoji:"🤤"
+                                    }
+                                    ListElement{
+                                        emoji:"🥶"
+                                    }
+                                }
+                                Component{
+                                    id:facebag
+                                    Rectangle{
+                                        id:emojirec
+                                        width: 40
+                                        height: 40
+                                        Text {
+                                            text: emoji
+                                            font.pixelSize: 30
+                                            anchors.centerIn: parent
+                                        }
+                                        Rectangle{
+                                            id:maskrec
+                                            anchors.fill: parent
+                                            color:"black"
+                                            opacity: 0.1
+                                            radius: 5
+                                            visible: false
+                                        }
+                                        HoverHandler{
+                                            onHoveredChanged: {
+                                                if(hovered){
+                                                    maskrec.visible=true
+                                                }
+                                                else{
+                                                    maskrec.visible=false
+                                                }
+                                            }
+                                        }
+                                        TapHandler{
+                                            onTapped:{
+                                                msginput.text=msginput.text+emoji
+                                            }
+                                        }
+                                    }
+                                }
+                                Rectangle{
+                                    anchors.fill: parent
+                                    GridView{
+                                        anchors.fill: parent
+                                        anchors.margins: 5
+                                        model: mod
+                                        delegate: facebag
+                                        cellWidth: 40  // 设置单元格宽度
+                                        cellHeight: 40
+                                        clip: true
+                                    }
+                                }
+                            }
+                            Rectangle{
+                                width: 30
+                                height: 30
+                                color:"transparent"
+                                Image {
+                                    anchors.centerIn: parent
+                                    source: "qrc:/image/Expression.svg"
+                                    sourceSize: Qt.size(parent.width-10,parent.height-10)
+                                }
+                                Rectangle{
+                                    id:mk_emoji
+                                    anchors.fill: parent
+                                    color:"black"
+                                    opacity: 0.2
+                                    visible: false
+                                    radius: 5
+                                }
+                                HoverHandler{
+                                    onHoveredChanged: {
+                                        if(hovered){
+                                            mk_emoji.visible=true
+                                        }
+                                        else{
+                                            mk_emoji.visible=false
+                                        }
+                                    }
+                                }
+                                TapHandler{
+                                    onTapped: {
+                                        emojiPop.open()
+                                    }
+                                }
                             }
                             Rectangle{
                                 width: 30
@@ -202,6 +370,27 @@ Rectangle{
                                         }
                                     }
                                 }
+                                TapHandler{
+                                    onTapped: {
+                                        fileDialog.open()
+                                    }
+                                }
+                                FileDialog {
+                                        id: fileDialog
+                                        title: "请选择文件"
+
+                                        nameFilters: ["文本文件 (*.txt)", "图片文件 (*.jpg *.png)", "所有文件 (*)"]
+
+                                        onAccepted: {
+                                            console.log(fileDialog.currentFile)
+                                            communicationPageControler.selectFile(fileDialog.currentFile)
+                                            // communicationPageControler.myMessage=fileDialog.currentFile
+                                            // 处理选中的文件
+                                        }
+                                        onRejected: {
+                                            console.log("用户取消选择")
+                                        }
+                                    }
                             }
                             Rectangle{
                                 width: 30
@@ -242,7 +431,7 @@ Rectangle{
                             }
 
                             Rectangle{
-                                width: textEditRec.width - 220
+                                width: textEditRec.width - 270
                                 height:1
                                 opacity: 0
                             }
@@ -253,7 +442,7 @@ Rectangle{
                                 color:"transparent"
                                 Image {
                                     anchors.centerIn: parent
-                                    source: "qrc:/image/Phone.svg"
+                                    source: "qrc:/image/history_record_16.svg"
                                     sourceSize: Qt.size(parent.width-10,parent.height-10)
                                 }
                                 Rectangle{
@@ -352,20 +541,22 @@ Rectangle{
         }
         Connections{
             target:communicationPageControler
-            function onMyMessageChanged(){
+            function onMyMessageChanged(type){
                 var msghistory={}
                 msghistory.sender=communicationPageControler.myId
                 msghistory.textmsg=communicationPageControler.myMessage
+                msghistory.type=type
                 msglistmodel.append(msghistory)
                 communicationlistview.positionViewAtEnd()
             }
         }
         Connections{
             target: communicationPageControler
-            function onFriendMessageChanged(){
+            function onFriendMessageChanged(type){
                 var msghistory={}
                 msghistory.sender=communicationPageControler.friendId
                 msghistory.textmsg=communicationPageControler.friendMessage
+                msghistory.type=type
                 msglistmodel.append(msghistory)
                 communicationlistview.positionViewAtEnd()
 

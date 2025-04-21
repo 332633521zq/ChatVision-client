@@ -1,0 +1,40 @@
+﻿Manjaro定制系统发布说明
+
+2024-05-30 夏季版: 基于manjaro 24.0.1, 主要变更如下
+ 1.内核及相关系统软件更新到最新版，其中Plasma 5升级到Plasma 6首次发布，默认启用Wayland.
+ 2.所有应用软件更新到最新版本
+ 3.所有开发软件更新到最新版本：Qt6.7.1、QtCreator 13.0.1(包含自编译的2023年8月的C++ Reference英文帮助文档，2023年10月的C++ Reference中文帮助文档)、GCC13.2、Gammaray(Qt6)等
+
+ 
+常见问题的解决:
+1.如果系统恢复和安装遇到问题，请查看文档文件：/root/tmp/双系统安装文档和视频/搭建Linux和Win10双系统_2023_09.pdf
+ 
+2.命令行安装软件、更新系统的工具pacman
+如果想在命令行安装archlinux/manjaro的软件，需要使用pacman工具，请进入tmp目录,查看其中pacman网页熟悉其用法
+想获得ARM架构的软件包，如ARM版本的boost库软件包，请访问http://mirrors.ustc.edu.cn/manjaro-arm
+想获得Archlinux旧版本的软件包，请访问https://archive.archlinux.org/packages/
+
+在命令行自行更新Manjaro：pacman -Syu
+
+注意：更新之后root用户会没有声音，因为默认root用户会关闭声音服务：
+由于系统安全的原因，许多Linux发行版不建议以root用户来启动声音服务，所以更新系统之后，root用户下声音服务不会默认启用，此时可以执行下面的命令予以恢复，具体细节可以看二者不同之处：
+    cp -af /usr/lib/systemd/user/pipewire-pulse.service.bak   /usr/lib/systemd/user/pipewire-pulse.service
+    cp -af /usr/lib/systemd/user/pipewire-pulse.socket.bak   /usr/lib/systemd/user/pipewire-pulse.socket
+命令执行完之后，请重启电脑。
+
+3.磁盘恢复软件testdisk+qphotorec，用于恢复丢失的文件
+
+4.修改双系统启动时的背景图片的路径，请查看grub的主题配置文件：
+   /usr/share/grub/themes/manjaro/theme.txt
+
+  修改桌面背景，需要修改sddm配置，其配置文件目录为：
+   /usr/share/sddm/themes/breeze/
+
+5.安装NVIDIA显卡驱动
+然后使用"系统设置"-->"硬件设定"中安装NVIDIA显卡的"专利"驱动
+
+6.安装网卡驱动
+要查看网卡型号，请打开一个终端，然后运行以下命令：
+          lspci | grep -i net
+或者       lspci | grep -i wifi
+然后根据网卡所属公司和型号，搜索软件包进行安装：大部分的网卡可以在octopi中直接可以找到软件包

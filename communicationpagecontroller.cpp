@@ -2,7 +2,12 @@
 
 CommunicationPageController::CommunicationPageController(QObject *parent)
     : QObject(parent)
-{}
+{
+    connect(this,
+            &CommunicationPageController::newMessage,
+            this,
+            &CommunicationPageController::onNewMessage);
+}
 
 CommunicationPageController &CommunicationPageController::getInstance()
 {
@@ -27,6 +32,8 @@ void CommunicationPageController::initCommunicationPage()
         // json json_it = json::parse(it);
         QString text = QString::fromStdString(json_it["data"].get<std::string>());
         QString uid = QString::number(json_it["uid"].get<unsigned int>());
+        short msgid = json_it["msgid"];
+        setType(msgid);
         if (uid == m_myId) {
             setMyMessage(text);
         } else {
@@ -42,6 +49,7 @@ void CommunicationPageController::saveMessage()
     jo["uid"] = m_myId.toUInt();
     unsigned int object_id = m_friendId.toUInt();
     jo["object_id"] = object_id;
+    jo["msgid"] = m_type;
     if (!FileTools::GetInstance()->SaveTextMsg(object_id, jo)) {
         qDebug() << "save send msg in file failed";
     }
@@ -84,19 +92,19 @@ void CommunicationPageController::hangUp()
     PiplineBuild::cleanup_and_quit_loop("挂断", PEER_CALL_STOPPED);
 }
 
-void CommunicationPageController::saveMessage(QString msg, QString send_id)
-{
-    QJsonObject jo;
-    QString path = "root/test" + send_id + ".json";
-    jo["text"] = msg;
-    jo["sender"] = send_id;
-    if (!Tool::getInstance().saveJsonObjectToFile(jo, path)) {
-        qDebug() << "save friend msg failed";
-    }
-    if (send_id == m_friendId) {
-        setFriendMessage(msg);
-    }
-}
+// void CommunicationPageController::saveMessage(QString msg, QString send_id)
+// {
+//     QJsonObject jo;
+//     QString path = "root/test" + send_id + ".json";
+//     jo["text"] = msg;
+//     jo["sender"] = send_id;
+//     if (!Tool::getInstance().saveJsonObjectToFile(jo, path)) {
+//         qDebug() << "save friend msg failed";
+//     }
+//     if (send_id == m_friendId) {
+//         setFriendMessage(msg);
+//     }
+// }
 void CommunicationPageController::initChattedList()
 {
     std::map<unsigned int, json> ts;
@@ -112,6 +120,7 @@ void CommunicationPageController::initChattedList()
         QString gender = QString::fromStdString(data["gender"]);
         QString signature = QString::fromStdString(data["signature"]);
         QString avatar_path = QString::fromStdString(data["avatar_path_"]);
+        m_unread.append(id);
         emit addListElement(id, memo, nickname, area, gender, signature, avatar_path);
     }
 }
@@ -124,7 +133,7 @@ QString CommunicationPageController::myMessage() const
 void CommunicationPageController::setMyMessage(const QString myMessage)
 {
     m_myMessage = myMessage;
-    emit myMessageChanged();
+    emit myMessageChanged(m_type);
 }
 
 QString CommunicationPageController::friendMessage() const
@@ -135,7 +144,7 @@ QString CommunicationPageController::friendMessage() const
 void CommunicationPageController::setFriendMessage(const QString friendMessage)
 {
     m_friendMessage = friendMessage;
-    emit friendMessageChanged();
+    emit friendMessageChanged(m_type);
 }
 
 QString CommunicationPageController::myId() const
@@ -239,4 +248,28 @@ void CommunicationPageController::addDayMsg(const QString datetime)
 void CommunicationPageController::onWasHangUp()
 {
     emit closeVideoWindow();
+}
+
+void CommunicationPageController::onNewMessage(unsigned int uid)
+{
+    QString id = QString::number(uid);
+    int index = m_unread.indexOf(id);
+    emit unreadChanged(index);
+    qDebug("this is onnewmessage slot" + index);
+}
+void CommunicationPageController::selectFile(QString filepath)
+{
+    QUrl url(filepath);
+    QString localFilePath = url.toLocalFile();
+    QFileInfo fileinfo(localFilePath);
+    QString filename = fileinfo.fileName();
+    qDebug() << "Local file path:" << localFilePath;
+    setType(1005);
+    setMyMessage(filename);
+    saveMessage();
+}
+
+void CommunicationPageController::setType(short type)
+{
+    m_type = type;
 }

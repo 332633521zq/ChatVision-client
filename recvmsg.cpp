@@ -257,12 +257,16 @@ void RecvMsg::TextChatCallBack(const std::string &msg_data)
     std::cout << "jsonmsg:" << jsonmsg << std::endl;
     unsigned int object_id = jsonmsg["uid"];
     FileTools::GetInstance()->SaveTextMsg(object_id, jsonmsg);
+
     //向前端发信号有新的消息
     QString text = QString::fromStdString(jsonmsg["data"].get<std::string>());
+    short msgid = jsonmsg["msgid"];
+    CommunicationPageController::getInstance().setType(msgid);
     if (object_id == CommunicationPageController::getInstance().friendId().toUInt()) {
         CommunicationPageController::getInstance().setFriendMessage(text);
+    } else {
+        CommunicationPageController::getInstance().newMessage(object_id);
     }
-
     FileTools::GetInstance()->GetLatestMsg(object_id);
 }
 

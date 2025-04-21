@@ -26,6 +26,7 @@ Rectangle{
         // }
     }
 
+
     BaseInfoProperties{
         id:bips
     }
@@ -42,6 +43,7 @@ Rectangle{
             rightloader.source = "CommunicationPage.qml";
         }
     }
+
 
     Row{
         id:homepagerow
@@ -65,7 +67,7 @@ Rectangle{
                     Image{
                         id:avaterimage
                         anchors.fill: parent
-                        source:"qrc:/image/bg2.jpg"
+                        source:bips.my_avatar
                         fillMode: Image.PreserveAspectCrop
                         visible: false
                     }
@@ -89,12 +91,179 @@ Rectangle{
                             bips.memo = myinfo.nickname /*"85"*/
                             bips.signal_text = myinfo.signature/*"罪业的报偿"*/
                             bips.area = myinfo.area/*"中国大陆 重庆"*/
-                            // bips.avatar_path = myinfo.avatar_path/*"../assets/Picture/avatar/cats.jpg"*/
+                            bips.avatar_path = myinfo.avatar_path_/*"../assets/Picture/avatar/cats.jpg"*/
                             bips.gender = myinfo.gender
+                            personalpop.open()
+                            // // if(isfollowlistloadeed == true){
+                            // console.log("tapped ")
+                            // rightloader.source = "qrc:/qml/PersonalInfo.qml";
+                            // // }
+                        }
+                    }
+                }
 
-                            if(isfollowlistloadeed == true){
-                                console.log("tapped ")
-                                rightloader.source = "qrc:/qml/FollowUserInfoPage.qml";
+                Popup{
+                    id:personalpop
+                    width: 300
+                    height: 300
+                    x:leftbar.width-10
+                    y:30
+                    background: Rectangle{
+                        color: "white"
+                        radius: 5
+                        clip: true
+                        border.color: "black"
+                    }
+                    Column{
+                        anchors.fill: parent
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        spacing: 10
+                        Rectangle{
+                            id:up_rec
+                            width:personalpop.width * 0.9
+                            height:personalpop.height * 0.3
+
+                            Row{
+                                spacing: 10
+                                Rectangle{
+                                    id:avaterrec1
+                                    width: 60
+                                    height: width
+                                    // color:"orange"
+                                    y:10
+                                    Image{
+                                        id:avaterimage1
+                                        anchors.fill: parent
+                                        source:bips.my_avatar
+                                        fillMode: Image.PreserveAspectCrop
+                                        visible: false
+                                    }
+                                    Rectangle{
+                                        id:maskrec1
+                                        radius: avaterrec1.width * 0.5
+                                        anchors.fill: parent
+                                        visible: false
+                                    }
+                                    OpacityMask{
+                                        anchors.fill: maskrec1
+                                        source:avaterimage1
+                                        maskSource: maskrec1
+                                    }
+
+                                }
+                                Rectangle{
+                                    id: idrec
+
+                                    width: up_rec.width-avaterrec1.width-10
+                                    height:avaterrec1.height - 20
+                                    color: "red"
+                                    anchors.verticalCenter: avaterrec1.verticalCenter
+
+                                    Rectangle{
+                                        width:idrec.width
+                                        height:avaterrec1.height
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        Column{
+                                            spacing:5
+                                            Text{
+                                                text:bips.nickname
+                                                font.pixelSize: 22
+                                            }
+                                            Text{
+                                                text:"uid:"+bips.following_uid
+                                                font.pixelSize: 12
+                                            }
+                                            Text{
+                                                text:"OnlineState:"
+                                                font.pixelSize: 12
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        Rectangle{
+                            id:signatureRec
+                            width:personalpop.width * 0.9
+                            height:20
+                            Row{
+                                anchors.fill: parent
+                                Text {
+                                    width:70
+                                    height:parent.height
+                                    text: qsTr("签名")
+                                }
+                                Text {
+                                    text: bips.signal_text
+                                }
+                            }
+                        }
+                        Rectangle{
+                            id:addrRec
+                            width:personalpop.width * 0.9
+                            height:20
+                            Row{
+                                anchors.fill: parent
+                                Text {
+                                    width:70
+                                    height:parent.height
+                                    text: qsTr("所在地")
+                                }
+                                Text {
+                                    text: bips.area
+                                }
+                            }
+                        }
+                        Rectangle{
+                            width:parent.width
+                            height: 30
+                        }
+
+                        Rectangle{
+                            id:toolRec
+                            width:personalpop.width * 0.9
+                            height:20
+                            Row{
+                                anchors.fill: parent
+                                spacing: 10
+                                Rectangle{
+                                    width: 20
+                                    height: 30
+                                }
+
+                                Button{
+                                    width: 110
+                                    height: 30
+                                    background: Rectangle{
+                                        anchors.fill: parent
+                                        radius: 3
+                                        color: "white"
+                                        border.color: "#ccc"
+                                    }
+                                    Text{
+                                        anchors.centerIn: parent
+                                        text:"编辑资料"
+                                        font.pointSize: 10
+                                    }
+                                    onClicked: {
+                                        personalinfowindow.show()
+                                        personalpop.close()
+                                    }
+                                }
+                                Button{
+                                    width: 110
+                                    height: 30
+                                    background: Rectangle{
+                                        anchors.fill: parent
+                                        radius: 3
+                                        color: "#3399FF"
+                                    }
+                                    Text{
+                                        anchors.centerIn: parent
+                                        text:"发送消息"
+                                        font.pointSize: 10
+                                    }
+                                }
                             }
                         }
                     }
@@ -366,7 +535,7 @@ Rectangle{
             x:leftbar.width+5
             y:homepagerec.height-settingpopup.height-20
             background: Rectangle{
-                color: "#368EB0"
+                color: "white"
                 radius: 5
                 clip: true
             }
@@ -772,6 +941,7 @@ Rectangle{
             listelement.gender=gender;
             listelement.signature=signature;
             listelement.avatar_path=avatar_path;
+            listelement.unread_count=0;
             chattedListModel.append(listelement)
         }
     }
@@ -822,6 +992,230 @@ Rectangle{
         communicationPageControler.myMessage=textmsg;
         communicationPageControler.saveMessage();
     }
-
+    Connections{
+        target: followingPageController
+        function onInitPersonalInfo(myinfo){
+            bips.following_uid = myinfo.uid/* "2000000"*/
+            bips.nickname = myinfo.nickname /*"85"*/
+            bips.memo = myinfo.nickname /*"85"*/
+            bips.signal_text = myinfo.signature/*"罪业的报偿"*/
+            bips.area = myinfo.area/*"中国大陆 重庆"*/
+            bips.avatar_path = myinfo.avatar_path_/*"../assets/Picture/avatar/cats.jpg"*/
+            bips.my_avatar=myinfo.avatar_path_
+            bips.gender = myinfo.gender
+        }
+    }
+    Window{
+        id:personalinfowindow
+        width: 400
+        height: 420
+        title: "编辑资料"
+        color: "#F2F2F2"
+        flags: Qt.Dialog // 设置为对话框样式
+        modality: Qt.WindowModal // 窗口模态
+        Column{
+            anchors.fill: parent
+            spacing: 20
+            Rectangle{
+                width: parent.width
+                height:130
+                color:"transparent"
+                Rectangle{
+                    width: 80
+                    height: 80
+                    anchors.centerIn: parent
+                    color:"transparent"
+                    Image{
+                        id:avaterimage2
+                        anchors.fill: parent
+                        source:bips.my_avatar
+                        fillMode: Image.PreserveAspectCrop
+                        visible: false
+                    }
+                    Rectangle{
+                        id:maskrec2
+                        radius: parent.width * 0.5
+                        anchors.fill: parent
+                        visible: false
+                    }
+                    OpacityMask{
+                        anchors.fill: maskrec2
+                        source:avaterimage2
+                        maskSource: maskrec2
+                    }
+                }
+            }
+            Rectangle{
+                width: parent.width-40
+                height: 30
+                color: "white"
+                anchors.horizontalCenter: parent.horizontalCenter
+                radius: 4
+                Row{
+                    anchors.fill: parent
+                    spacing: 20
+                    Rectangle{
+                        width: 40
+                        height: parent.height
+                        Text {
+                            width: 20
+                            text: qsTr("昵称")
+                            anchors.centerIn: parent
+                            font.pixelSize: 15
+                        }
+                    }
+                    TextInput{
+                        id:nicknameinput
+                        width: parent.width-20
+                        text: bips.nickname
+                        font.pixelSize: 15
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                }
+            }
+            Rectangle{
+                width: parent.width-40
+                height: 30
+                color: "white"
+                anchors.horizontalCenter: parent.horizontalCenter
+                radius: 4
+                Row{
+                    anchors.fill: parent
+                    spacing: 20
+                    Rectangle{
+                        width: 40
+                        height: parent.height
+                        Text {
+                            width: 20
+                            text: qsTr("个签")
+                            anchors.centerIn: parent
+                            font.pixelSize: 15
+                        }
+                    }
+                    TextInput{
+                        id:siginput
+                        width: parent.width-20
+                        text: bips.signal_text
+                        font.pixelSize: 15
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                }
+            }
+            Rectangle{
+                width: parent.width-40
+                height: 30
+                color: "white"
+                anchors.horizontalCenter: parent.horizontalCenter
+                radius: 4
+                Row{
+                    anchors.fill: parent
+                    spacing: 20
+                    Rectangle{
+                        width: 40
+                        height: parent.height
+                        Text {
+                            width: 20
+                            text: qsTr("性别")
+                            anchors.centerIn: parent
+                            font.pixelSize: 15
+                        }
+                    }
+                    TextInput{
+                        id:genderinput
+                        width: parent.width-20
+                        text: bips.gender
+                        font.pixelSize: 15
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                }
+            }
+            Rectangle{
+                width: parent.width-40
+                height: 30
+                color: "white"
+                anchors.horizontalCenter: parent.horizontalCenter
+                radius: 4
+                Row{
+                    anchors.fill: parent
+                    spacing: 20
+                    Rectangle{
+                        width: 40
+                        height: parent.height
+                        Text {
+                            width: 20
+                            text: qsTr("地区")
+                            anchors.centerIn: parent
+                            font.pixelSize: 15
+                        }
+                    }
+                    TextInput{
+                        id:areainput
+                        width: parent.width-20
+                        text: bips.area
+                        font.pixelSize: 15
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                }
+            }
+            Rectangle{
+                width: parent.width-40
+                height: 30
+                color: "transparent"
+                anchors.horizontalCenter: parent.horizontalCenter
+                radius: 4
+                Row{
+                    anchors.fill: parent
+                    spacing: 20
+                    Rectangle{
+                        width: parent.width-150
+                        height: parent.height
+                        color:"transparent"
+                    }
+                    Button{
+                        width: 55
+                        height: 25
+                        background: Rectangle{
+                            anchors.fill: parent
+                            radius: 3
+                            color: "#3399FF"
+                        }
+                        Text{
+                            text: "保存"
+                            anchors.centerIn: parent
+                        }
+                        onClicked: {
+                            newinfo.nickname=nicknameinput.text
+                            newinfo.gender=genderinput.text
+                            newinfo.area=areainput.text
+                            newinfo.signal_text=siginput.text
+                            newinfo.following_uid=bips.following_uid
+                            newinfo.avatar_path=bips.avatar_path
+                            followingPageController.changePersonalInfo(newinfo.nickname,newinfo.gender,newinfo.area,newinfo.signal_text,newinfo.avatar_path,newinfo.following_uid)
+                            personalinfowindow.close()
+                        }
+                    }
+                    Button{
+                        width: 55
+                        height: 25
+                        background: Rectangle{
+                            anchors.fill: parent
+                            radius: 3
+                            color: "#3399FF"
+                        }
+                        Text{
+                            text: "取消"
+                            anchors.centerIn: parent
+                        }
+                        onClicked: {
+                            personalinfowindow.close()
+                        }
+                    }
+                }
+            }
+        }
+    }
+    BaseInfoProperties{
+        id:newinfo
+    }
 }
 

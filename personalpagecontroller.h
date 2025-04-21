@@ -11,6 +11,7 @@ class PersonalPageController : public QObject
     Q_PROPERTY(QString netNumber READ netNumber WRITE setNetNumber NOTIFY netNumberChanged)
 public:
     Q_INVOKABLE void init();
+
     static PersonalPageController &getInstance();
     void setNetNumber(const QString number);
     QString netNumber() const;

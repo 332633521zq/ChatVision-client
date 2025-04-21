@@ -10,5 +10,6 @@ Item {
     property string signal_text /*"罪业的报偿"*/
     property string area /*"中国大陆 重庆"*/
     property string avatar_path /*"../assets/Picture/avatar/cats.jpg"*/
+    property string my_avatar
     property string gender
 }

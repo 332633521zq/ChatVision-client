@@ -29,7 +29,7 @@ Rectangle{
                     color:"transparent"
                     Image{
                         id:listavaterimage
-                        source:"qrc:/image/bg.png"
+                        source:avatar_path
                         sourceSize: Qt.size(parent.width,parent.height)
                         visible: false
                     }

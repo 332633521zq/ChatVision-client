@@ -154,8 +154,9 @@ Rectangle{
                         Image{
                             id:avaterimage
                             anchors.fill: parent
-                            source:"qrc:/image/bg2.jpg"
+                            source:modelData.avatar_path_
                             fillMode: Image.PreserveAspectCrop
+                            sourceSize: Qt.size(parent.width,parent.height)
                             visible: false
                         }
                         Rectangle{
@@ -206,7 +207,7 @@ Rectangle{
                         bips.memo = modelData.nickname /*"85"*/
                         bips.signal_text = modelData.signature/*"罪业的报偿"*/
                         bips.area = modelData.area/*"中国大陆 重庆"*/
-                        // bips.avatar_path = modelData.avatar_path/*"../assets/Picture/avatar/cats.jpg"*/
+                        bips.avatar_path = modelData.avatar_path_/*"../assets/Picture/avatar/cats.jpg"*/
                         bips.gender = modelData.gender
 
                         loadfollowinginfo();

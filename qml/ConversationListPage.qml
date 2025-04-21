@@ -7,24 +7,7 @@ Rectangle{
     width:240
     height: parent.height
     color:"transparent"
-    // ListModel{
-    //     id:conversationlist
-    //     ListElement{
-    //         name:"沐树01"
-    //         avater:"qrc:/image/avater.jpg"
-    //         friendId:"20000001"
-    //     }
-    //     ListElement{
-    //         name:"亦已00"
-    //         avater:"qrc:/image/avater.png"
-    //         friendId:"20000000"
-    //     }
-    //     ListElement{
-    //         name:"幻蓝02"
-    //         avater:"qrc:/image/avater.png"
-    //         friendId:"20000002"
-    //     }
-    // }
+
     Component{
         id:conversationcomponent
         Rectangle{
@@ -42,7 +25,7 @@ Rectangle{
                     color:"transparent"
                     Image{
                         id:listavaterimage
-                        source:"qrc:/image/avater.jpg"
+                        source:avatar_path
                         sourceSize: Qt.size(parent.width,parent.height)
                         visible: false
                     }
@@ -63,6 +46,25 @@ Rectangle{
                     id: nametext
                     text: memo
                 }
+            }
+            Rectangle{
+                id:unread_rec
+                width: 16
+                height: 16
+                anchors.right:parent.right
+                anchors.margins: 10
+                anchors.bottom: parent.bottom
+                radius:8
+                color: "#DC0103"
+                visible: unread_count !== 0
+                Text {
+                    id: unread_number
+                    text: unread_count
+                    font.pixelSize: 10
+                    color: "white"
+                    anchors.centerIn: parent
+                }
+
             }
             Rectangle{
                 id:conversationrecmask
@@ -97,6 +99,7 @@ Rectangle{
                     communicationPageControler.friendId=obid
                     communication_name=memo
                     communicationPageControler.initCommunicationPage()
+                    unread_count=0
                 }
             }
         }
@@ -111,6 +114,15 @@ Rectangle{
             color: "#5EB6E8"
         }
         highlightFollowsCurrentItem: true
+    }
+
+    Connections{
+        target: communicationPageControler
+        function onUnreadChanged(index){
+            var item=conversationlist.get(index)
+            var count=item.unread_count+1
+            conversationlist.set(index,{"unread_count":count})
+        }
     }
 
 }

@@ -37,9 +37,11 @@ Rectangle{
                     Image{
                         id:avaterimage
                         anchors.fill: parent
-                        source:"qrc:/image/bg2.jpg"
+                        source:bips.avatar_path
                         fillMode: Image.PreserveAspectCrop
                         visible: false
+                        sourceSize: Qt.size(parent.width,parent.height)
+
                     }
                     Rectangle{
                         id:maskrec
@@ -137,14 +139,16 @@ Rectangle{
                     // color: "#91e"
                     Rectangle{
                         id:sig_img
-                        width: 30
+                        width: 20
                         height: width
                         // color:"orange"
                         anchors.verticalCenter: parent.verticalCenter
                         Image{
                             id:sig_icon
                             anchors.fill: parent
-                            source:"qrc:/image/bg2.jpg"
+                            source:"qrc:/image/edit_24.svg"
+                            sourceSize: Qt.size(parent.width,parent.height)
+
                         }
                     }
                     Text{
@@ -170,14 +174,16 @@ Rectangle{
                     // color: "#91e"
                     Rectangle{
                         id:memo_img
-                        width: 30
+                        width: 20
                         height: width
                         // color:"orange"
                         anchors.verticalCenter: parent.verticalCenter
                         Image{
                             id:memo_icon
                             anchors.fill: parent
-                            source:"qrc:/image/bg2.jpg"
+                            source:"qrc:/image/remark_24.svg"
+                            sourceSize: Qt.size(parent.width,parent.height)
+
                         }
                     }
                     Text{
@@ -272,10 +278,18 @@ Rectangle{
 
                     TapHandler{
                         onTapped: {
-                            var uid = bips.uid;
+                            var uid = bips.following_uid;
                             currentuid(uid);
                             loadchatlistpage();
                             loadchatpage();
+                            communicationPageControler.friendId=uid
+                            communication_name=bips.memo
+                            if(msglistmodel===null){
+                            }else{
+                                msglistmodel.clear()
+                            }
+                            communicationPageControler.initCommunicationPage()
+                            communicationPageControler.addListElement(bips.following_uid, bips.memo, bips.nickname, bips.area, bips.gender, bips.signal_text, bips.avatar_path)
                         }
                     }
                 }

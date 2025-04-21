@@ -21,5 +21,6 @@ signals:
                       QString memo,
                       QString nickname,
                       QString signature,
-                      QString uid);
+                      QString uid,
+                      QString avatar);
 };

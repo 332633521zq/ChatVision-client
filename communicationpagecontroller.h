@@ -3,6 +3,7 @@
 #include <QCoreApplication>
 #include <QDebug>
 #include <QFile>
+#include <QFileInfo>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -37,7 +38,8 @@ public:
     Q_INVOKABLE void hangUp();
     Q_INVOKABLE void initChattedList();
     Q_INVOKABLE void initMsgDate();
-
+    Q_INVOKABLE void selectFile(QString filepath);
+    void setType(short type);
     //保存我接收的消息，需要消息内容和发送者id
     void saveMessage(QString msg, QString send_id);
     QString myMessage() const;
@@ -59,8 +61,8 @@ public:
 
     void addDayMsg(const QString datetime);
 signals:
-    void myMessageChanged();
-    void friendMessageChanged();
+    void myMessageChanged(short type);
+    void friendMessageChanged(short type);
     void myIdChanged();
     void friendIdChanged();
     void videoCallRequest();
@@ -75,17 +77,22 @@ signals:
                         QString avatar_path);
     void historyMsgChanged();
     void msgDateChanged();
+    void newMessage(unsigned int);
+    void unreadChanged(int index);
 
 public slots:
     void onWasHangUp();
+    void onNewMessage(unsigned int uid);
 
 private:
     QString m_myMessage;
     QString m_friendMessage;
     QString m_myId;
     QString m_friendId;
+    short m_type;
     QVector<QJsonObject> messages;
     QString m_msg_date;
     QList<QJsonObject> m_history_msgs;
+    QList<QString> m_unread;
     CommunicationPageController(QObject *parent = nullptr);
 };

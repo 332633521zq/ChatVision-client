@@ -37,10 +37,17 @@ public:
                                   QString area,
                                   QString signature);
     Q_INVOKABLE void cancelFocus(QString uid);
+    Q_INVOKABLE void changePersonalInfo(QString nickname,
+                                        QString gender,
+                                        QString area,
+                                        QString signature,
+                                        QString avatar_path,
+                                        QString uid);
 signals:
     void onFollowingChanged();
     void onFollowerChanged();
     void onMyInfoChanged();
+    void initPersonalInfo(QJsonObject myInfo);
 
 private:
     FollowListPageController(QObject* parent = nullptr);

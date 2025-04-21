@@ -15,13 +15,16 @@ void FindFriendPageController::initFindFriendPage(json &jsondata)
     for (auto &[key, value] : jsondata.items()) {
         // std::cout << "it is:" << key << std::endl;
         QString area = QString::fromStdString(value["area"]);
-        // QString avater = QString::fromStdString(value["avater_path_"]);
+        qDebug() << "!!!!!!!!!!!!!!!" << area;
+        QString avater = QString::fromStdString(value["avatar_path_"]);
+        qDebug() << "!!!!!!!!!!!!!!!" << avater;
+
         QString gender = QString::fromStdString(value["gender"]);
         QString memo = QString::fromStdString(value["memo"]);
         QString nickname = QString::fromStdString(value["nickname"]);
         QString signature = QString::fromStdString(value["signature"]);
         QString uid = QString::fromStdString(value["uid"]);
-        emit initFindPage(area, gender, memo, nickname, signature, uid);
+        emit initFindPage(area, gender, memo, nickname, signature, uid, avater);
     }
 }
 

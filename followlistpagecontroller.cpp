@@ -74,7 +74,6 @@ void FollowListPageController::initRelationData()
         follower.push_back(baseinfo);
     }
     SetFollowers(follower);
-
     SetMyInfo(User::GetInstance()->GetMyInfo());
 }
 
@@ -126,6 +125,7 @@ void FollowListPageController::updateQmlMyinfo()
     m_qmlMyinfo["nickname"] = QString::fromStdString(m_myinfo["nickname"]);
     m_qmlMyinfo["area"] = QString::fromStdString(m_myinfo["area"]);
     m_qmlMyinfo["signature"] = QString::fromStdString(m_myinfo["signature"]);
+    emit initPersonalInfo(GetMyinfo());
 }
 void FollowListPageController::addFollowing(QString uid,
                                             QString avatar_path,
@@ -158,4 +158,28 @@ void FollowListPageController::cancelFocus(QString uid)
     }
     SetFollowings(res);
     SendMsg::GetInstance()->SendRequest("", id, MSG_CANCEL_FOLLOW);
+}
+
+void FollowListPageController::changePersonalInfo(QString nickname,
+                                                  QString gender,
+                                                  QString area,
+                                                  QString signature,
+                                                  QString avatar_path,
+                                                  QString uid)
+{
+    std::string s_nickname = nickname.toStdString();
+    std::string s_gender = gender.toStdString();
+    std::string s_area = area.toStdString();
+    std::string s_signature = signature.toStdString();
+    std::string s_uid = uid.toStdString();
+    std::string s_avatar_path = avatar_path.toStdString();
+    json myinfo;
+    myinfo["nickname"] = s_nickname;
+    myinfo["gender"] = s_gender;
+    myinfo["area"] = s_area;
+    myinfo["signature"] = s_signature;
+    myinfo["uid"] = s_uid;
+    myinfo["avatar_path_"] = s_avatar_path;
+    User::GetInstance()->SetMyInfo(myinfo);
+    SetMyInfo(User::GetInstance()->GetMyInfo());
 }
