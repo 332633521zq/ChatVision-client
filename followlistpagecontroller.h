@@ -14,7 +14,7 @@ class FollowListPageController : public QObject
     Q_PROPERTY(QList<QJsonObject> followings READ GetFollowings NOTIFY onFollowingChanged FINAL)
     Q_PROPERTY(QList<QJsonObject> followers READ GetFollowers NOTIFY onFollowerChanged FINAL)
     Q_PROPERTY(QJsonObject myinfo READ GetMyinfo NOTIFY onMyInfoChanged FINAL)
-    Q_PROPERTY(bool isonline READ GetOnlineState NOTIFY onIsOnlineChanged FINAL)
+    Q_PROPERTY(bool isonline READ GetOnlineState NOTIFY isOnlineChanged FINAL)
 
 public:
     ~FollowListPageController();
@@ -54,7 +54,7 @@ signals:
     void onMyInfoChanged();
 
     void initPersonalInfo(QJsonObject myInfo);
-    void onIsOnlineChanged();
+    void isOnlineChanged(bool isonline);
 
 private:
     FollowListPageController(QObject* parent = nullptr);

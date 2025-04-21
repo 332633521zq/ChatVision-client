@@ -83,11 +83,11 @@ Rectangle{
                         communicationPageControler.friendId=obid
                         communication_name=memo
                         communicationPageControler.initCommunicationPage()
-                        followingPageController.getOnlineState(obid)
 
                     }
                     else{
                         isNetSearch=false;
+                        followingPageController.getOnlineState(obid)
                         console.log("this is net search");
                         rightloader.visible=true
                         rightloader.source="qrc:/qml/Main.qml"

@@ -13,6 +13,8 @@ Rectangle{
     property real randomNumber:0
     property bool isNetSearch: false
     property var startTime
+    property bool isonline
+
     ListModel{
         id:chattedListModel
         // ListElement{
@@ -1006,6 +1008,12 @@ Rectangle{
             bips.avatar_path = myinfo.avatar_path_/*"../assets/Picture/avatar/cats.jpg"*/
             bips.my_avatar=myinfo.avatar_path_
             bips.gender = myinfo.gender
+        }
+    }
+    Connections{
+        target: followingPageController
+        function onIsOnlineChanged(is_online){
+            isonline = is_online
         }
     }
     Window{

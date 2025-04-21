@@ -66,6 +66,7 @@ bool FollowListPageController::GetOnlineState() const
 void FollowListPageController::SetOnlineState(const bool onlinestate)
 {
     m_isonline = onlinestate;
+    emit isOnlineChanged(m_isonline);
 }
 
 void FollowListPageController::getOnlineState(const unsigned int& uid)

@@ -80,7 +80,7 @@ Rectangle{
                                 font.pixelSize: 12
                             }
                             Text{
-                                text:"OnlineState:" + followingPageController.isonline
+                                text:"OnlineState:" + isonline
                                 font.pixelSize: 12
                             }
                         }
