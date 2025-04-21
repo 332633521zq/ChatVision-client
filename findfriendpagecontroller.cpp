@@ -31,12 +31,12 @@ void FindFriendPageController::initFindFriendPage(json &jsondata)
 void FindFriendPageController::sendRandowRequest()
 {
     unsigned int uid = User::GetInstance()->GetUid();
-    SendMsg::GetInstance()->SendRequest("", uid, MSG_RANDOM_PUSH);
+    MsgSender::GetInstance()->SendRequest("", uid, MSG_RANDOM_PUSH);
 }
 
 void FindFriendPageController::addFocus(QString obid)
 {
     qDebug() << "obid is:" << obid;
     unsigned int object_id = obid.toUInt();
-    SendMsg::GetInstance()->SendRequest("", object_id, MSG_FOLLOWING);
+    MsgSender::GetInstance()->SendRequest("", object_id, MSG_FOLLOWING);
 }

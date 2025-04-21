@@ -264,6 +264,7 @@ Rectangle{
                                         font.pointSize: 10
                                     }
                                 }
+
                             }
                         }
                     }
@@ -319,7 +320,7 @@ Rectangle{
 
                             rightloader.visible=false
                             centerloader.source="qrc:/qml/ConversationListPage.qml"
-                            isfollowlistloadeed == false
+                            isfollowlistloadeed = false
                         }
                     }
                 }
@@ -375,6 +376,7 @@ Rectangle{
                             rightloader.visible=false
                             findfriendPageController.sendRandowRequest()
                             centerloader.source="qrc:/qml/FindFriendPage.qml"
+                            isfollowlistloadeed = false
                         }
                     }
                 }
@@ -424,9 +426,8 @@ Rectangle{
                             tapmaskfocus.visible=true
                             tapmaskset.visible=false
 
-                            // followingPageController.initRelationData()
-                            isfollowlistloadeed = true;
                             rightloader.source = ""
+                            isfollowlistloadeed = true;
                             rightloader.visible=false
                             centerloader.source = "qrc:/qml/FollowListPage.qml"
                         }
@@ -522,7 +523,7 @@ Rectangle{
                             tapmaskset.visible=true
 
                             settingpopup.open()
-                            isfollowlistloadeed == false
+                            isfollowlistloadeed = false
                         }
                     }
                 }
@@ -933,6 +934,7 @@ Rectangle{
     Connections{
         target: communicationPageControler
         function onAddListElement(id,memo,nickname, area, gender, signature, avatar_path){
+            console.log("add was touched")
             var listelement={};
             listelement.obid=id;
             listelement.memo=memo;
@@ -950,6 +952,7 @@ Rectangle{
         function onAddSearchUserList(id,memo,nickname, area, gender, signature, avatar_path){
             var listelement={};
             listelement.obid=id;
+            console.log("id is "+id)
             listelement.memo=memo;
             listelement.nickname=nickname;
             listelement.area=area;

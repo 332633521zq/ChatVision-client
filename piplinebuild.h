@@ -3,7 +3,7 @@
 
 #undef signals
 #include "ConstValue.h"
-#include "sendmsg.h"
+#include "msgsender.h"
 #include <boost/asio.hpp>
 #include <gst/app/gstappsink.h>
 #include <gst/gst.h>

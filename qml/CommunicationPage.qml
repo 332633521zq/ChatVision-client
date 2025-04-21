@@ -71,7 +71,7 @@ Rectangle{
                             color:"transparent"
                             Image{
                                 id:msg_avater
-                                source:"qrc:/image/avater.jpg"
+                                source:bips.my_avatar
                                 sourceSize: Qt.size(parent.width,parent.height)
                                 visible: false
                             }
@@ -139,6 +139,7 @@ Rectangle{
                                 }
                             }
                             else{
+                                msg_avater.source=bips.avatar_path
                                 msgavaterRec.anchors.left=msgrec.left
                                 msgavaterRec.anchors.leftMargin=25
                                 textmsgrec.anchors.leftMargin=10
@@ -443,6 +444,7 @@ Rectangle{
                                 Image {
                                     anchors.centerIn: parent
                                     source: "qrc:/image/history_record_16.svg"
+
                                     sourceSize: Qt.size(parent.width-10,parent.height-10)
                                 }
                                 Rectangle{

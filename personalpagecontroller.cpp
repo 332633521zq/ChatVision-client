@@ -30,5 +30,16 @@ QString PersonalPageController::netNumber() const
 }
 void PersonalPageController::init()
 {
-    SendMsg::GetInstance()->SendRequest("yes", m_number, MSG_LOGIN);
+    std::string is_first_login = "yes";
+
+    std::filesystem::path root_path
+        = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation).toStdString();
+    std::cout << "root_path:" << root_path;
+    std::filesystem::path user_dir = root_path / "ChatVisionUserInfo" / std::to_string(m_number);
+
+    QFileInfo fileInfo(user_dir);
+    if (fileInfo.exists())
+        is_first_login = "no";
+
+    MsgSender::GetInstance()->SendRequest(is_first_login, m_number, MSG_LOGIN);
 }

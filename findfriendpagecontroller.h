@@ -1,6 +1,6 @@
 #pragma once
 #include <QObject>
-#include "sendmsg.h"
+#include "msgsender.h"
 #include "user.h"
 class FindFriendPageController : public QObject
 {

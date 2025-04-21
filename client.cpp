@@ -4,9 +4,9 @@
 using namespace std;
 using namespace boost::asio::ip;
 
-// #define IPADDRESS "127.0.0.1"
+#define IPADDRESS "127.0.0.1"
 // #define IPADDRESS "10.252.78.90"
-#define IPADDRESS "10.253.5.10"
+// #define IPADDRESS "10.253.5.10"
 
 // #define IPADDRESS "192.168.83.186"
 
@@ -26,8 +26,8 @@ Client::Client()
 
 void Client::Start()
 {
-    _send_msg = SendMsg::GetInstance();
-    _recv_msg = RecvMsg::GetInstance();
+    _send_msg = MsgSender::GetInstance();
+    _recv_msg = MsgReceiver::GetInstance();
     _send_msg->SetSocket(_sock);
     _recv_msg->SetSocket(_sock);
     _recv_msg->start();

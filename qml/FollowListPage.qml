@@ -127,8 +127,8 @@ Rectangle{
         ListView{
             id:user_list
             anchors.fill: parent
-            model: followingPageController.followings
             clip:true
+            model: followingPageController.followings
             delegate: Rectangle{
                 id: model_rec
 
@@ -210,6 +210,7 @@ Rectangle{
                         bips.avatar_path = modelData.avatar_path_/*"../assets/Picture/avatar/cats.jpg"*/
                         bips.gender = modelData.gender
 
+                        followingPageController.getOnlineState(modelData.uid)
                         loadfollowinginfo();
                     }
                 }

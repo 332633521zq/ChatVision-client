@@ -59,8 +59,9 @@ void CommunicationPageController::sendMessage(QString data)
 {
     std::string s_data = data.toStdString();
     unsigned int object_id = m_friendId.toUInt();
-    // SendMsg::GetInstance()->SendRequest("", object_id, MSG_FOLLOWING);
-    SendMsg::GetInstance()->SendRequest(s_data, object_id, MSG_TEXT_CHAT);
+
+    // MsgSender::GetInstance()->SendRequest("", object_id, MSG_FOLLOWING);
+    MsgSender::GetInstance()->SendRequest(s_data, object_id, MSG_TEXT_CHAT);
 }
 
 void CommunicationPageController::callRequest()
@@ -74,7 +75,7 @@ void CommunicationPageController::callRequest()
     //                  &MediaThread::wasHangUp,
     //                  &CommunicationPageController::getInstance(),
     //                  &CommunicationPageController::onWasHangUp);
-    // SendMsg::GetInstance()->SendRequest("", object_id, MSG_VIDEO_CHAT);
+    // MsgSender::GetInstance()->SendRequest("", object_id, MSG_VIDEO_CHAT);
 }
 
 void CommunicationPageController::getThrough()
@@ -82,13 +83,13 @@ void CommunicationPageController::getThrough()
     PiplineBuild::setPiplinePlaying();
 
     unsigned int object_id = m_friendId.toUInt();
-    SendMsg::GetInstance()->SendRequest("GetThrough", object_id, MSG_VIDEO_CHAT);
+    MsgSender::GetInstance()->SendRequest("GetThrough", object_id, MSG_VIDEO_CHAT);
 }
 
 void CommunicationPageController::hangUp()
 {
     unsigned int object_id = m_friendId.toUInt();
-    SendMsg::GetInstance()->SendRequest("HangUp", object_id, MSG_VIDEO_CHAT);
+    MsgSender::GetInstance()->SendRequest("HangUp", object_id, MSG_VIDEO_CHAT);
     PiplineBuild::cleanup_and_quit_loop("挂断", PEER_CALL_STOPPED);
 }
 

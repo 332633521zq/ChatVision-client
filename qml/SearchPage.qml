@@ -83,12 +83,16 @@ Rectangle{
                         communicationPageControler.friendId=obid
                         communication_name=memo
                         communicationPageControler.initCommunicationPage()
+                        followingPageController.getOnlineState(obid)
+
                     }
                     else{
                         isNetSearch=false;
                         console.log("this is net search");
                         rightloader.visible=true
                         rightloader.source="qrc:/qml/Main.qml"
+                        bips.following_uid=obid
+                        bips.avatar_path=avatar_path
                         bips.nickname=nickname
                         bips.memo=memo
                         bips.area=area

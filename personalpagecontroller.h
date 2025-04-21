@@ -1,10 +1,13 @@
 #pragma once
 
 #include <QDebug>
+#include <QFileInfo>
 #include <QObject>
 #include <QQmlEngine>
-#include "sendmsg.h"
+#include <QStandardPaths>
+#include "msgsender.h"
 #include "user.h"
+
 class PersonalPageController : public QObject
 {
     Q_OBJECT

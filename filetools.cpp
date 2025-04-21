@@ -5,6 +5,9 @@
 #include "user.h"
 #include <chrono>
 #include <iostream>
+#include <openssl/bio.h>
+#include <openssl/evp.h>
+#include <openssl/buffer.h>
 
 FileTools::FileTools()
 {
@@ -64,6 +67,57 @@ void FileTools::GetFiles(const std::string& directory,
     }
 }
 
+std::vector<unsigned char> Base64Decode(const std::string& input) {
+    // 创建Base64解码的BIO链
+    BIO* b64 = BIO_new(BIO_f_base64());
+    BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL); // 不处理换行符
+
+    // 将输入字符串放入内存BIO
+    BIO* mem = BIO_new_mem_buf(input.data(), static_cast<int>(input.length()));
+    mem = BIO_push(b64, mem);
+
+    // 准备输出缓冲区
+    std::vector<unsigned char> output(input.length()); // 解码后数据不会比输入长
+    int decoded_length = BIO_read(mem, output.data(), static_cast<int>(input.length()));
+
+    // 清理资源
+    BIO_free_all(mem);
+
+    if(decoded_length < 0) {
+        throw std::runtime_error("Base64解码失败");
+    }
+
+    output.resize(decoded_length);
+    return output;
+}
+
+void FileTools::SaveFileMsg(unsigned int &uid, std::filesystem::path filename, std::string data, size_t length)
+{
+    unsigned int my_uid = User::GetInstance()->GetUid();
+
+    std::filesystem::path root_path
+        = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation).toStdString();
+    root_path = root_path / "ChatVisionUserInfo" / std::to_string(my_uid);
+
+    std::filesystem::path dir_name = root_path / "chatmsgs" / std::to_string(uid) / "file";
+
+    std::filesystem::path file_name = std::filesystem::path(filename).filename().string();
+    file_name = dir_name / file_name;
+
+    if (!std::filesystem::exists(dir_name)) {
+        InitChatMsgFiles(uid);
+    }
+
+    std::ofstream file(file_name, std::ios::app | std::ios::binary);
+    if (!file) {
+        std::cerr << "Failed to create file: " << file_name << std::endl;
+        return;
+    }
+
+    auto decode = Base64Decode(data);
+    file.write(std::string(decode.begin(),decode.end()).c_str(), length);
+}
+
 void FileTools::InitUserDirectory()
 {
     unsigned int my_uid = User::GetInstance()->GetUid();
@@ -93,6 +147,7 @@ void FileTools::InitChatMsgFiles(unsigned int uid)
     CreateDir(dir_name / "picture");
     CreateDir(dir_name / "video");
     CreateDir(dir_name / "audio");
+    CreateDir(dir_name / "file");
 }
 
 bool FileTools::SaveUserInfo(const json& msg_data)
@@ -266,18 +321,14 @@ bool FileTools::SaveRelation(unsigned int relation, unsigned int uid, json basei
 
     auto file_path = root_path / (_relation[relation] + ".txt");
 
-    json relation_json;
-    relation_json[std::to_string(uid)] = uid;
-    relation_json["baseinfo"] = baseinfo;
-
     // 打开文件
-    std::ofstream file(file_path, std::ios::app);
+    std::ofstream file(file_path);
     if (!file.is_open()) {
         std::cerr << "Failed to open file: " << file_path << std::endl;
         return false;
     }
 
-    file << relation_json << std::endl;
+    file << baseinfo << std::endl;
     file.close();
     return true;
 }

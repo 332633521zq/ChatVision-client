@@ -4,7 +4,7 @@
 //现在先去搭建ui界面，后面再考虑这部分代码的调整
 
 #include "piplinebuild.h"
-#include "sendmsg.h"
+#include "msgsender.h"
 
 GstElement *PiplineBuild::m_audio_bin = nullptr;
 GstElement *PiplineBuild::m_pipeline = nullptr;
@@ -255,7 +255,7 @@ void PiplineBuild::send_sdp_to_peer(GstWebRTCSessionDescription *desc)
     json_object_unref(msg);
 
     /*****************************************/
-    SendMsg::GetInstance()->SendRequest(data, m_object_id, MSG_VIDEO_CHAT);
+    MsgSender::GetInstance()->SendRequest(data, m_object_id, MSG_VIDEO_CHAT);
     // SendRequest(*m_socket, data, m_object_id, MSG_TEXT_CHAT);
     /*向服务器发送消息的函数*******************/
     g_free(text);
@@ -300,7 +300,7 @@ void PiplineBuild::send_ice_candidate_message(GstElement *m_webrtcbin,
     std::string data = text;
     /**********************************************/
 
-    SendMsg::GetInstance()->SendRequest(data, m_object_id, MSG_VIDEO_CHAT);
+    MsgSender::GetInstance()->SendRequest(data, m_object_id, MSG_VIDEO_CHAT);
     // sleep(1);
     /* * 向信令服务器发送候选者text*******************/
     g_free(text);
@@ -499,12 +499,14 @@ void PiplineBuild::handle_media_stream(GstPad *pad,
         resample = gst_element_factory_make("audioresample", NULL);
         g_assert_nonnull(resample);
         gst_bin_add_many(GST_BIN(pipe), q, conv, resample, /*probe,*/ sink, NULL);
+
         gst_element_sync_state_with_parent(q);
         gst_element_sync_state_with_parent(conv);
         gst_element_sync_state_with_parent(resample);
         gst_element_sync_state_with_parent(sink);
         // gst_element_sync_state_with_parent(probe);
         gst_element_link_many(q, conv, resample, /*probe,*/ sink, NULL);
+
     } else {
         gst_bin_add_many(GST_BIN(pipe), q, conv, sink, NULL);
         gst_element_sync_state_with_parent(q);

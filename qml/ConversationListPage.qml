@@ -97,6 +97,7 @@ Rectangle{
                     }
                     // console.log("msglistmodel cleared. Current count:", msglistmodel.count);
                     communicationPageControler.friendId=obid
+                    bips.avatar_path=avatar_path
                     communication_name=memo
                     communicationPageControler.initCommunicationPage()
                     unread_count=0

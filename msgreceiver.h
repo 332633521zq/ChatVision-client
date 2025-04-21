@@ -14,12 +14,12 @@ using boost::asio::ip::tcp;
 
 typedef std::function<void(const std::string& msg_data)> FunCallBack;
 
-class RecvMsg : public Singleton<RecvMsg>
+class MsgReceiver : public Singleton<MsgReceiver>
 {
-    friend class Singleton<RecvMsg>;
+    friend class Singleton<MsgReceiver>;
 
 public:
-    ~RecvMsg();
+    ~MsgReceiver();
     void start();
 
     void SetSocket(boost::asio::ip::tcp::socket* sock);
@@ -45,9 +45,11 @@ public:
     void RandomPushCallBack(const std::string& msg_data);
     void ChattedUserCallBack(const std::string& msg_data);
     void SearchUserCallBack(const std::string& msg_data);
+    void OnlineStateCallBack(const std::string& msg_data);
+    void FileCallBack(const std::string& msg_data);
 
 private:
-    RecvMsg();
+    MsgReceiver();
     tcp::socket* _sock;
     std::mutex _mutex;
     std::condition_variable _consume;
