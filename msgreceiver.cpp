@@ -6,6 +6,7 @@
 #include "ConstValue.h"
 #include "filetools.h"
 
+#include <QString>
 #include "followlistpagecontroller.h"
 #include "msgreceiver.h"
 #include "user.h"
@@ -265,6 +266,11 @@ void MsgReceiver::TextChatCallBack(const std::string &msg_data)
     json jsonmsg = json::parse(msg_data);
     std::cout << "jsonmsg:" << jsonmsg << std::endl;
     unsigned int object_id = jsonmsg["uid"];
+
+    if (!User::GetInstance()->IsChatted(object_id)) {
+        MsgSender::GetInstance()->SendRequest("update", object_id, MSG_SEARCH);
+    }
+
     FileTools::GetInstance()->SaveTextMsg(object_id, jsonmsg);
 
     //向前端发信号有新的消息
@@ -468,7 +474,7 @@ void MsgReceiver::ChattedUserCallBack(const std::string &msg_data)
     qDebug() << "ChattedUserCallBack----------------";
 
     json jsonmsg = json::parse(msg_data);
-    std::cout << "jsonmsg:" << jsonmsg << std::endl;
+    std::cout << "ChattedUserCallBack ----- jsonmsg:" << jsonmsg << std::endl;
     json users_data = jsonmsg["data"];
 
     if (users_data.size() == 0)
@@ -489,6 +495,7 @@ void MsgReceiver::SearchUserCallBack(const std::string &msg_data)
     json jsonmsg = json::parse(msg_data);
     if (jsonmsg["data"].size() != 0) {
         std::cout << "data is not null:" << jsonmsg["data"] << std::endl;
+        std::string type = jsonmsg["searchtype"];
         jsonmsg = jsonmsg["data"];
 
         QString area = QString::fromStdString(jsonmsg["area"]);
@@ -498,8 +505,19 @@ void MsgReceiver::SearchUserCallBack(const std::string &msg_data)
         QString nickname = QString::fromStdString(jsonmsg["nickname"]);
         QString signature = QString::fromStdString(jsonmsg["signature"]);
         QString id = QString::fromStdString(jsonmsg["uid"]);
-        SearchController::getInstance()
-            .addSearchUserList(id, memo, nickname, area, gender, signature, avatar_path);
+
+        qDebug() << "SearcUSerCallBack11111111111111111111111111";
+        if (type == "update") {
+            CommunicationPageController::getInstance().addUnread(id);
+            CommunicationPageController::getInstance()
+                .addListElement(id, memo, nickname, area, gender, signature, avatar_path);
+            CommunicationPageController::getInstance().newMessage(id.toUInt());
+        }
+        qDebug() << "SearcUSerCallBack222222222222222222222222222";
+        if (type == "search") {
+            SearchController::getInstance()
+                .addSearchUserList(id, memo, nickname, area, gender, signature, avatar_path);
+        }
     }
 }
 

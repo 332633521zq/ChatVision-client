@@ -76,3 +76,8 @@ std::map<unsigned int, json> &User::GetChatted()
 {
     return _chatted;
 }
+
+bool User::IsChatted(unsigned int &uid)
+{
+    return _chatted.contains(uid);
+}

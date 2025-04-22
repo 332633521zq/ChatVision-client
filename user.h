@@ -33,6 +33,7 @@ public:
     void InsertToChatted(unsigned int uid, const json user_info);
     void RemoveFromChatted(unsigned int uid);
     std::map<unsigned int, json> &GetChatted();
+    bool IsChatted(unsigned int &uid);
 
 private:
     unsigned int _uid;
