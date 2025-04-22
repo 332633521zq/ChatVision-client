@@ -265,9 +265,13 @@ void CommunicationPageController::selectFile(QString filepath)
     QFileInfo fileinfo(localFilePath);
     QString filename = fileinfo.fileName();
     qDebug() << "Local file path:" << localFilePath;
-    setType(1005);
+    setType(1025);
     setMyMessage(filename);
     saveMessage();
+
+    std::string file_path = localFilePath.toStdString();
+
+    MsgSender::GetInstance()->SendFile(std::filesystem::path(file_path), m_friendId.toUInt());
 }
 
 void CommunicationPageController::setType(short type)

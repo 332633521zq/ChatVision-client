@@ -527,4 +527,19 @@ void MsgReceiver::FileCallBack(const std::string &msg_data)
 
     FileTools::GetInstance()->SaveFileMsg(obj_id,filename,chunk_data,data_size);    // 将文件存入本地
 
+    if (data["chunk_index"] == data["total_chunks"]) {
+        qDebug() << "this is file callback!!!!!!!!!!!!!!!!!!!!";
+        jsonmsg["data"] = filename;
+        FileTools::GetInstance()->SaveTextMsg(obj_id, jsonmsg);
+
+        //向前端发信号有新的消息
+        QString text = QString::fromStdString(jsonmsg["data"].get<std::string>());
+        short msgid = jsonmsg["msgid"];
+        CommunicationPageController::getInstance().setType(msgid);
+        if (obj_id == CommunicationPageController::getInstance().friendId().toUInt()) {
+            CommunicationPageController::getInstance().setFriendMessage(text);
+        } else {
+            CommunicationPageController::getInstance().newMessage(obj_id);
+        }
+    }
 }

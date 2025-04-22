@@ -97,7 +97,7 @@ void MsgSender::SendFile(std::filesystem::path file_path,unsigned int object_id)
     const size_t MAX_CHUNK_SIZE = MAX_LENGTH / 2;       // Base64编码后会膨胀
     char buf[MAX_CHUNK_SIZE];
     size_t total_chunks = (file_size + MAX_CHUNK_SIZE - 1) / MAX_CHUNK_SIZE;
-    int chunk_num = 0;
+    int chunk_num = 1;
     while(!file.eof()){
         memset(buf,0,MAX_CHUNK_SIZE);
         file.read(buf,MAX_CHUNK_SIZE);

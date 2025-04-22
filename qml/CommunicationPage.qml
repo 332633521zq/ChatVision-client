@@ -107,7 +107,7 @@ Rectangle{
                         Rectangle{
                             id:filemsgrec
                             width: 120
-                            height: 60
+                            height: 50
                             color: "white"
                             radius: 5
                             visible: false
@@ -127,7 +127,7 @@ Rectangle{
                                 msgavaterRec.anchors.right=msgrec.right
                                 msgavaterRec.anchors.rightMargin=25
 
-                                if(type===1005){
+                                if(type===1025){
                                     filemsgrec.visible=true
                                     textmsgrec.visible=false
                                     filemsgrec.anchors.rightMargin=10
@@ -142,9 +142,19 @@ Rectangle{
                                 msg_avater.source=bips.avatar_path
                                 msgavaterRec.anchors.left=msgrec.left
                                 msgavaterRec.anchors.leftMargin=25
-                                textmsgrec.anchors.leftMargin=10
-                                textmsgrec.anchors.left=msgavaterRec.right
-                                textmsgrec.color="#FFFFFF"
+
+                                if(type===1025){
+                                    filemsgrec.visible=true
+                                    textmsgrec.visible=false
+                                    filemsgrec.anchors.leftMargin=10
+                                    filemsgrec.anchors.left=msgavaterRec.right
+                                }
+                                else{
+                                    textmsgrec.anchors.leftMargin=10
+                                    textmsgrec.anchors.left=msgavaterRec.right
+                                    textmsgrec.color="#FFFFFF"
+                                }
+
                             }
                         }
                     }
