@@ -71,6 +71,8 @@ Rectangle{
                         anchors.fill: parent
                         source:bips.my_avatar
                         fillMode: Image.PreserveAspectCrop
+                        sourceSize: Qt.size(parent.width,parent.height)
+
                         visible: false
                     }
                     Rectangle{
@@ -138,6 +140,7 @@ Rectangle{
                                         anchors.fill: parent
                                         source:bips.my_avatar
                                         fillMode: Image.PreserveAspectCrop
+                                        sourceSize: Qt.size(parent.width,parent.height)
                                         visible: false
                                     }
                                     Rectangle{
@@ -176,7 +179,7 @@ Rectangle{
                                                 font.pixelSize: 12
                                             }
                                             Text{
-                                                text:"OnlineState:"
+                                                text:"OnlineState:"+isonline
                                                 font.pixelSize: 12
                                             }
                                         }
@@ -739,7 +742,7 @@ Rectangle{
         id:mediawindow
         width: 600
         height: 500
-        color:"#368EB0"
+        color:"white"
         MediaPlayer{
             id:mediaplayer
             source: "qrc:/audio/callaudio.mp3"
@@ -1041,6 +1044,7 @@ Rectangle{
                         anchors.fill: parent
                         source:bips.my_avatar
                         fillMode: Image.PreserveAspectCrop
+                        sourceSize: Qt.size(parent.width,parent.height)
                         visible: false
                     }
                     Rectangle{

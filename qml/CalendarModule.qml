@@ -16,6 +16,7 @@ Window {
         spacing: 10
 
         Row{
+            anchors.fill: parent
             // anchors.horizontalCenter:parent.horizontalCenter
             width:calendar_page.width
             height:35
