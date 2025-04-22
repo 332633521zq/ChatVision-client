@@ -27,7 +27,17 @@ void SearchController::setSearchID(const QString sID)
 void SearchController::searchUser()
 {
     unsigned int objectid = m_searchID.toUInt();
-    MsgSender::GetInstance()->SendRequest("", objectid, MSG_SEARCH);
+    MsgSender::GetInstance()->SendRequest("search", objectid, MSG_SEARCH);
+}
+
+void SearchController::setSearchInfo(nlohmann::json search_uinfo)
+{
+    _search_uinfo = search_uinfo;
+}
+
+nlohmann::json SearchController::getSearchInfo()
+{
+    return _search_uinfo;
 }
 
 void SearchController::onSearchIDChanged()

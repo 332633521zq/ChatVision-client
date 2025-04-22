@@ -60,6 +60,7 @@ public:
     void setMsgDate(const QString datetime);
 
     void addDayMsg(const QString datetime);
+    void addUnread(QString id);
 signals:
     void myMessageChanged(short type);
     void friendMessageChanged(short type);

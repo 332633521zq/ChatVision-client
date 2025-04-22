@@ -85,8 +85,12 @@ qt_add_qml_module(
   SOURCES
   findfriendpagecontroller.h
   findfriendpagecontroller.cpp
-  SOURCES tokenbucket.h tokenbucket.cpp
-  SOURCES searchcontroller.h searchcontroller.cpp)
+  SOURCES
+  tokenbucket.h
+  tokenbucket.cpp
+  SOURCES
+  searchcontroller.h
+  searchcontroller.cpp)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GST REQUIRED gstreamer-1.0 gstreamer-webrtc-1.0
@@ -112,11 +116,14 @@ set_target_properties(
 
 target_link_libraries(
   appChatVision-client
-  PRIVATE Qt6::Quick Qt6::quickmultimedia ${GST_LIBRARIES} # 链接GStreamer库
-          gstvideo-1.0 ${JSON_GLIB_LIBRARIES} nlohmann_json
+  PRIVATE Qt6::Quick
+          Qt6::quickmultimedia
+          ${GST_LIBRARIES} # 链接GStreamer库
+          gstvideo-1.0
+          ${JSON_GLIB_LIBRARIES}
+          nlohmann_json
           OpenSSL::SSL
-          OpenSSL::Crypto
-      )
+          OpenSSL::Crypto)
 
 include(GNUInstallDirs)
 install(

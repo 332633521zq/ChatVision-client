@@ -108,6 +108,7 @@ void CommunicationPageController::hangUp()
 // }
 void CommunicationPageController::initChattedList()
 {
+    sleep(1);
     std::map<unsigned int, json> ts;
     ts = User::GetInstance()->GetChatted();
     std::cout << "ts.begin is" << ts.size() << std::endl;
@@ -124,6 +125,11 @@ void CommunicationPageController::initChattedList()
         m_unread.append(id);
         emit addListElement(id, memo, nickname, area, gender, signature, avatar_path);
     }
+}
+
+void CommunicationPageController::addUnread(QString id)
+{
+    m_unread.append(id);
 }
 
 QString CommunicationPageController::myMessage() const

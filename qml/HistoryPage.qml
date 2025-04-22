@@ -144,7 +144,7 @@ Window{
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 Image{
                                     id:avatar_img
-                                    source: "qrc:/image/avater.jpg"/*modelData.avatar_path*/
+                                    source: "qrc:/image/avatar/24.jpg"/*modelData.avatar_path*/
                                     width:parent.width
                                     anchors.fill: parent
                                     fillMode: Image.PreserveAspectCrop

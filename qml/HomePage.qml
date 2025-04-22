@@ -739,7 +739,7 @@ Rectangle{
         id:mediawindow
         width: 600
         height: 500
-        color:"#368EB0"
+        color:"white"
         MediaPlayer{
             id:mediaplayer
             source: "qrc:/audio/callaudio.mp3"

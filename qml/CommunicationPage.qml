@@ -128,6 +128,7 @@ Rectangle{
                                 msgavaterRec.anchors.rightMargin=25
 
                                 if(type===1025){
+                                    console.log("CommunicationPageqml 131")
                                     filemsgrec.visible=true
                                     textmsgrec.visible=false
                                     filemsgrec.anchors.rightMargin=10
