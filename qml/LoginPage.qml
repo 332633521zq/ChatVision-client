@@ -11,6 +11,12 @@ ApplicationWindow{
     // flags: Qt.Window|Qt.FramelessWindowHint
 
     title:qsTr("ChatVision")
+
+    function sleep(ms){
+        var now = new Date().getTime()
+        while(new Date().getTime() < now + ms){}
+    }
+
     Loader{
         id:loginloader
         anchors.fill: parent
@@ -138,6 +144,7 @@ ApplicationWindow{
 
                            loginloader.sourceComponent=null
                            loginloader.source="HomePage.qml"
+
 
                            communicationPageControler.initChattedList()
                            followingPageController.initRelationData()

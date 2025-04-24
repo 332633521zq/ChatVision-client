@@ -506,14 +506,12 @@ void MsgReceiver::SearchUserCallBack(const std::string &msg_data)
         QString signature = QString::fromStdString(jsonmsg["signature"]);
         QString id = QString::fromStdString(jsonmsg["uid"]);
 
-        qDebug() << "SearcUSerCallBack11111111111111111111111111";
         if (type == "update") {
             CommunicationPageController::getInstance().addUnread(id);
             CommunicationPageController::getInstance()
                 .addListElement(id, memo, nickname, area, gender, signature, avatar_path);
             CommunicationPageController::getInstance().newMessage(id.toUInt());
         }
-        qDebug() << "SearcUSerCallBack222222222222222222222222222";
         if (type == "search") {
             SearchController::getInstance()
                 .addSearchUserList(id, memo, nickname, area, gender, signature, avatar_path);
@@ -542,22 +540,38 @@ void MsgReceiver::FileCallBack(const std::string &msg_data)
     std::filesystem::path filename = data["filename"];
     size_t data_size = data["data_size"];
     std::string chunk_data=data["chunk_data"];
+    short filetype = data["file_type"];
+    std::cout << "filetype:" << filetype << std::endl;
 
-    FileTools::GetInstance()->SaveFileMsg(obj_id,filename,chunk_data,data_size);    // 将文件存入本地
+    FileTools::GetInstance()->SaveFileMsg(obj_id,
+                                          filename,
+                                          chunk_data,
+                                          data_size,
+                                          filetype); // 将文件存入本地
 
     if (data["chunk_index"] == data["total_chunks"]) {
         qDebug() << "this is file callback!!!!!!!!!!!!!!!!!!!!";
         jsonmsg["data"] = filename;
-        FileTools::GetInstance()->SaveTextMsg(obj_id, jsonmsg);
 
         //向前端发信号有新的消息
-        QString text = QString::fromStdString(jsonmsg["data"].get<std::string>());
         short msgid = jsonmsg["msgid"];
+        if (filetype == MSG_IMAGE) {
+            msgid = MSG_IMAGE;
+            filename = FileTools::GetInstance()->GetRootPath() / "chatmsgs" / std::to_string(obj_id)
+                       / "picture" / filename;
+            std::cout << "GetRootPath: " << filename << std::endl;
+            jsonmsg["data"] = filename;
+            jsonmsg["msgid"] = MSG_IMAGE;
+        }
+        QString text = QString::fromStdString(jsonmsg["data"].get<std::string>());
         CommunicationPageController::getInstance().setType(msgid);
         if (obj_id == CommunicationPageController::getInstance().friendId().toUInt()) {
             CommunicationPageController::getInstance().setFriendMessage(text);
         } else {
             CommunicationPageController::getInstance().newMessage(obj_id);
         }
+        CommunicationPageController::getInstance().setType(MSG_TEXT_CHAT);
+
+        FileTools::GetInstance()->SaveTextMsg(obj_id, jsonmsg);
     }
 }

@@ -75,7 +75,9 @@ std::string Base64Encode(const unsigned char* input, size_t length) {
     return result;
 }
 
-void MsgSender::SendFile(std::filesystem::path file_path,unsigned int object_id)
+void MsgSender::SendFile(std::filesystem::path file_path,
+                         unsigned int object_id,
+                         const short& filetype)
 {
     std::ifstream file(file_path, std::ios::binary);
     if (!file) {
@@ -110,6 +112,7 @@ void MsgSender::SendFile(std::filesystem::path file_path,unsigned int object_id)
         fileinfo["filesize"] = file_size;
         fileinfo["total_chunks"] = total_chunks;
         fileinfo["chunk_index"] = chunk_num++;
+        fileinfo["file_type"] = filetype;
         fileinfo["data_size"] = bytes_read;
 
         fileinfo["chunk_data"] = Base64Encode(

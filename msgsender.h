@@ -21,7 +21,7 @@ public:
     void SetSocket(boost::asio::ip::tcp::socket* sock);
     void SendRequest(char* msg, size_t msg_len, unsigned int object_id, short msgid);
     void SendRequest(std::string msg, unsigned int object_id, short msgid);
-    void SendFile(std::filesystem::path file_path, unsigned int object_id);
+    void SendFile(std::filesystem::path file_path, unsigned int object_id, const short& filetype);
 
 private:
     MsgSender();

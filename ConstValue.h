@@ -35,6 +35,7 @@ constexpr int MAX_LENGTH = 1024 * 2;
 *   1023: 查找用户
 *   1024: 获取在线状态
 *   1025: 发送文件
+*   1026: 图片消息
 */
 
 enum MSG_IDS {
@@ -62,7 +63,8 @@ enum MSG_IDS {
     MSG_CHATTED_USER = 1022,
     MSG_SEARCH = 1023,
     MSG_ONLINE_STATE = 1024,
-    MSG_FILE = 1025
+    MSG_FILE = 1025,
+    MSG_IMAGE = 1026
 };
 
 enum Relation_IDS : unsigned int {

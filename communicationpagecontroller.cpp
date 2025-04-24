@@ -109,7 +109,7 @@ void CommunicationPageController::hangUp()
 // }
 void CommunicationPageController::initChattedList()
 {
-    sleep(1);
+    sleep(0.5);
     std::map<unsigned int, json> ts;
     ts = User::GetInstance()->GetChatted();
     std::cout << "ts.begin is" << ts.size() << std::endl;
@@ -265,22 +265,31 @@ void CommunicationPageController::onNewMessage(unsigned int uid)
     emit unreadChanged(index);
     qDebug("this is onnewmessage slot" + index);
 }
-void CommunicationPageController::selectFile(QString filepath)
+void CommunicationPageController::selectFile(QString filepath, short filetype)
 {
     QUrl url(filepath);
     QString localFilePath = url.toLocalFile();
     QFileInfo fileinfo(localFilePath);
     QString filename = fileinfo.fileName();
     qDebug() << "Local file path:" << localFilePath;
-    setType(1025);
-    setMyMessage(filename);
-    setType(1004);
 
+    setType(filetype);
+    if (filetype == MSG_IMAGE) {
+        qDebug() << "select file image filepath:" << filepath;
+        setMyMessage(localFilePath);
+    } else if (filetype == MSG_FILE) {
+        setMyMessage(filename);
+    }
     saveMessage();
+    setType(MSG_TEXT_CHAT);
 
     std::string file_path = localFilePath.toStdString();
 
-    MsgSender::GetInstance()->SendFile(std::filesystem::path(file_path), m_friendId.toUInt());
+    std::thread([this, file_path, filetype]() {
+        MsgSender::GetInstance()->SendFile(std::filesystem::path(file_path),
+                                           m_friendId.toUInt(),
+                                           filetype);
+    }).detach();
 }
 
 void CommunicationPageController::setType(short type)

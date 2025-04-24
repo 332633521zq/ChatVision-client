@@ -77,6 +77,7 @@ void FollowListPageController::getOnlineState(const unsigned int& uid)
 
 void FollowListPageController::initRelationData()
 {
+    sleep(0.5);
     json res;
     const auto& followings = User::GetInstance()->GetFollowing();
     for (const auto& pair : followings) {
