@@ -62,7 +62,7 @@ Rectangle{
                         id:msgrec
                         width: 600
                         // height: 40
-                        height:Math.max(text_msg.implicitHeight+10,40)
+                        height:type === 1026 ? image_msg.height + 10 :Math.max(text_msg.implicitHeight+10,40)
                         color:"transparent"
                         Rectangle{
                             id:msgavaterRec
@@ -121,18 +121,46 @@ Rectangle{
                                 font.pixelSize: 15
                             }
                         }
-
+                        Rectangle{
+                            id:imagemsgrec
+                            width: 300
+                            height:image_msg.height
+                            visible: false
+                            Image {
+                                id: image_msg
+                                width: 300
+                                source: "file://" + textmsg
+                                fillMode: Image.PreserveAspectFit
+                                // sourceSize: Qt.size(parent.width,parent.height)
+                                visible: true
+                            }
+                            // TapHandler{
+                            //     onTapped: {
+                            //         var fileUrl = Qt.resolvedUrl("file://" + textmsg);
+                            //         console.log("imagemsgrec tapped")
+                            //         Qt.openUrlExternally(fileUrl);
+                            //     }
+                            // }
+                        }
                         Component.onCompleted: {
                             if(sender === communicationPageControler.myId){
                                 msgavaterRec.anchors.right=msgrec.right
                                 msgavaterRec.anchors.rightMargin=25
 
+                                console.log("Communication type150" + type)
                                 if(type===1025){
                                     console.log("CommunicationPageqml 131")
                                     filemsgrec.visible=true
                                     textmsgrec.visible=false
+                                    imagemsgrec.visible = false
                                     filemsgrec.anchors.rightMargin=10
                                     filemsgrec.anchors.right=msgavaterRec.left
+                                }
+                                else if(type === 1026){
+                                    imagemsgrec.visible = true
+                                    imagemsgrec.anchors.right = msgavaterRec.left
+                                    filemsgrec.visible = false
+                                    textmsgrec.visible = false
                                 }
                                 else{
                                     textmsgrec.anchors.rightMargin=10
@@ -147,8 +175,16 @@ Rectangle{
                                 if(type===1025){
                                     filemsgrec.visible=true
                                     textmsgrec.visible=false
+                                    imagemsgrec.visible = false
                                     filemsgrec.anchors.leftMargin=10
                                     filemsgrec.anchors.left=msgavaterRec.right
+                                }
+                                // 图片消息
+                                else if(type === 1026){
+                                    imagemsgrec.visible = true
+                                    imagemsgrec.anchors.left = msgavaterRec.right
+                                    filemsgrec.visible = false
+                                    textmsgrec.visible = false
                                 }
                                 else{
                                     textmsgrec.anchors.leftMargin=10
@@ -214,6 +250,26 @@ Rectangle{
                                         }
                                     }
                                 }
+                                TapHandler{
+                                    onTapped: {
+                                        imageDialog.open()
+                                    }
+                                }
+                                FileDialog {
+                                        id: imageDialog
+                                        title: "请选择图片"
+
+                                        nameFilters: [ "图片文件 (*.jpg *.png *.svg)", "所有文件 (*)"]
+
+                                        onAccepted: {
+                                            console.log("fileDialog.currentFile"+imageDialog.currentFile)
+                                            communicationPageControler.selectFile(imageDialog.currentFile,1026)
+                                            // 处理选中的文件
+                                        }
+                                        onRejected: {
+                                            console.log("用户取消选择")
+                                        }
+                                    }
                             }
                             Popup{
                                 id:emojiPop
@@ -395,7 +451,7 @@ Rectangle{
 
                                         onAccepted: {
                                             console.log(fileDialog.currentFile)
-                                            communicationPageControler.selectFile(fileDialog.currentFile)
+                                            communicationPageControler.selectFile(fileDialog.currentFile,1025)
                                             // communicationPageControler.myMessage=fileDialog.currentFile
                                             // 处理选中的文件
                                         }
@@ -559,6 +615,7 @@ Rectangle{
                 msghistory.sender=communicationPageControler.myId
                 msghistory.textmsg=communicationPageControler.myMessage
                 msghistory.type=type
+                console.log("msghistory.textmsg" + msghistory.textmsg)
                 msglistmodel.append(msghistory)
                 communicationlistview.positionViewAtEnd()
             }

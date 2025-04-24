@@ -754,7 +754,7 @@ Rectangle{
         }
         Timer{
             id:t1
-            interval: 1
+            interval: 5
             running: true
             repeat: true
             onTriggered: {

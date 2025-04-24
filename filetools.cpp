@@ -91,7 +91,11 @@ std::vector<unsigned char> Base64Decode(const std::string& input) {
     return output;
 }
 
-void FileTools::SaveFileMsg(unsigned int &uid, std::filesystem::path filename, std::string data, size_t length)
+void FileTools::SaveFileMsg(unsigned int& uid,
+                            std::filesystem::path filename,
+                            std::string data,
+                            size_t length,
+                            short filetype)
 {
     unsigned int my_uid = User::GetInstance()->GetUid();
 
@@ -99,7 +103,8 @@ void FileTools::SaveFileMsg(unsigned int &uid, std::filesystem::path filename, s
         = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation).toStdString();
     root_path = root_path / "ChatVisionUserInfo" / std::to_string(my_uid);
 
-    std::filesystem::path dir_name = root_path / "chatmsgs" / std::to_string(uid) / "file";
+    std::string file_dir = filetype == MSG_FILE ? "file" : "picture";
+    std::filesystem::path dir_name = root_path / "chatmsgs" / std::to_string(uid) / file_dir;
 
     std::filesystem::path file_name = std::filesystem::path(filename).filename().string();
     file_name = dir_name / file_name;
@@ -116,6 +121,17 @@ void FileTools::SaveFileMsg(unsigned int &uid, std::filesystem::path filename, s
 
     auto decode = Base64Decode(data);
     file.write(std::string(decode.begin(),decode.end()).c_str(), length);
+}
+
+std::filesystem::path FileTools::GetRootPath()
+{
+    unsigned int my_uid = User::GetInstance()->GetUid();
+
+    std::filesystem::path root_path
+        = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation).toStdString();
+    root_path = root_path / "ChatVisionUserInfo" / std::to_string(my_uid);
+
+    return root_path;
 }
 
 void FileTools::InitUserDirectory()

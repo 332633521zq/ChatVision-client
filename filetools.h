@@ -35,7 +35,13 @@ public:
     void GetFiles(const std::string& directory,
                   std::vector<std::string>& files,
                   const std::string& datetime);
-    void SaveFileMsg(unsigned int& uid, std::filesystem::path filename, std::string data, size_t length);
+    void SaveFileMsg(unsigned int& uid,
+                     std::filesystem::path filename,
+                     std::string data,
+                     size_t length,
+                     short filetype);
+
+    std::filesystem::path GetRootPath();
 
 private:
     FileTools();

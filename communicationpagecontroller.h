@@ -38,7 +38,7 @@ public:
     Q_INVOKABLE void hangUp();
     Q_INVOKABLE void initChattedList();
     Q_INVOKABLE void initMsgDate();
-    Q_INVOKABLE void selectFile(QString filepath);
+    Q_INVOKABLE void selectFile(QString filepath, short filetype);
     void setType(short type);
     //保存我接收的消息，需要消息内容和发送者id
     void saveMessage(QString msg, QString send_id);
