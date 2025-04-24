@@ -138,7 +138,7 @@ Rectangle{
                                     Image{
                                         id:avaterimage1
                                         anchors.fill: parent
-                                        source:bips.my_avatar
+                                        source:"file:///root/屏幕截图_20250422_132716.png"
                                         fillMode: Image.PreserveAspectCrop
                                         sourceSize: Qt.size(parent.width,parent.height)
                                         visible: false
@@ -762,11 +762,30 @@ Rectangle{
             repeat: true
             onTriggered: {
                 randomNumber++
-                videoimage.source="image://pictures/"+randomNumber
+                videoimage.source="image://pictures/"+"a"+randomNumber
             }
         }
-
-
+        Rectangle{
+            id:myself_windowrec
+            width: 200
+            height: 160
+            color: "white"
+            Image{
+                anchors.fill: parent
+                id:myselfimage
+                source:"image://pictures/b"
+            }
+        }
+        Timer{
+            id:t2
+            interval: 1
+            running: true
+            repeat: true
+            onTriggered: {
+                randomNumber++
+                myselfimage.source="image://pictures/"+"b"+randomNumber
+            }
+        }
         Rectangle{
             id:answerRequestRec
             anchors.fill: parent

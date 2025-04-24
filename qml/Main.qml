@@ -236,10 +236,11 @@ Rectangle{
                     color:"#ccc"
                     Text{
                         id:foucustext
-                        text:"关注"
+                        text:bips.relation==="2"?"关注":"取关"
                         font.pixelSize: 17
                         anchors.horizontalCenter: parent.horizontalCenter
                         anchors.verticalCenter: parent.verticalCenter
+
                     }
 
                     TapHandler{
@@ -289,7 +290,7 @@ Rectangle{
                                 msglistmodel.clear()
                             }
                             communicationPageControler.initCommunicationPage()
-                            communicationPageControler.addListElement(bips.following_uid, bips.memo, bips.nickname, bips.area, bips.gender, bips.signal_text, bips.avatar_path)
+                            communicationPageControler.isAddConversationList(bips.following_uid, bips.memo, bips.nickname, bips.area, bips.gender, bips.signal_text, bips.avatar_path)
                         }
                     }
                 }

@@ -12,4 +12,5 @@ Item {
     property string avatar_path /*"../assets/Picture/avatar/cats.jpg"*/
     property string my_avatar
     property string gender
+    property string relation
 }

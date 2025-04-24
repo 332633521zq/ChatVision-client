@@ -92,6 +92,7 @@ Rectangle{
                     bips.following_uid=uid
                     bips.signal_text=signature
                     bips.avatar_path=avater
+                    bips.relation=relation
                     // rightloader.sourceComponent=findfriendInfoComponent
 
                 }
@@ -106,7 +107,7 @@ Rectangle{
     }
     Connections{
         target: findfriendPageController
-        function onInitFindPage(area, gender, memo, nickname, signature, uid,avatar){
+        function onInitFindPage(area, gender, memo, nickname, signature, uid,avatar,relation){
             var addlist={};
             addlist.area=area;
             addlist.avater=avatar;
@@ -115,6 +116,7 @@ Rectangle{
             addlist.nickname=nickname;
             addlist.signature=signature;
             addlist.uid=uid;
+            addlist.relation=relation;
             findfriendlist.append(addlist);
         }
     }

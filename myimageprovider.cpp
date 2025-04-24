@@ -8,10 +8,15 @@ QPixmap MyImageProvider::requestPixmap(const QString &id, QSize *size, const QSi
 {
     Q_UNUSED(requestedSize)
     Q_UNUSED(size)
+    QPixmap pixmap;
+    if (id.at(0) == 'a') {
+        pixmap = QPixmap::fromImage(PiplineBuild::image);
+    } else {
+        pixmap = QPixmap::fromImage(PiplineBuild::myimage);
+    }
+    return pixmap;
     // QPixmap p(
     //     "/run/media/root/study/tempWechat/WeChat-Imitate-Client/assets/Picture/avatar/avater1.jpg");
-    QPixmap pixmap = QPixmap::fromImage(PiplineBuild::image);
-    return pixmap;
 }
 
 void MyImageProvider::setAvater(QPixmap avater)

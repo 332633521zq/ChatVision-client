@@ -73,12 +73,14 @@ public:
     static void on_offer_received(GstSDPMessage *sdp);
     static GstFlowReturn newSampleCallback(GstElement *appsink, gpointer user_data);
     static bool setPiplinePlaying();
+    static GstFlowReturn local_sample_callback(GstElement *appsink, gpointer user_data);
 
     static unsigned int m_object_id;
     static enum AppState app_state;
     static GstElement *m_webrtcbin;
     static GMainLoop *loop;
     static QImage image;
+    static QImage myimage;
 
 private:
     static GstElement *m_pipeline, *m_audio_bin, *m_video_bin, *probe;

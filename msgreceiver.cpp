@@ -462,7 +462,7 @@ void MsgReceiver::RandomPushCallBack(const std::string &msg_data)
     qDebug() << "RandomPushCallBack----------------";
 
     json jsonmsg = json::parse(msg_data);
-    std::cout << "jsonmsg:" << jsonmsg << std::endl;
+    std::cout << "randomjsonmsg:" << jsonmsg << std::endl;
     std::string users_data = jsonmsg["data"];
     json jsondata = json::parse(users_data);
     FindFriendPageController::getInstance().initFindFriendPage(jsondata);

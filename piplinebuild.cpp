@@ -20,6 +20,7 @@ unsigned int PiplineBuild::m_object_id = NULL;
 GstWebRTCDataChannel *PiplineBuild::send_channel = nullptr;
 
 QImage PiplineBuild::image(640, 480, QImage::Format_ARGB32);
+QImage PiplineBuild::myimage(640, 480, QImage::Format_ARGB32);
 
 PiplineBuild::PiplineBuild() {}
 
@@ -122,12 +123,16 @@ gboolean PiplineBuild::start_pipeline(gboolean create_offer)
     }
 
     //创建视频箱
-    video_desc = g_strdup_printf("v4l2src ! videoconvert ! queue ! vp8enc "
-                                 "deadline=1 keyframe-max-dist=2000 ! "
-                                 "rtpvp8pay name=videopay picture-id-mode=15-bit pt=%u ! queue",
+    // 在start_pipeline函数中修改视频箱创建部分
+    video_desc = g_strdup_printf("v4l2src ! videoconvert ! tee name=videotee ! "
+                                 "queue ! vp8enc deadline=1 keyframe-max-dist=2000 ! "
+                                 "rtpvp8pay name=videopay picture-id-mode=15-bit pt=%u ! queue "
+                                 "videotee. ! videoconvert ! appsink name=localsink ",
                                  RTP_VP8_DEFAULT_PT);
+
     m_video_bin = gst_parse_bin_from_description(video_desc, TRUE, &video_erro);
     g_free(video_desc);
+
     if (video_erro) {
         gst_printerr("Failed to parse m_video_bin from video_desc:%s\n", video_erro->message);
         g_error_free(video_erro);
@@ -177,6 +182,19 @@ gboolean PiplineBuild::start_pipeline(gboolean create_offer)
 
     //将webrtcbin元素的pad-added信号与处理媒体流的回调函数相连，动态添加元素decodebin
     g_signal_connect(m_webrtcbin, "pad-added", G_CALLBACK(on_incoming_stream), m_pipeline);
+
+    // 在管道启动后获取本地预览的appsink
+    GstElement *local_sink = gst_bin_get_by_name(GST_BIN(m_pipeline), "localsink");
+    if (local_sink) {
+        g_object_set(local_sink,
+                     "emit-signals",
+                     TRUE,
+                     "caps",
+                     gst_caps_from_string("video/x-raw,format=BGRA"),
+                     NULL);
+        g_signal_connect(local_sink, "new-sample", G_CALLBACK(local_sample_callback), NULL);
+        gst_object_unref(local_sink);
+    }
 
     gst_print("Starting pipline\n");
 
@@ -656,4 +674,60 @@ bool PiplineBuild::setPiplinePlaying()
         return FALSE;
     }
     return TRUE;
+}
+GstFlowReturn PiplineBuild::local_sample_callback(GstElement *appsink, gpointer user_data)
+{
+    GstSample *sample = nullptr;
+    GstBuffer *buffer = nullptr;
+    GstMapInfo map;
+    GstCaps *caps = nullptr;
+    GstVideoInfo video_info;
+    GstVideoFrame frame;
+    guchar *data;
+    gint width, height, stride;
+    // 从appsink拉取样本
+    g_signal_emit_by_name(appsink, "pull-sample", &sample);
+    if (!sample) {
+        return GST_FLOW_ERROR;
+    }
+
+    buffer = gst_sample_get_buffer(sample);
+    if (!gst_buffer_map(buffer, &map, GST_MAP_READ)) {
+        gst_sample_unref(sample);
+        return GST_FLOW_ERROR;
+    }
+
+    caps = gst_sample_get_caps(sample); // 获取与样本关联的caps
+    gst_video_info_init(&video_info);
+    if (!caps || !gst_video_info_from_caps(&video_info, caps)) {
+        g_printerr("Failed to get video info from caps.\n");
+        gst_buffer_unmap(buffer, &map);
+        gst_sample_unref(sample);
+        if (caps) {
+            gst_caps_unref(caps);
+        }
+        return GST_FLOW_ERROR;
+    }
+    // 初始化GstVideoFrame以访问视频帧数据
+    if (!gst_video_frame_map(&frame, &video_info, buffer, GST_MAP_READ)) {
+        g_printerr("Failed to map video frame.\n");
+        gst_buffer_unmap(buffer, &map);
+        gst_sample_unref(sample);
+        return GST_FLOW_ERROR;
+    }
+    // 获取视频帧的宽度、高度和行跨度
+    width = GST_VIDEO_FRAME_WIDTH(&frame);
+    height = GST_VIDEO_FRAME_HEIGHT(&frame);
+    stride = GST_VIDEO_FRAME_PLANE_STRIDE(&frame, 0);
+    // 获取BGR像素数据
+    data = static_cast<guchar *>(GST_VIDEO_FRAME_PLANE_DATA(&frame, 0));
+
+    myimage = QImage(data, width, height, stride, QImage::Format_ARGB32);
+    gst_video_frame_unmap(&frame);
+    // 这里可以将视频帧发送到前端UI显示
+    // 例如: emit newLocalFrame(QImage(data, width, height, QImage::Format_ARGB32));
+
+    gst_buffer_unmap(buffer, &map);
+    gst_sample_unref(sample);
+    return GST_FLOW_OK;
 }

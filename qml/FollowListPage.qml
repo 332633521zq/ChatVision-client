@@ -6,7 +6,7 @@ Rectangle{
     // anchors.fill: parent
     width: 240
     height:parent.height
-
+    property var selection:"关注"
     property var homepage
     signal loadfollowinginfo()
 
@@ -79,6 +79,7 @@ Rectangle{
             // 点击事件
             TapHandler {
                 onTapped: {
+                    selection="关注";
                     if (translate.x !== 0) {
                         highlight_follow.start();  // 滑动到左侧
                         user_list.model = followingPageController.followings;  // 更新模型
@@ -107,6 +108,7 @@ Rectangle{
             // 点击事件
             TapHandler {
                 onTapped: {
+                    selection="粉丝";
                     if (translate.x === 0) {
                         highlight_fans.start();
                         user_list.model = followingPageController.followers;
@@ -211,7 +213,12 @@ Rectangle{
                         bips.gender = modelData.gender
 
                         followingPageController.getOnlineState(modelData.uid)
-                        loadfollowinginfo();
+                        if(selection==="关注"){
+                            loadfollowinginfo();
+                        }
+                        else{
+                            rightloader.source="qrc:/qml/Main.qml"
+                        }
                     }
                 }
             }

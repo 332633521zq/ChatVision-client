@@ -39,6 +39,7 @@ void CommunicationPageController::initCommunicationPage()
         } else {
             setFriendMessage(text);
         }
+        setType(1004);
     }
 }
 
@@ -273,6 +274,8 @@ void CommunicationPageController::selectFile(QString filepath)
     qDebug() << "Local file path:" << localFilePath;
     setType(1025);
     setMyMessage(filename);
+    setType(1004);
+
     saveMessage();
 
     std::string file_path = localFilePath.toStdString();
@@ -283,4 +286,18 @@ void CommunicationPageController::selectFile(QString filepath)
 void CommunicationPageController::setType(short type)
 {
     m_type = type;
+}
+void CommunicationPageController::isAddConversationList(QString id,
+                                                        QString memo,
+                                                        QString nickname,
+                                                        QString area,
+                                                        QString gender,
+                                                        QString signature,
+                                                        QString avatar_path)
+{
+    int index = m_unread.indexOf(id);
+    if (index == -1) {
+        m_unread.append(id);
+        emit addListElement(id, memo, nickname, area, gender, signature, avatar_path);
+    }
 }

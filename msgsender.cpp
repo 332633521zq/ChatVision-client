@@ -12,7 +12,7 @@
 using namespace nlohmann;
 
 MsgSender::MsgSender()
-    : _token_bucket(std::make_shared<TokenBucket>(3, 2))
+    : _token_bucket(std::make_shared<TokenBucket>(10, 10))
 {}
 
 MsgSender::~MsgSender() {}

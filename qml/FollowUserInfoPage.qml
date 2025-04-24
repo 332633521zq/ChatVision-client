@@ -273,7 +273,7 @@ Rectangle{
                                 msglistmodel.clear()
                             }
                             communicationPageControler.initCommunicationPage()
-                            communicationPageControler.addListElement(bips.following_uid, bips.memo, bips.nickname, bips.area, bips.gender, bips.signal_text, bips.avatar_path)
+                            communicationPageControler.isAddConversationList(bips.following_uid, bips.memo, bips.nickname, bips.area, bips.gender, bips.signal_text, bips.avatar_path)
                         }
                     }
                 }
