@@ -99,7 +99,7 @@ Rectangle{
             z: 2
 
             Text {
-                text: "粉丝"
+                text: "被关注"
                 anchors.centerIn: parent
                 font.pixelSize: 14
                 color: translate.x !== 0 ? "#000" : "#888"
