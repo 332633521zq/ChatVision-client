@@ -107,18 +107,27 @@ Rectangle{
                         Rectangle{
                             id:filemsgrec
                             width: 120
-                            height: 50
+                            height: 45
                             color: "white"
                             radius: 5
                             visible: false
                             Text {
                                 id: file_msg
-                                width: parent.width
+                                width: 80
                                 anchors.centerIn: parent.Center
-                                text: textmsg
+                                text: textmsg.length<8 ? textmsg : textmsg.substring(0,8)+"..."
                                 padding: 5
                                 wrapMode: Text.Wrap
-                                font.pixelSize: 15
+                                font.pixelSize: 10
+
+                            }
+                            Image {
+                                id: fileimage
+                                source: "qrc:/image/filelook_txt_16.svg"
+                                sourceSize: Qt.size(25,25)
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.right: parent.right
+                                anchors.rightMargin: 10
                             }
                         }
                         Rectangle{

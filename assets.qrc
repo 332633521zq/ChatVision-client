@@ -119,5 +119,7 @@
         <file>image/remark_24.svg</file>
         <file>image/history_record_16.svg</file>
         <file>image/edit_24.svg</file>
+        <file>image/filelook_txt_16.svg</file>
+        <file>image/message_24.png</file>
     </qresource>
 </RCC>

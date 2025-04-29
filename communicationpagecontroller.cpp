@@ -109,7 +109,7 @@ void CommunicationPageController::hangUp()
 // }
 void CommunicationPageController::initChattedList()
 {
-    sleep(0.5);
+    sleep(1);
     std::map<unsigned int, json> ts;
     ts = User::GetInstance()->GetChatted();
     std::cout << "ts.begin is" << ts.size() << std::endl;

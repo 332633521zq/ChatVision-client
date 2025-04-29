@@ -138,7 +138,7 @@ Rectangle{
                                     Image{
                                         id:avaterimage1
                                         anchors.fill: parent
-                                        source:"file:///root/屏幕截图_20250422_132716.png"
+                                        source:bips.my_avatar
                                         fillMode: Image.PreserveAspectCrop
                                         sourceSize: Qt.size(parent.width,parent.height)
                                         visible: false
