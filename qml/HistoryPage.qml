@@ -144,7 +144,7 @@ Window{
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 Image{
                                     id:avatar_img
-                                    source: "qrc:/image/avatar/24.jpg"/*modelData.avatar_path*/
+                                    source: modelData.sender_id === bips.following_uid ? bips.avatar_path : bips.my_avatar
                                     width:parent.width
                                     anchors.fill: parent
                                     fillMode: Image.PreserveAspectCrop
@@ -202,8 +202,10 @@ Window{
 
                                     Text{
                                         id:text_content
+                                        width:parent.width
                                         text:modelData.data
                                         font.pixelSize: 20
+                                        wrapMode: Text.Wrap
                                     }
                                 }
 

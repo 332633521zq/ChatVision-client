@@ -5,8 +5,8 @@ Window {
     id:calendar_page
 
     width: 270
-    height:300
-    flags: Qt.Window | Qt.FramelessWindowHint
+    height:250
+    // flags: Qt.Window | Qt.FramelessWindowHint
 
     property date selectedDate: new Date()
     property date selectedDay: new Date()
@@ -14,12 +14,13 @@ Window {
     Column {
         anchors.centerIn: parent
         spacing: 10
+        anchors.fill:parent
 
         Row{
-            anchors.fill: parent
-            // anchors.horizontalCenter:parent.horizontalCenter
             width:calendar_page.width
             height:35
+            // anchors.horizontalCenter: parent.horizontalCenter
+
             Rectangle{
                 id:pre_month
                 width:30
@@ -45,6 +46,7 @@ Window {
                 font.pixelSize: 20
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.verticalCenter: pre_month.verticalCenter
+                color: "black"
             }
 
             Rectangle{
@@ -75,6 +77,7 @@ Window {
                 text: model.shortName.charAt(0).toUpperCase()
                 font.bold: true
                 horizontalAlignment: Text.AlignHCenter
+                color: "black"
             }
         }
 
@@ -123,6 +126,7 @@ Window {
                     }
                 }
             }
+
         }
     }
 }
