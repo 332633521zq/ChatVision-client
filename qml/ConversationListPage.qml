@@ -110,7 +110,7 @@ Rectangle{
         anchors.fill: parent
         model: conversationlist
         delegate: conversationcomponent
-
+        clip: true
         highlight: Rectangle {
             color: "#5EB6E8"
         }

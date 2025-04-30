@@ -149,8 +149,8 @@ gboolean PiplineBuild::start_pipeline(gboolean create_offer)
     m_webrtcbin = gst_element_factory_make_full("webrtcbin",
                                                 "name",
                                                 "sendrecv",
-                                                // "stun-server",
-                                                // STUN_SERVER,
+                                                "stun-server",
+                                                STUN_SERVER,
                                                 NULL);
     g_assert_nonnull(m_webrtcbin);
     g_print("webrtcbin create succeed");

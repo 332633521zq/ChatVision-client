@@ -179,7 +179,7 @@ Rectangle{
                                                 font.pixelSize: 12
                                             }
                                             Text{
-                                                text:"OnlineState:"+isonline
+                                                text:"OnlineState:"+"true"
                                                 font.pixelSize: 12
                                             }
                                         }
@@ -448,7 +448,7 @@ Rectangle{
                         id:mineimage
                         width:25
                         height:25
-                        source:"qrc:/image/administering_user_24.svg"
+                        // source:"qrc:/image/administering_user_24.svg"
                         fillMode: Image.PreserveAspectCrop
                         anchors.horizontalCenter: parent.horizontalCenter
                         anchors.verticalCenter: parent.verticalCenter
@@ -461,16 +461,7 @@ Rectangle{
                         visible: false
                         radius: 5
                     }
-                    HoverHandler{
-                        onHoveredChanged: {
-                            if(hovered){
-                                maskmine.visible=true
-                            }
-                            else{
-                                maskmine.visible=false
-                            }
-                        }
-                    }
+
                 }
 
                 Rectangle{
