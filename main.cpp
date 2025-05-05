@@ -23,7 +23,7 @@ using namespace boost::asio::ip;
 
 int main(int argc, char* argv[])
 {
-    Client client;
+    Client::getInstance();
 
     QGuiApplication app(argc, argv);
 

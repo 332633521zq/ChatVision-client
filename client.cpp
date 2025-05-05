@@ -12,17 +12,13 @@ using namespace boost::asio::ip;
 
 #define PORT 10086
 
-Client::Client()
+Client &Client::getInstance()
 {
-    // 创建上下文服务
-    boost::asio::io_context ioc;
-    //构造endpoint
-    tcp::endpoint remote_ep(make_address(IPADDRESS), PORT);
-    _sock = new tcp::socket(ioc);
-    (*_sock).connect(remote_ep);
-
-    _logic_thread = std::thread(&Client::Start, this);
+    static Client client;
+    return client;
 }
+
+Client::Client() {}
 
 void Client::Start()
 {
@@ -31,4 +27,21 @@ void Client::Start()
     _send_msg->SetSocket(_sock);
     _recv_msg->SetSocket(_sock);
     _recv_msg->start();
+}
+
+void Client::connectServer()
+{
+    // 创建上下文服务
+    boost::asio::io_context ioc;
+    //构造endpoint
+    tcp::endpoint remote_ep(make_address(ipaddress), PORT);
+    _sock = new tcp::socket(ioc);
+    (*_sock).connect(remote_ep);
+
+    _logic_thread = std::thread(&Client::Start, this);
+}
+
+void Client::setIpAddress(std::string address)
+{
+    ipaddress = address;
 }

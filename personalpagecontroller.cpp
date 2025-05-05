@@ -1,4 +1,5 @@
 #include "personalpagecontroller.h"
+#include "client.h"
 
 PersonalPageController &PersonalPageController::getInstance()
 {
@@ -28,8 +29,28 @@ QString PersonalPageController::netNumber() const
 {
     return QString::number(m_number);
 }
+void PersonalPageController::setIpNumber(const QString number)
+{
+    // bool ret;
+    std::cout << "this is set ip" << std::endl;
+    m_ipNumber = number.toStdString();
+    std::cout << m_ipNumber << std::endl;
+    // if (!ret) {
+    //     qDebug() << "netNumber convert to unsigned int failed int function setNetNumber";
+    // } else {
+    //     qDebug() << "newnumber set succeed";
+    // }
+    // emit netNumberChanged(m_number);
+}
+
+QString PersonalPageController::ipNumber() const
+{
+    return QString::fromStdString(m_ipNumber);
+}
 void PersonalPageController::init()
 {
+    Client::getInstance().setIpAddress(m_ipNumber);
+    Client::getInstance().connectServer();
     std::string is_first_login = "yes";
 
     std::filesystem::path root_path

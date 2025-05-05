@@ -109,7 +109,54 @@ ApplicationWindow{
                             }
                         }
                     }
-
+                    Rectangle{
+                        id:inputrecip
+                        width:loginrec.width/8*6
+                        height: loginrec.height/9
+                        opacity: 0.6
+                        radius: 5
+                        // color: "transparent"
+                        Row{
+                            id:inputrowip
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            anchors.verticalCenter: parent.verticalCenter
+                            Rectangle{
+                                width: inputrecip.width/5
+                                height: inputrecip.height/2
+                                color:"transparent"
+                                Text {
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    id: myidtextip
+                                    text: qsTr("ip:")
+                                    font.pixelSize: 20
+                                }
+                            }
+                            spacing: 10
+                            Rectangle{
+                                width:inputrecip.width/5*3
+                                height:inputrecip.height/2
+                                color:"transparent"
+                                border.color: "black"
+                                TextInput{
+                                    id:id_textinputip
+                                    anchors.fill: parent
+                                    autoScroll: false
+                                    echoMode: TextInput.Normal
+                                    font.pixelSize: 18
+                                    horizontalAlignment: TextInput.AlignLeft
+                                    verticalAlignment: TextInput.AlignVCenter
+                                    leftPadding: 10
+                                    // validator: RegularExpressionValidator{
+                                    //     regularExpression: /\b[1-9]\d{7}\b/
+                                    // }
+                                    onAccepted: {
+                                        personalPageControler.ipNumber=text
+                                    }
+                                }
+                            }
+                        }
+                    }
                     Button{
                        id:loginbutton
                        width: inputrec.width
@@ -136,6 +183,7 @@ ApplicationWindow{
                        }
                        onClicked: {
                            personalPageControler.netNumber=id_textinput.text
+                           personalPageControler.ipNumber=id_textinputip.text
                            communicationPageControler.myId=id_textinput.text
                            personalPageControler.init();
 
